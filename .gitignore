@@ -1,0 +1,45 @@
+# Local dependencies and output
+node_modules/
+.svelte-kit/
+build/
+dist/
+.output/
+.vercel/
+.netlify/
+.wrangler/
+coverage/
+
+# Configuration, credentials and private evidence
+.env
+.env.*
+!.env.example
+.firebaserc
+firebase.json
+*credentials*.json
+*service-account*.json
+*serviceAccount*.json
+*.pem
+*.key
+*.p12
+*.pfx
+*.log
+logs/
+private/
+tmp/
+temp/
+test-results/
+playwright-report/
+blob-report/
+browser-profiles/
+auth-state*.json
+storage-state*.json
+*.har
+*.trace
+*.tgz
+*.zip
+*snapshot*.json
+
+# OS and generated Vite config
+.DS_Store
+Thumbs.db
+vite.config.*.timestamp-*

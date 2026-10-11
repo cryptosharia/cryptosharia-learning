@@ -1,0 +1,22 @@
+{
+	"files": [
+		"docs/academy-phase1e/00_EXECUTION_SUMMARY.md",
+		"docs/academy-phase1e/01_SOURCE_DEPENDENCY_MAP.md",
+		"docs/academy-phase1e/02_EXTRACTION_MANIFEST.md",
+		"docs/academy-phase1e/03_NEW_REPOSITORY_STRUCTURE.md",
+		"docs/academy-phase1e/04_SECURITY_AND_ISOLATION.md",
+		"docs/academy-phase1e/05_TEST_EVIDENCE.md",
+		"docs/academy-phase1e/06_VERCEL_CUTOVER_PLAN.md",
+		"docs/academy-phase1e/07_ROLLBACK_PLAN.md",
+		"docs/academy-phase1e/08_OWNER_DECISION_GATE.md",
+		"docs/academy-phase1e/academy-dependency-graph.json",
+		"docs/academy-phase1e/extraction-manifest.json",
+		"docs/academy-phase1e/new-files-manifest.json",
+		"docs/academy-phase1e/provenance.json",
+		"docs/academy-phase1e/test-mapping.json",
+		"scripts/scan-repository.mjs",
+		"scripts/verify-separation.mjs",
+		"tests/academy-separation.test.ts",
+		"tests/academy.http.mjs"
+	]
+}

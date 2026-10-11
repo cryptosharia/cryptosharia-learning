@@ -1,0 +1,2014 @@
+{
+	"sourceSha": "5457e6b80b5560bb96b48a76f1f1e26d32807488",
+	"counts": {
+		"sourceFiles": 233,
+		"retainedSourceFiles": 68,
+		"unchangedSourceFiles": 50,
+		"adaptedSourceFiles": 18,
+		"masterclassOnlyExcluded": 119,
+		"historicalEvidenceExcluded": 39,
+		"otherUnusedSharedExcluded": 7
+	},
+	"files": [
+		{
+			"sourcePath": ".env.example",
+			"category": "ACADEMY REQUIRED",
+			"action": "retain adapted",
+			"reason": "Standalone config: no Blob token; ignore private/generated artifacts; Tailwind formatter references retained app.css.",
+			"sourceGitBlob": "bf27e13feb4dcd5152d4156659b590f2e28ca440",
+			"sourceSha256": "18d7ec752a9338ada99bebb6a8d2a1714d02b57530fb2540e9d258c209ed1623",
+			"targetPath": ".env.example",
+			"targetSha256": "034979499fb7f6a0d4ef6f4fe67529b1cdb80b834a570157dff089187dee890f"
+		},
+		{
+			"sourcePath": ".gitattributes",
+			"category": "ACADEMY REQUIRED",
+			"action": "retain unchanged",
+			"reason": "Transitive Academy/test dependency, containment alias, build/configuration or license.",
+			"sourceGitBlob": "6313b56c57848efce05faa7aa7e901ccfc2886ea",
+			"sourceSha256": "d60f352d0db1404c70afb4bb8b2ca3fd1c610572aa40720e8a0b7baa7885418c",
+			"targetPath": ".gitattributes",
+			"targetSha256": "d60f352d0db1404c70afb4bb8b2ca3fd1c610572aa40720e8a0b7baa7885418c"
+		},
+		{
+			"sourcePath": ".gitignore",
+			"category": "ACADEMY REQUIRED",
+			"action": "retain adapted",
+			"reason": "Standalone config: no Blob token; ignore private/generated artifacts; Tailwind formatter references retained app.css.",
+			"sourceGitBlob": "8ad638564989c88de1ffc51b62639c427fdd0df1",
+			"sourceSha256": "0c204044307539348f9837f98ef13353709d3238e571bec16f4d75203d9bd1ef",
+			"targetPath": ".gitignore",
+			"targetSha256": "55b5101fe46f1fb123ad0c3d546ba2dd1e6d39a6bc659984a6d39b964a98d407"
+		},
+		{
+			"sourcePath": ".kiro/steering/ponytail.md",
+			"category": "SHARED DEPENDENCY",
+			"action": "exclude redundant tooling",
+			"reason": "AGENTS retains applicable guidance; editor-specific metadata is unnecessary.",
+			"sourceGitBlob": "15d50a8b42ae643cf4ed77821a1d2c4aaeab5343",
+			"sourceSha256": "e742761614c9d73b009dcc0cc2ae5b7945181e1fe9c6e3dc1fca4836a5964d0f"
+		},
+		{
+			"sourcePath": ".node-version",
+			"category": "ACADEMY REQUIRED",
+			"action": "retain unchanged",
+			"reason": "Transitive Academy/test dependency, containment alias, build/configuration or license.",
+			"sourceGitBlob": "df6ae3370f9f89272d88629c442cf554d6c1f9fb",
+			"sourceSha256": "73fb1b615e2043a933be1c0895cde4358036acc28d785692509b822aa53c761f",
+			"targetPath": ".node-version",
+			"targetSha256": "73fb1b615e2043a933be1c0895cde4358036acc28d785692509b822aa53c761f"
+		},
+		{
+			"sourcePath": ".npmrc",
+			"category": "ACADEMY REQUIRED",
+			"action": "retain unchanged",
+			"reason": "Transitive Academy/test dependency, containment alias, build/configuration or license.",
+			"sourceGitBlob": "b6f27f135954640c8cc5bfd7b8c9922ca6eb2aad",
+			"sourceSha256": "7151cf397def0c2cb0ab65643701d27d335a72c90f775675b5f826bc7005818a",
+			"targetPath": ".npmrc",
+			"targetSha256": "7151cf397def0c2cb0ab65643701d27d335a72c90f775675b5f826bc7005818a"
+		},
+		{
+			"sourcePath": ".prettierignore",
+			"category": "ACADEMY REQUIRED",
+			"action": "retain unchanged",
+			"reason": "Transitive Academy/test dependency, containment alias, build/configuration or license.",
+			"sourceGitBlob": "7d74fe246876dde74005fccc222f36abe34303f4",
+			"sourceSha256": "be260523ec91060e4c6124643f1ad3ce529b13219f9c1be12b1318bb25ea5f0a",
+			"targetPath": ".prettierignore",
+			"targetSha256": "be260523ec91060e4c6124643f1ad3ce529b13219f9c1be12b1318bb25ea5f0a"
+		},
+		{
+			"sourcePath": ".prettierrc",
+			"category": "ACADEMY REQUIRED",
+			"action": "retain adapted",
+			"reason": "Standalone config: no Blob token; ignore private/generated artifacts; Tailwind formatter references retained app.css.",
+			"sourceGitBlob": "819fa5766c19da053fe8a857f174b64b593d4960",
+			"sourceSha256": "ac614ae56044e2cd2ede1434da9fb63f7319c198aafab7373c2dc5e41943b489",
+			"targetPath": ".prettierrc",
+			"targetSha256": "1b9d8f72b0c8abaca25831bdb5d8d34ba3765d1a3395fd2ed6f12e5723309c2a"
+		},
+		{
+			"sourcePath": ".qoder/specs/Landing_Page_Visual_Revisions_31aa4a52.md",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "29c7e6901305b079a4cfe9cd68a4c8b4d90846b8",
+			"sourceSha256": "5009822b92907d58ce2b762f9e6dd7667e5cee3e327cd7d0b8276caf8b2df67f"
+		},
+		{
+			"sourcePath": ".vscode/extensions.json",
+			"category": "SHARED DEPENDENCY",
+			"action": "exclude redundant tooling",
+			"reason": "AGENTS retains applicable guidance; editor-specific metadata is unnecessary.",
+			"sourceGitBlob": "175f389ea9a75879616400892618874673b7ea85",
+			"sourceSha256": "9345a02e1c98a76f3942f993a41834bb7f9337eaaa571ff6ce454df4fa01f159"
+		},
+		{
+			"sourcePath": ".vscode/settings.json",
+			"category": "SHARED DEPENDENCY",
+			"action": "exclude redundant tooling",
+			"reason": "AGENTS retains applicable guidance; editor-specific metadata is unnecessary.",
+			"sourceGitBlob": "bc31e1553d61aaa17e46cb2eb661d5ca01373690",
+			"sourceSha256": "1d2f8c3e8eb3bc068819718c603cf9bea3fb175c8c28296bf229f53815b2eb0a"
+		},
+		{
+			"sourcePath": "AGENTS.md",
+			"category": "ACADEMY REQUIRED",
+			"action": "retain unchanged",
+			"reason": "Transitive Academy/test dependency, containment alias, build/configuration or license.",
+			"sourceGitBlob": "788ec886b181dce9c915b82abba6d143d1d10bf9",
+			"sourceSha256": "fb34b30fb825298eec333f6a8d1ab8ee9e389103890a4c6b175be827a4c4e53a",
+			"targetPath": "AGENTS.md",
+			"targetSha256": "fb34b30fb825298eec333f6a8d1ab8ee9e389103890a4c6b175be827a4c4e53a"
+		},
+		{
+			"sourcePath": "Devin Halim.jpeg",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "42fc603283c0819e092418a3c7ab4103ab2778e1",
+			"sourceSha256": "497efcf0386d2a9199cf3aabb54cf54d8e1819cf9d66c73ba510a33c3d1a5249"
+		},
+		{
+			"sourcePath": "IMPLEMENTATION_PLAN_MASTERCLASS_SCHEDULE.md",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "c16ec183aa24bb5e4fcaf95737d097db4eeecc17",
+			"sourceSha256": "229d2ef78b624eb7c5c65a1f74a9cff4df9efb1085e85679e8bdeaaac0aa9a26"
+		},
+		{
+			"sourcePath": "LICENSE",
+			"category": "ACADEMY REQUIRED",
+			"action": "retain unchanged",
+			"reason": "Transitive Academy/test dependency, containment alias, build/configuration or license.",
+			"sourceGitBlob": "f1597e78d09247ebe2514d28ebdc3028e99c3475",
+			"sourceSha256": "d1d0f8c9a4e3631c6d21ced46af28ee74f1f94e77c7ca4deedfe7fe506316778",
+			"targetPath": "LICENSE",
+			"targetSha256": "d1d0f8c9a4e3631c6d21ced46af28ee74f1f94e77c7ca4deedfe7fe506316778"
+		},
+		{
+			"sourcePath": "MuhammadGhithrif.jpeg",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "92df1e9e02b228c01a4c6fc42f5e1e0e48d12725",
+			"sourceSha256": "fe64750ca26a5d0d2dc1ca4df58518ad638ab78b6d9c48ca5f2e7ff8ae4f44a9"
+		},
+		{
+			"sourcePath": "README.md",
+			"category": "ACADEMY REQUIRED",
+			"action": "retain adapted",
+			"reason": "Replace inaccurate/legacy README with actual standalone stack, prerequisites, workflows, commands and limitations.",
+			"sourceGitBlob": "6c9e7098b53bd0425c61875fa0314ff17e97c551",
+			"sourceSha256": "d119c3aecb0b1c0931c58613cc574dec6253c3bef2da14efb3cf13de432ba341",
+			"targetPath": "README.md",
+			"targetSha256": "9a91091d88f342b8f2cbe9671e62dc70cabd8a7ed63306afbfde3a0104be492d"
+		},
+		{
+			"sourcePath": "Sholahuddin Al Ayyubi, B.B.A., WMI, AWP..jpeg",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "49af849b5805af07eb580c5b8adcb3a260d4b8cb",
+			"sourceSha256": "13b2858faab8bbc9a6ec7ea12926ed1bafd8414eff5a791c5f1166717779f858"
+		},
+		{
+			"sourcePath": "WhatsApp Image 2026-06-17 at 16.10.02.jpeg",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "a5d124215cff389c13f8c34ff321354cdbb236df",
+			"sourceSha256": "77f87c969f679fe84bbfa3087f27b4b6c544edc469d568ec5969466f1a12cd4e"
+		},
+		{
+			"sourcePath": "WhatsApp Image 2026-06-17 at 16.10.03 (1).jpeg",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "48cd6dbca492b7c91b82c11470da0ab61bdf23a6",
+			"sourceSha256": "e52d44a7b2e1c0b567785d0e815cf938defe4ef982e984dcf06d7c0336a1166b"
+		},
+		{
+			"sourcePath": "WhatsApp Image 2026-06-17 at 16.10.03 (2).jpeg",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "41949b4b57d36938eadd9e68e636e8939b0c1136",
+			"sourceSha256": "26e67257930a0e5a184a4d62e903b37ca6780cb218835e692b3b195e44e255b5"
+		},
+		{
+			"sourcePath": "WhatsApp Image 2026-06-17 at 16.10.03.jpeg",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "72fadb5850cf9086561a9fd37f4f20bcf115d4b8",
+			"sourceSha256": "c143284a7708ff1364542c67344a4ed5bbf52e7e501f4d39437c82f4753c150f"
+		},
+		{
+			"sourcePath": "analisis-glosia.txt",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "9c550031efb869298be04f77bfdbd2d1ac84bc7f",
+			"sourceSha256": "d57012413fbb0acf4bfe473137a9dd07f515e27d3c25067e3c6edb2901d174d0"
+		},
+		{
+			"sourcePath": "catatan animasi",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "7ff47fc119d115ccea43da045f9387da92b13fcc",
+			"sourceSha256": "9f9324624709445ceee79573e56a45d2ea7d4432ddb3a730aa1bb449120c7fa0"
+		},
+		{
+			"sourcePath": "catatan detail.txt",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "2b0557e046b8c69b62ab305e1da0374b0bb0c911",
+			"sourceSha256": "1d3304d57af1d49fd664cf7c989e1f1d00e4cc1f2251257ffaddbce481ba5487"
+		},
+		{
+			"sourcePath": "catatan halaman pemateri 2.txt",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "2ccd8fc5e39db20c9d7011b0e346a114d2ab4ccd",
+			"sourceSha256": "91f7e3bd36d6a22932bd2e69f8d483e78ff956e0eeda6723dbb812ee7c386554"
+		},
+		{
+			"sourcePath": "catatan halaman pemateri.txt",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "898b80c6ced70914ff4526398da6c29603d40446",
+			"sourceSha256": "cccf5fc6185a694daa01b5af635603ccaee17a93f35293052054c3a51ad55ac6"
+		},
+		{
+			"sourcePath": "catatan kenapa.txt",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "e991b985532d21361790d7cafc9d9b0281a40b13",
+			"sourceSha256": "ffe9408efc157f98de7449d90bffd0245eaa386c8c42b7f192726a202086fe71"
+		},
+		{
+			"sourcePath": "catatan kritik.txt",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "d479add1d52c952eb39edaa05861c91906556bba",
+			"sourceSha256": "2b6b29add9d0953631615f52adb00fbb8dc5aa9361fb1c2a4fcb1809b903cddf"
+		},
+		{
+			"sourcePath": "catatan materi pembelajaran.txt",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "d0ab4339530aac4f64bedb1e8d0b0bfc39e5448a",
+			"sourceSha256": "60ce59553a67f49cfa531a8f9c1d3771f1271bfa854bd171b212b5b9fd3ef470"
+		},
+		{
+			"sourcePath": "catatan mobile.txt",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "3d523e1b400f42dfdc4f1ba3c93987bde593dd33",
+			"sourceSha256": "83f1582b26c81db05d1bb212d22c2e76f8cb5d2a331ebdd2a276022b0380d76d"
+		},
+		{
+			"sourcePath": "catatan promo bundling.txt",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "15bb10aefaad331936f13309862f536d031e90b0",
+			"sourceSha256": "bf87edb114ef336cb09dd6f06b24423b8c6282bf0330b7b34156de9a34505bc3"
+		},
+		{
+			"sourcePath": "catatan urutan.txt",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "cbf8851131eca810300a7f40c5ee6befa5fa82f4",
+			"sourceSha256": "68c379e470f10de76844b797a18b75a010edfbc239e4026759c63ca3c652eaff"
+		},
+		{
+			"sourcePath": "catatan-2.txt",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "e384b4c4fcd3731736ac3175b97189fe824da26f",
+			"sourceSha256": "26c34a31bece165906549c853b71a1c89e5580f9d3ceb5cb881daff119072152"
+		},
+		{
+			"sourcePath": "catatan-3.txt",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "a097969c7ed10e7adc07ca8553a5accada551bca",
+			"sourceSha256": "0719d6ce75a133dd73cae0e8aefbabb06b62eceb68cd016451c08f66537dc953"
+		},
+		{
+			"sourcePath": "catatan-reason.txt",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "017c3a7d681c13f92982077c1b7efd2f65a78e60",
+			"sourceSha256": "ecb124f6be7293dd29f03aa73e49da67bda0ee320387e401009620c4258ad8fd"
+		},
+		{
+			"sourcePath": "catatan-revisi-final.txt",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "d71f343cff2d48657a95775e813f41f9960be4f0",
+			"sourceSha256": "78f93ede7535db2d24afd2107ad9030015ee0599cfc7fb99b1a2c7a1f014ba2d"
+		},
+		{
+			"sourcePath": "catatan-terakhir-2.txt",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "4c685130551c9f2b5d4f4d0dea4184124dc3b7ff",
+			"sourceSha256": "2dc566c3f5b756ea9bd50994f2e1c7a7276b2b812bf03e8e981598ee47e6aa48"
+		},
+		{
+			"sourcePath": "catatan-terakhir.txt",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "1d720f1764e146c89401f9f107cbe92c44c91251",
+			"sourceSha256": "687c4aa0e7e54fe77d1cc4d9973fcf6e427abf142c6f513999874f9c8ab3b143"
+		},
+		{
+			"sourcePath": "catatan.txt",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "667dcc65e8bb7e4042dffd60cc9a588265407278",
+			"sourceSha256": "1db32ddee9c4e1b2c2d1cfb5d368b5143dd18b5e631cf22dc34983cd5014dc55"
+		},
+		{
+			"sourcePath": "catatans.txt",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "4f4ce91a2f50ecb1ff6a543eb35e4b3da592ef1e",
+			"sourceSha256": "97e48fb6cc3f7e3cef9c6c9bb819c406c56e4550933fd690e0e0f88662fdb922"
+		},
+		{
+			"sourcePath": "cv_DevinHalim.txt",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "e6d699c89d8f826b3b96ba862b549e04870fb71c",
+			"sourceSha256": "b08df5d96a989b56736923fa955bc3f926b0a32a6322aae5baebde62a879f4de"
+		},
+		{
+			"sourcePath": "cv_MuhammadGhithrif.txt",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "b1d46c12bece8387b276edb4388370debb33d854",
+			"sourceSha256": "f54037d7b99422ad2f6d4aa7802752f76fb3e3a4bd427a371fcfb68918f6a096"
+		},
+		{
+			"sourcePath": "cv_sholauhddin.txt",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "5be210d59def480504503296d326d6ecf54342f5",
+			"sourceSha256": "3b37c1a3ab6915e88f77de3feffb49e8b00be460bdbfc81b39b570a0245ce2be"
+		},
+		{
+			"sourcePath": "docs/academy-audit/00_BASELINE.md",
+			"category": "ACADEMY REQUIRED",
+			"action": "exclude historical evidence",
+			"reason": "Review input only; historical audit/logs are not required to run and must not enter fresh public history.",
+			"sourceGitBlob": "14d2e86178caf877cfdc08ac591b28c8a516cc06",
+			"sourceSha256": "fc896aafeea027fe24ae7d12d14a2eb9a3a225b0b6ee1511542b0fb2e6837a2e"
+		},
+		{
+			"sourcePath": "docs/academy-audit/01_FEATURE_MATRIX.md",
+			"category": "ACADEMY REQUIRED",
+			"action": "exclude historical evidence",
+			"reason": "Review input only; historical audit/logs are not required to run and must not enter fresh public history.",
+			"sourceGitBlob": "beee440dd356221d2d581b3e7857a958fd89eb46",
+			"sourceSha256": "d690a6bd110219e551276719d4b6ee543bd0db000799c7f7c5873d7cdb5339a0"
+		},
+		{
+			"sourcePath": "docs/academy-audit/02_SECURITY_AND_ACCESS_REVIEW.md",
+			"category": "ACADEMY REQUIRED",
+			"action": "exclude historical evidence",
+			"reason": "Review input only; historical audit/logs are not required to run and must not enter fresh public history.",
+			"sourceGitBlob": "573c89301b1b110a28315b012fd96da97c4d6201",
+			"sourceSha256": "b5992447f1abb99d1636df9723a7d5870d0b7b68f5a340a4e4a8435869eabb8d"
+		},
+		{
+			"sourcePath": "docs/academy-audit/03_MVP_SCOPE_AND_BACKLOG.md",
+			"category": "ACADEMY REQUIRED",
+			"action": "exclude historical evidence",
+			"reason": "Review input only; historical audit/logs are not required to run and must not enter fresh public history.",
+			"sourceGitBlob": "bdeb78aca9c04229c171fdd388dc2750340e69b4",
+			"sourceSha256": "caa23e6705e2d0c181a895e4e4b80c2a66019d320196ad81a88da57ef4b53328"
+		},
+		{
+			"sourcePath": "docs/academy-audit/04_RELEASE_GATES.md",
+			"category": "ACADEMY REQUIRED",
+			"action": "exclude historical evidence",
+			"reason": "Review input only; historical audit/logs are not required to run and must not enter fresh public history.",
+			"sourceGitBlob": "a4ee37a8aac042faf96dafe53a75ec42a6f1dee9",
+			"sourceSha256": "da51b27f1b8c124f88b955fcbcce4500c02035abaa99f9656ff2b3ea5fde34cd"
+		},
+		{
+			"sourcePath": "docs/academy-audit/05_MANUAL_TEST_PLAN.md",
+			"category": "ACADEMY REQUIRED",
+			"action": "exclude historical evidence",
+			"reason": "Review input only; historical audit/logs are not required to run and must not enter fresh public history.",
+			"sourceGitBlob": "9de7b70209a7d0319ce3a332f022ccaf6f0a77f4",
+			"sourceSha256": "78cd3af777a70cef86bc11953ab93ec6ca78b6f636ea4d023051ec65c638e01f"
+		},
+		{
+			"sourcePath": "docs/academy-phase1a/00_EXECUTION_SUMMARY.md",
+			"category": "ACADEMY REQUIRED",
+			"action": "exclude historical evidence",
+			"reason": "Review input only; historical audit/logs are not required to run and must not enter fresh public history.",
+			"sourceGitBlob": "6adbdb92984331f9ca9a57d8e6e64096da0cb91b",
+			"sourceSha256": "c8b3b5ca04897b647092c58e8f074756b0c4e2aaaf43ec04d42b1f97ec437b63"
+		},
+		{
+			"sourcePath": "docs/academy-phase1a/01_BASELINE_RECOVERY.md",
+			"category": "ACADEMY REQUIRED",
+			"action": "exclude historical evidence",
+			"reason": "Review input only; historical audit/logs are not required to run and must not enter fresh public history.",
+			"sourceGitBlob": "0442961e79bbb85946ae89968c096dd66b3087f5",
+			"sourceSha256": "6ed5975649b635c3fc03c5693a8ac07aa63fd91e1ccd831a36d33cbe5d914451"
+		},
+		{
+			"sourcePath": "docs/academy-phase1a/02_DEPENDENCY_TRIAGE.md",
+			"category": "ACADEMY REQUIRED",
+			"action": "exclude historical evidence",
+			"reason": "Review input only; historical audit/logs are not required to run and must not enter fresh public history.",
+			"sourceGitBlob": "757b6a0b49a1fb9022cefe2965dc89f3e832f5cb",
+			"sourceSha256": "09d18620e409d7aef366d8db513fe15273547db78386bedcc1525be3b24df53c"
+		},
+		{
+			"sourcePath": "docs/academy-phase1a/03_ISOLATION_EVIDENCE.md",
+			"category": "ACADEMY REQUIRED",
+			"action": "exclude historical evidence",
+			"reason": "Review input only; historical audit/logs are not required to run and must not enter fresh public history.",
+			"sourceGitBlob": "55f36f6ff6f3ad539fbfee5634895e66f9156c51",
+			"sourceSha256": "d5b70b3ae06b7069c010c2273a3217eb7cf6f187911d46b7d67bc316e8feceb3"
+		},
+		{
+			"sourcePath": "docs/academy-phase1a/04_PLAYER_VALIDATION.md",
+			"category": "ACADEMY REQUIRED",
+			"action": "exclude historical evidence",
+			"reason": "Review input only; historical audit/logs are not required to run and must not enter fresh public history.",
+			"sourceGitBlob": "021a3a058c2fb238d78c8db829ee0c3c95a8dac4",
+			"sourceSha256": "7c8d4db9fb45ebd40116eb2f7e04527e89ed7994d898bf2aeaf07cf6d75ba05a"
+		},
+		{
+			"sourcePath": "docs/academy-phase1a/05_NEXT_GATE.md",
+			"category": "ACADEMY REQUIRED",
+			"action": "exclude historical evidence",
+			"reason": "Review input only; historical audit/logs are not required to run and must not enter fresh public history.",
+			"sourceGitBlob": "54ee6648a59883663dbd4b5f2fef8b530e2efde4",
+			"sourceSha256": "f8c9fd7b52c15ce0d0cdf059c0bcd40d06b60c6ec6dc2e07709f5d8c759ad7f3"
+		},
+		{
+			"sourcePath": "docs/academy-phase1b/00_EXECUTION_SUMMARY.md",
+			"category": "ACADEMY REQUIRED",
+			"action": "exclude historical evidence",
+			"reason": "Review input only; historical audit/logs are not required to run and must not enter fresh public history.",
+			"sourceGitBlob": "56ac0d59a8f5190390945674d21399534c3dbdfe",
+			"sourceSha256": "ade50fabea79b59c600d6ed0f2971fa6e01c6cd98a0dc44505098ed37fa7cc9c"
+		},
+		{
+			"sourcePath": "docs/academy-phase1b/01_DATA_BOUNDARY.md",
+			"category": "ACADEMY REQUIRED",
+			"action": "exclude historical evidence",
+			"reason": "Review input only; historical audit/logs are not required to run and must not enter fresh public history.",
+			"sourceGitBlob": "362485a281cb0b4178a540210c2493d699a24fbf",
+			"sourceSha256": "61180546c97b57a762d26603e7b57ab8ff940596acb027f6a7b1cc62b1b7a2b2"
+		},
+		{
+			"sourcePath": "docs/academy-phase1b/02_RULES_TEST_MATRIX.md",
+			"category": "ACADEMY REQUIRED",
+			"action": "exclude historical evidence",
+			"reason": "Review input only; historical audit/logs are not required to run and must not enter fresh public history.",
+			"sourceGitBlob": "6427c7fb2fef0c8ed7d3f506d3476d4f371ea123",
+			"sourceSha256": "7f819512378de9510dc3332d006d840f1e1d8b0b0dabe64be245852cdf056c08"
+		},
+		{
+			"sourcePath": "docs/academy-phase1b/03_APP_INTEGRATION_TESTS.md",
+			"category": "ACADEMY REQUIRED",
+			"action": "exclude historical evidence",
+			"reason": "Review input only; historical audit/logs are not required to run and must not enter fresh public history.",
+			"sourceGitBlob": "c68e440a1174aabdffdf270f803ce47fa99e73ab",
+			"sourceSha256": "0102e76d3d7a07767376e76cf9da1e16dcbb97a5b0b6a619dfd551921e25ddd2"
+		},
+		{
+			"sourcePath": "docs/academy-phase1b/04_ACCESS_LIFECYCLE.md",
+			"category": "ACADEMY REQUIRED",
+			"action": "exclude historical evidence",
+			"reason": "Review input only; historical audit/logs are not required to run and must not enter fresh public history.",
+			"sourceGitBlob": "4727cce3fa08828756bf86533bf3793009061b20",
+			"sourceSha256": "bca52cf550e596456382a353110409c3942a2c4120a699c5dd1272d9565cba33"
+		},
+		{
+			"sourcePath": "docs/academy-phase1b/05_REMAINING_BLOCKERS.md",
+			"category": "ACADEMY REQUIRED",
+			"action": "exclude historical evidence",
+			"reason": "Review input only; historical audit/logs are not required to run and must not enter fresh public history.",
+			"sourceGitBlob": "2ffdf77acc474248d881fdd10a2de2c582139a18",
+			"sourceSha256": "a2fc217707cdd26635a3963ffa833a5fa5617261d69070135b03d00ea400a675"
+		},
+		{
+			"sourcePath": "docs/academy-phase1b/06_RELEASE_GATE.md",
+			"category": "ACADEMY REQUIRED",
+			"action": "exclude historical evidence",
+			"reason": "Review input only; historical audit/logs are not required to run and must not enter fresh public history.",
+			"sourceGitBlob": "e78dbd5950e5088d2cc2754357418ae573648bff",
+			"sourceSha256": "9b7d32de991f494758804d7cb3817388c7d7b250c5ef0db0ccbf16086523c23a"
+		},
+		{
+			"sourcePath": "docs/academy-phase1c/00_EXECUTION_SUMMARY.md",
+			"category": "ACADEMY REQUIRED",
+			"action": "exclude historical evidence",
+			"reason": "Review input only; historical audit/logs are not required to run and must not enter fresh public history.",
+			"sourceGitBlob": "854764c81385f2582c521a5fc668e717b72c3c67",
+			"sourceSha256": "bd22509df5377a4ddfaa39c21560e94247469df8e4dbceead0997b2f59dcabc3"
+		},
+		{
+			"sourcePath": "docs/academy-phase1c/01_CURRICULUM_MODEL.md",
+			"category": "ACADEMY REQUIRED",
+			"action": "exclude historical evidence",
+			"reason": "Review input only; historical audit/logs are not required to run and must not enter fresh public history.",
+			"sourceGitBlob": "7e88caef7d63dce48312553c1ef868b01dfdcb53",
+			"sourceSha256": "63a5f5b851f6e2d3d6081613b70549b526dad4ee12c8f273cd8c1cb85239b7c5"
+		},
+		{
+			"sourcePath": "docs/academy-phase1c/02_LEARNING_UX.md",
+			"category": "ACADEMY REQUIRED",
+			"action": "exclude historical evidence",
+			"reason": "Review input only; historical audit/logs are not required to run and must not enter fresh public history.",
+			"sourceGitBlob": "0a8b73213492a8b21654594ea0b59e278577b0a2",
+			"sourceSha256": "b0b289497b8e74ddb7e68c2d20d5f6972da34d6e7f3c808df8a7882c87ae7e01"
+		},
+		{
+			"sourcePath": "docs/academy-phase1c/03_PROGRESS_RESUME.md",
+			"category": "ACADEMY REQUIRED",
+			"action": "exclude historical evidence",
+			"reason": "Review input only; historical audit/logs are not required to run and must not enter fresh public history.",
+			"sourceGitBlob": "14323c0a600254720fc868d3d349dedb8f12d1db",
+			"sourceSha256": "5c8c0280e48b33d09e0521d18d7fa9f8a187bade20f756815813cc074c133d57"
+		},
+		{
+			"sourcePath": "docs/academy-phase1c/04_CMS_AND_PUBLISHING.md",
+			"category": "ACADEMY REQUIRED",
+			"action": "exclude historical evidence",
+			"reason": "Review input only; historical audit/logs are not required to run and must not enter fresh public history.",
+			"sourceGitBlob": "0a2b636d2e02ac9ee682c0a0b4284a51de775e1b",
+			"sourceSha256": "e29612cffe26fcd6a5a861a24e9a57cf6cb2bffdd8abb9d97748c36ec4047c9f"
+		},
+		{
+			"sourcePath": "docs/academy-phase1c/05_TEST_EVIDENCE.md",
+			"category": "ACADEMY REQUIRED",
+			"action": "exclude historical evidence",
+			"reason": "Review input only; historical audit/logs are not required to run and must not enter fresh public history.",
+			"sourceGitBlob": "84c8bfb008074c4b38b201fabad72e4ef641914f",
+			"sourceSha256": "d47dc5c1ac39491080f6c63b6fcc50cb0a278fc2ac82e87a340284e4cab92027"
+		},
+		{
+			"sourcePath": "docs/academy-phase1c/06_REMAINING_BLOCKERS.md",
+			"category": "ACADEMY REQUIRED",
+			"action": "exclude historical evidence",
+			"reason": "Review input only; historical audit/logs are not required to run and must not enter fresh public history.",
+			"sourceGitBlob": "c464640b0e155c1788dfbc23bdd0ab3fe0265dcd",
+			"sourceSha256": "7a8a32b893ac47d388459082b0bd1fa76886f6ec1f7641d65fab727747d73c66"
+		},
+		{
+			"sourcePath": "docs/academy-phase1c/07_NEXT_RELEASE_GATE.md",
+			"category": "ACADEMY REQUIRED",
+			"action": "exclude historical evidence",
+			"reason": "Review input only; historical audit/logs are not required to run and must not enter fresh public history.",
+			"sourceGitBlob": "e8e63ae5b15c25885af7f8b28a4b32cc6a83e1b3",
+			"sourceSha256": "4d4ed10c89590c547911d3b658aac7973572e6b888be6e2c780b725c38f61367"
+		},
+		{
+			"sourcePath": "docs/academy-phase1c/curated-content-manifest.example.json",
+			"category": "ACADEMY REQUIRED",
+			"action": "exclude historical evidence",
+			"reason": "Review input only; historical audit/logs are not required to run and must not enter fresh public history.",
+			"sourceGitBlob": "ae2924ffe841f82061130521e84ce2facc395a84",
+			"sourceSha256": "6ded6698fdb8257eafa6c2966c551613e73cb525596e931e4a721e09cf8dcbee"
+		},
+		{
+			"sourcePath": "docs/academy-phase1d/00_EXECUTION_SUMMARY.md",
+			"category": "ACADEMY REQUIRED",
+			"action": "exclude historical evidence",
+			"reason": "Review input only; historical audit/logs are not required to run and must not enter fresh public history.",
+			"sourceGitBlob": "2ca31cb382ca56a55fad8afe0873fc11a3095b70",
+			"sourceSha256": "7f5f898b2c04ebb49ef45777549682677a65a4dad52996f1579b81c3e16fd92a"
+		},
+		{
+			"sourcePath": "docs/academy-phase1d/01_ENVIRONMENT_MAPPING.md",
+			"category": "ACADEMY REQUIRED",
+			"action": "exclude historical evidence",
+			"reason": "Review input only; historical audit/logs are not required to run and must not enter fresh public history.",
+			"sourceGitBlob": "e38b5eef76b5e6fe0d5bfba272d35bae54b2c71f",
+			"sourceSha256": "ceb5e45530d6e23ab5daa13db4722e4b962f7586df8356d1a05cb885217b8918"
+		},
+		{
+			"sourcePath": "docs/academy-phase1d/02_FIREBASE_RULES_COMPATIBILITY.md",
+			"category": "ACADEMY REQUIRED",
+			"action": "exclude historical evidence",
+			"reason": "Review input only; historical audit/logs are not required to run and must not enter fresh public history.",
+			"sourceGitBlob": "30667d7f1d41c6b7c9deb217bdf5c6d12a11214b",
+			"sourceSha256": "b646c7ceaa4a8f39b2fcc6e87e7c65767f5e9225e47c1457672da6751171fd35"
+		},
+		{
+			"sourcePath": "docs/academy-phase1d/03_PREVIEW_PROTECTION.md",
+			"category": "ACADEMY REQUIRED",
+			"action": "exclude historical evidence",
+			"reason": "Review input only; historical audit/logs are not required to run and must not enter fresh public history.",
+			"sourceGitBlob": "878f760b61040d73beb0613d18bf9597d853ab9e",
+			"sourceSha256": "44b96aaebdda03324d82c5a5a1a4008bd25034fd11a13e9bbcc6494dadcf7a26"
+		},
+		{
+			"sourcePath": "docs/academy-phase1d/04_REAL_YOUTUBE_QA_PLAN.md",
+			"category": "ACADEMY REQUIRED",
+			"action": "exclude historical evidence",
+			"reason": "Review input only; historical audit/logs are not required to run and must not enter fresh public history.",
+			"sourceGitBlob": "38b79f3017f4bfdc84f9ebe5e5aafc5e48d89a9f",
+			"sourceSha256": "024861c620a8fa7ef3a32c442a3fdedae086d6fe7dd9d142e4330a3b2e37026e"
+		},
+		{
+			"sourcePath": "docs/academy-phase1d/05_CONTENT_AND_ROLE_READINESS.md",
+			"category": "ACADEMY REQUIRED",
+			"action": "exclude historical evidence",
+			"reason": "Review input only; historical audit/logs are not required to run and must not enter fresh public history.",
+			"sourceGitBlob": "7b1e121be2b5996a66417b334a4df56ccd073e6a",
+			"sourceSha256": "f84c09abe9cf05d5900f64c0bfb9a39761583c915da25bebed04e6ef813bdc7b"
+		},
+		{
+			"sourcePath": "docs/academy-phase1d/06_RECOVERY_AND_MONITORING.md",
+			"category": "ACADEMY REQUIRED",
+			"action": "exclude historical evidence",
+			"reason": "Review input only; historical audit/logs are not required to run and must not enter fresh public history.",
+			"sourceGitBlob": "f932e0d201c8b6f7afb51b8b3211bfd176d86beb",
+			"sourceSha256": "f74464245e7b4e95634627928812f2f0122f7aa05c30dcf374cbd95d25c4a50e"
+		},
+		{
+			"sourcePath": "docs/academy-phase1d/07_OWNER_DECISION_REGISTER.md",
+			"category": "ACADEMY REQUIRED",
+			"action": "exclude historical evidence",
+			"reason": "Review input only; historical audit/logs are not required to run and must not enter fresh public history.",
+			"sourceGitBlob": "8a00e784edad8e3c6b5d02cc6b2efecc7f69c2af",
+			"sourceSha256": "5371ebddca9364c9ed3c3273b57886d2c92c05634d6536007d47ab1acb7fc58d"
+		},
+		{
+			"sourcePath": "docs/academy-phase1d/08_RELEASE_GATE.md",
+			"category": "ACADEMY REQUIRED",
+			"action": "exclude historical evidence",
+			"reason": "Review input only; historical audit/logs are not required to run and must not enter fresh public history.",
+			"sourceGitBlob": "516290ab969f4039346dadefc2089ffdac59efc5",
+			"sourceSha256": "2a0a5bdeff8e606f36c1dc192433a76a0a4b65b452e478cc91018db4d74766c7"
+		},
+		{
+			"sourcePath": "docs/academy-phase1d/pilot-lesson-readiness.example.json",
+			"category": "ACADEMY REQUIRED",
+			"action": "exclude historical evidence",
+			"reason": "Review input only; historical audit/logs are not required to run and must not enter fresh public history.",
+			"sourceGitBlob": "264090d73175c092b5a4adfc4a3b0c50fb9ef7a1",
+			"sourceSha256": "884991e6106738bc1269266f9ad363801e5b4d89d5bcc4d369493b6b21192708"
+		},
+		{
+			"sourcePath": "eslint.config.js",
+			"category": "ACADEMY REQUIRED",
+			"action": "retain unchanged",
+			"reason": "Transitive Academy/test dependency, containment alias, build/configuration or license.",
+			"sourceGitBlob": "0014eddbac04a93a6e66976a0dade4538081b18c",
+			"sourceSha256": "56806fe435f8952d9686d0d56e5b5bd436c2ef065987574a74f9d6af7809acb9",
+			"targetPath": "eslint.config.js",
+			"targetSha256": "56806fe435f8952d9686d0d56e5b5bd436c2ef065987574a74f9d6af7809acb9"
+		},
+		{
+			"sourcePath": "firebase-debug.log",
+			"category": "ACADEMY REQUIRED",
+			"action": "exclude historical evidence",
+			"reason": "Review input only; historical audit/logs are not required to run and must not enter fresh public history.",
+			"sourceGitBlob": "59c1ac8a706c57192bcd58dfeb5d5f84607bb128",
+			"sourceSha256": "36145920ceda474c4ca159a2cbea1a9bdbd6b7ecae12ed0c5be2e8bc71960329"
+		},
+		{
+			"sourcePath": "firebase.emulator.json",
+			"category": "ACADEMY REQUIRED",
+			"action": "retain unchanged",
+			"reason": "Transitive Academy/test dependency, containment alias, build/configuration or license.",
+			"sourceGitBlob": "0151111c24be084b92308229179598fcd250c625",
+			"sourceSha256": "488750c50b3a8f40532abf561ee238986e3772626a60160e1c0910c28a6f9c60",
+			"targetPath": "firebase.emulator.json",
+			"targetSha256": "488750c50b3a8f40532abf561ee238986e3772626a60160e1c0910c28a6f9c60"
+		},
+		{
+			"sourcePath": "firebase/academy-v1.rules",
+			"category": "ACADEMY REQUIRED",
+			"action": "retain unchanged",
+			"reason": "Transitive Academy/test dependency, containment alias, build/configuration or license.",
+			"sourceGitBlob": "44988545ef2cb097627c3e0530f960e1c72b1808",
+			"sourceSha256": "849df8a238e0f6cfef6459b91240781f16702c932c779419fc808b3a22fce11e",
+			"targetPath": "firebase/academy-v1.rules",
+			"targetSha256": "849df8a238e0f6cfef6459b91240781f16702c932c779419fc808b3a22fce11e"
+		},
+		{
+			"sourcePath": "image.png",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "a0fa0e10061430c23910340136246a9c21b06cdc",
+			"sourceSha256": "3e4230b2751bdb0594bec5ae95e430ea1d96fa09b92342420f9ba7ed21e5a505"
+		},
+		{
+			"sourcePath": "notulensi rapat/NOTULENSI MEETING 19 JUNI 26_page-0001.jpg",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "5dbddec7ecef50828dedacc27cbe37e960a6382b",
+			"sourceSha256": "c98b5747225bfd8276759a752aa30cf398892c656ff6de3fca7077ae86d3405c"
+		},
+		{
+			"sourcePath": "notulensi rapat/NOTULENSI MEETING 19 JUNI 26_page-0002.jpg",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "5b213b15722846347ac4c94ca9b6beb359a94521",
+			"sourceSha256": "0154faa0d63aefd69b2ec84588fd8f21b19a7aa47d76f07b98baa0dc691d8ff7"
+		},
+		{
+			"sourcePath": "notulensi rapat/NOTULENSI MEETING 19 JUNI 26_page-0003.jpg",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "07778e7047127a3ae909454e9fc4e9f32dd5857c",
+			"sourceSha256": "8dc7d9f1124e99a1c42c0cd5908c07d11dcdec547751eba43be5ad945c0b9d53"
+		},
+		{
+			"sourcePath": "nuhafest-3.jpeg",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "b18d6df9186206fbed68ddbbde65e5c3f4c64bb8",
+			"sourceSha256": "cf71bd57b2cd1a4d620bb2e6d30b167b6820db833cecb45a423578780fe9dab4"
+		},
+		{
+			"sourcePath": "package-lock.json",
+			"category": "ACADEMY REQUIRED",
+			"action": "retain adapted",
+			"reason": "Prune 28 entries for removed direct dependencies; all retained dependency versions unchanged.",
+			"sourceGitBlob": "4a10b89d6dcacd13e7b65585004f124e203b97c8",
+			"sourceSha256": "2740a8edb2aefdfb54da274ce0a1e9f60cd10707244f93285d6f041f82c44bf3",
+			"targetPath": "package-lock.json",
+			"targetSha256": "278ca359496421826f910f76eecc58298c2ce53720d0c4378a178d94c3403c5a"
+		},
+		{
+			"sourcePath": "package.json",
+			"category": "ACADEMY REQUIRED",
+			"action": "retain adapted",
+			"reason": "Independent name/Node24 metadata; remove unreachable Blob/GSAP/Lenis/adapter-auto; add HTTP/recovery/build checks.",
+			"sourceGitBlob": "49ed0be1dd4233a0ce214a36471f78ce2c3adf5f",
+			"sourceSha256": "9389c8f8175c7aebeb2ce3abf9d8fc1aa0485932fba4e5f4e39d7abc3656e50e",
+			"targetPath": "package.json",
+			"targetSha256": "4518a5ce6ccfda9e419fa820b693dc2a67dc0c01f564c096062c8292c0583b94"
+		},
+		{
+			"sourcePath": "rangkuman-rapat-masterclass.txt",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "d6bfdfecc435e9e4a86ac2c1b21330573d9ff391",
+			"sourceSha256": "34b034562944331bef332163b662b8e78de636c5327f7ab1bc84a6bc3aed0038"
+		},
+		{
+			"sourcePath": "revisions/revisi-001, 002, 003.png",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "fdac6d0da4ad88c03f16552b490b71cf3bb04b0f",
+			"sourceSha256": "af2e15e0bf87a5cd284d35919af020a2f68a39543723b846839e7305a2dbda77"
+		},
+		{
+			"sourcePath": "revisions/revisi-004.png",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "6b7d75dc166caf759e6e233b19b8f53d65ecf7d2",
+			"sourceSha256": "bff2ea8038a6237422a5ab393a0d2a59d3ab48bfd8a776c5aa78f77e3d69199a"
+		},
+		{
+			"sourcePath": "revisions/revisi-005.png",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "4cacf7255d2996c1ce96bd1e01661b7425766e8d",
+			"sourceSha256": "e61c5ef3d1ca3a362dd1ef7def63a8e1674977d0e926c3a1ee075655f8ba5710"
+		},
+		{
+			"sourcePath": "revisions/revisi-006.png",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "e3e4d70d9dea8629d2b03695a1c5fa8f42979d6b",
+			"sourceSha256": "709d32d8a6513309671d9d463f10782fe00d4b40237c3677241b0d338f642d7b"
+		},
+		{
+			"sourcePath": "revisions/revisi-007.png",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "7679ca2371012724a1c3316a97bba5063f35cb1f",
+			"sourceSha256": "6c35dd4dcdee5e56330507b7bb12cc5d939c53422ec4feede5809807faabf78a"
+		},
+		{
+			"sourcePath": "scripts/academy-hosted-qa.mjs",
+			"category": "ACADEMY REQUIRED",
+			"action": "retain unchanged",
+			"reason": "Transitive Academy/test dependency, containment alias, build/configuration or license.",
+			"sourceGitBlob": "e5d0ce1e445ab76ad42b182d4494008f0231074a",
+			"sourceSha256": "0a150797131fe92b9720bf79e93770309a8eff817c941eba2eb83b6c3e943e86",
+			"targetPath": "scripts/academy-hosted-qa.mjs",
+			"targetSha256": "0a150797131fe92b9720bf79e93770309a8eff817c941eba2eb83b6c3e943e86"
+		},
+		{
+			"sourcePath": "scripts/run-local.mjs",
+			"category": "ACADEMY REQUIRED",
+			"action": "retain unchanged",
+			"reason": "Transitive Academy/test dependency, containment alias, build/configuration or license.",
+			"sourceGitBlob": "a61717a58dc423c9dfe5c03b37c12457da6c9037",
+			"sourceSha256": "7341f8e4b35833e02551701d7e81a6c152ded75842c54d93be5c65edfc6157e6",
+			"targetPath": "scripts/run-local.mjs",
+			"targetSha256": "7341f8e4b35833e02551701d7e81a6c152ded75842c54d93be5c65edfc6157e6"
+		},
+		{
+			"sourcePath": "scripts/start-emulators.mjs",
+			"category": "ACADEMY REQUIRED",
+			"action": "retain unchanged",
+			"reason": "Transitive Academy/test dependency, containment alias, build/configuration or license.",
+			"sourceGitBlob": "8ec5571f73c8af9181a86b3fb5ab6ca91f420540",
+			"sourceSha256": "17c3953451b7fada8cfc711f57bb973ba9d230fffb14a1e29dd83223461c2152",
+			"targetPath": "scripts/start-emulators.mjs",
+			"targetSha256": "17c3953451b7fada8cfc711f57bb973ba9d230fffb14a1e29dd83223461c2152"
+		},
+		{
+			"sourcePath": "scripts/verify-test-build.mjs",
+			"category": "ACADEMY REQUIRED",
+			"action": "retain unchanged",
+			"reason": "Transitive Academy/test dependency, containment alias, build/configuration or license.",
+			"sourceGitBlob": "c9ce28c73e473c7d3aaccda179542d5a08320880",
+			"sourceSha256": "fb4713efde026743a64db00de6dbc72cc0781a48b0a40f55a782cbd2d8eacbe5",
+			"targetPath": "scripts/verify-test-build.mjs",
+			"targetSha256": "fb4713efde026743a64db00de6dbc72cc0781a48b0a40f55a782cbd2d8eacbe5"
+		},
+		{
+			"sourcePath": "src/app.css",
+			"category": "SHARED DEPENDENCY",
+			"action": "retain adapted",
+			"reason": "Preserve brand/semantic tokens, remove unused Lenis import and remote font request; use system fonts.",
+			"sourceGitBlob": "064f07788c59eda08322e3b95e160002305a65c0",
+			"sourceSha256": "17fe16d6861590f223cb31424dd1bbbe641e90efe1af8972108a5ba622212078",
+			"targetPath": "src/app.css",
+			"targetSha256": "9cdc3ada33b30a1ddc7b285c342c9f964a6e6f1c78fa6f581faa35234e658516"
+		},
+		{
+			"sourcePath": "src/app.d.ts",
+			"category": "ACADEMY REQUIRED",
+			"action": "retain unchanged",
+			"reason": "Transitive Academy/test dependency, containment alias, build/configuration or license.",
+			"sourceGitBlob": "da08e6da592d210d5cc574d8a629868eced88543",
+			"sourceSha256": "3d450fc2fc7b0f10b6a9493a682769aac34f8b612f0f5d1bc4845a7b0bfe9f0a",
+			"targetPath": "src/app.d.ts",
+			"targetSha256": "3d450fc2fc7b0f10b6a9493a682769aac34f8b612f0f5d1bc4845a7b0bfe9f0a"
+		},
+		{
+			"sourcePath": "src/app.html",
+			"category": "SHARED DEPENDENCY",
+			"action": "retain adapted",
+			"reason": "Neutral Academy metadata; remove unsupported biggest/#1/certificate inventory claims.",
+			"sourceGitBlob": "4059e5e27932930e78a8d62aa5ad41d22ba6952d",
+			"sourceSha256": "0aa56b9706e8184824bcd73483e9f95be9fdaf34fe74d39b68cc0ddd57558a68",
+			"targetPath": "src/app.html",
+			"targetSha256": "dc2aee9db90a8f2d72e0f1e6b65f10ddb69b96e4f5b6cdc2920f144f486cfb42"
+		},
+		{
+			"sourcePath": "src/hooks.server.ts",
+			"category": "ACADEMY REQUIRED",
+			"action": "retain adapted",
+			"reason": "Preserve Academy containment; standalone resolver and Auth OFF/offline gate added.",
+			"sourceGitBlob": "4b1131954e18bb27fe2b63a0368ec20a962fa153",
+			"sourceSha256": "0e84144a0687ad1fe71a40afc18d6a42762163c00078ab1e93c0cb3f5590f9a9",
+			"targetPath": "src/hooks.server.ts",
+			"targetSha256": "a78f8becdc748177b1c920433b3bceef649000277d91155b5d39d12c80b717f8"
+		},
+		{
+			"sourcePath": "src/lib/academyAccess.ts",
+			"category": "ACADEMY REQUIRED",
+			"action": "retain unchanged",
+			"reason": "Transitive Academy/test dependency, containment alias, build/configuration or license.",
+			"sourceGitBlob": "b53767006fd93107b1da48dbf30a40a86fe09bfa",
+			"sourceSha256": "dec80b0356ef403f9a4d44ffca1c1d61febe3e552b5c8cf17bad47fef93057c2",
+			"targetPath": "src/lib/academyAccess.ts",
+			"targetSha256": "dec80b0356ef403f9a4d44ffca1c1d61febe3e552b5c8cf17bad47fef93057c2"
+		},
+		{
+			"sourcePath": "src/lib/academyCourse.ts",
+			"category": "SHARED DEPENDENCY",
+			"action": "exclude obsolete unused helper",
+			"reason": "Unused legacy flat course/pricing adapter; no Academy runtime/test importer. New hierarchy/data model already replaces it.",
+			"sourceGitBlob": "3f23c6a4b55d9a525db5ac467e293d78e7aefcff",
+			"sourceSha256": "e60e6d8c5616ffcf540bc359a02568c5419216ceafb817471ec5c48e82a3ee9a"
+		},
+		{
+			"sourcePath": "src/lib/academyCurriculum.ts",
+			"category": "ACADEMY REQUIRED",
+			"action": "retain unchanged",
+			"reason": "Transitive Academy/test dependency, containment alias, build/configuration or license.",
+			"sourceGitBlob": "bde65cd5a3863f9b41b2d758f8068eecfdcef121",
+			"sourceSha256": "c990f4ff989dbe5cf125c838ee65295741150686773f9ea81a21af7cc7e78425",
+			"targetPath": "src/lib/academyCurriculum.ts",
+			"targetSha256": "c990f4ff989dbe5cf125c838ee65295741150686773f9ea81a21af7cc7e78425"
+		},
+		{
+			"sourcePath": "src/lib/academyData.ts",
+			"category": "ACADEMY REQUIRED",
+			"action": "retain unchanged",
+			"reason": "Transitive Academy/test dependency, containment alias, build/configuration or license.",
+			"sourceGitBlob": "f43847643e109d4017b6631eb7e417d97ea6cc91",
+			"sourceSha256": "3e699be98020d97d160172bdbf9d8fdf32b64d70449e14176abb7139e1690ed4",
+			"targetPath": "src/lib/academyData.ts",
+			"targetSha256": "3e699be98020d97d160172bdbf9d8fdf32b64d70449e14176abb7139e1690ed4"
+		},
+		{
+			"sourcePath": "src/lib/academyPlayer.ts",
+			"category": "ACADEMY REQUIRED",
+			"action": "retain unchanged",
+			"reason": "Transitive Academy/test dependency, containment alias, build/configuration or license.",
+			"sourceGitBlob": "6ed4c34907ce849d5a3df9d7781491f5c6912acc",
+			"sourceSha256": "62af0906209259039951e2bc94ff49a1b0272b2ba07ba1383118085852dafd7b",
+			"targetPath": "src/lib/academyPlayer.ts",
+			"targetSha256": "62af0906209259039951e2bc94ff49a1b0272b2ba07ba1383118085852dafd7b"
+		},
+		{
+			"sourcePath": "src/lib/academyProgress.ts",
+			"category": "ACADEMY REQUIRED",
+			"action": "retain unchanged",
+			"reason": "Transitive Academy/test dependency, containment alias, build/configuration or license.",
+			"sourceGitBlob": "24811dd5419b801512d58f5b18d2fc3f2624af3a",
+			"sourceSha256": "26a7fd7bbb52f247f1e38675e8f305855bed21d0e3d6635ac8dc515ba2f77452",
+			"targetPath": "src/lib/academyProgress.ts",
+			"targetSha256": "26a7fd7bbb52f247f1e38675e8f305855bed21d0e3d6635ac8dc515ba2f77452"
+		},
+		{
+			"sourcePath": "src/lib/admin.ts",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "a1d8a0ee5aafd1c92be1f950589ec79f2d6ab5a9",
+			"sourceSha256": "fe3df5b66997dad8f9dc87b8641946222b50e520c50158e37a7cbc6c9bd19e50"
+		},
+		{
+			"sourcePath": "src/lib/assets/favicon.svg",
+			"category": "SHARED DEPENDENCY",
+			"action": "exclude unused",
+			"reason": "No reachable Academy import or runtime reference; CSS enters via src/app.css.",
+			"sourceGitBlob": "cc5dc66a3a524f4167cc097452cbe3c3883a684c",
+			"sourceSha256": "d7d9227f0fe5bfb4189fb6ba4dd9e2d524f6a1dfd02bd901c65330987675c0b3"
+		},
+		{
+			"sourcePath": "src/lib/auth.svelte.ts",
+			"category": "SHARED DEPENDENCY",
+			"action": "retain unchanged",
+			"reason": "Academy runtime dependency; remove marketing coupling only where necessary.",
+			"sourceGitBlob": "6444fb844079188a737176c2586e6b5cd032de70",
+			"sourceSha256": "a66d3446bf809b63742c0cdd5a0f4efc0b9cb4bc9b58075477ad727118bcdb9f",
+			"targetPath": "src/lib/auth.svelte.ts",
+			"targetSha256": "a66d3446bf809b63742c0cdd5a0f4efc0b9cb4bc9b58075477ad727118bcdb9f"
+		},
+		{
+			"sourcePath": "src/lib/blobUpload.ts",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "ec3bb358e297f8228266999fc50c819c4e3f51dd",
+			"sourceSha256": "69e8dc266ff2d17ec35289d24bdb9a5b18063cd99acb41e05e611addb6b452e8"
+		},
+		{
+			"sourcePath": "src/lib/components/AcademyCatalog.svelte",
+			"category": "ACADEMY REQUIRED",
+			"action": "retain unchanged",
+			"reason": "Transitive Academy/test dependency, containment alias, build/configuration or license.",
+			"sourceGitBlob": "f51aa4098c38b8611ea17d2c424c3c12f2e20503",
+			"sourceSha256": "1eab4d750ddc3db5c2e11fbb4503128e5221f4d0b50f0c7c389c890a2a4a34a8",
+			"targetPath": "src/lib/components/AcademyCatalog.svelte",
+			"targetSha256": "1eab4d750ddc3db5c2e11fbb4503128e5221f4d0b50f0c7c389c890a2a4a34a8"
+		},
+		{
+			"sourcePath": "src/lib/components/AcademyDashboard.svelte",
+			"category": "ACADEMY REQUIRED",
+			"action": "retain unchanged",
+			"reason": "Transitive Academy/test dependency, containment alias, build/configuration or license.",
+			"sourceGitBlob": "b20e9dab12137196fe3593a6eb20bfdb6ada909d",
+			"sourceSha256": "9ed23bf5c5fa47bc0f66b85125ec879eefe04e24ace733bf956db914de51bcb0",
+			"targetPath": "src/lib/components/AcademyDashboard.svelte",
+			"targetSha256": "9ed23bf5c5fa47bc0f66b85125ec879eefe04e24ace733bf956db914de51bcb0"
+		},
+		{
+			"sourcePath": "src/lib/components/AcademyPlayer.svelte",
+			"category": "ACADEMY REQUIRED",
+			"action": "retain unchanged",
+			"reason": "Transitive Academy/test dependency, containment alias, build/configuration or license.",
+			"sourceGitBlob": "a035036d57cafc9f955382381a9ba00027d995b8",
+			"sourceSha256": "9112203c7e7a00f4f45bf9b14e90bb8e1fffd2d488ea2a9bc26621e12c42d3ad",
+			"targetPath": "src/lib/components/AcademyPlayer.svelte",
+			"targetSha256": "9112203c7e7a00f4f45bf9b14e90bb8e1fffd2d488ea2a9bc26621e12c42d3ad"
+		},
+		{
+			"sourcePath": "src/lib/components/AcademyUnavailable.svelte",
+			"category": "ACADEMY REQUIRED",
+			"action": "retain unchanged",
+			"reason": "Transitive runtime dependency of units containment alias and the new OFF root entry.",
+			"sourceGitBlob": "6019390256782b84b79d015839078f5f319cebbf",
+			"sourceSha256": "9bb1f988ec57cfe432c27874311d2b67eee4ffdbdb963a6032a7dec597093aad",
+			"targetPath": "src/lib/components/AcademyUnavailable.svelte",
+			"targetSha256": "9bb1f988ec57cfe432c27874311d2b67eee4ffdbdb963a6032a7dec597093aad"
+		},
+		{
+			"sourcePath": "src/lib/components/AcademyVideo.svelte",
+			"category": "ACADEMY REQUIRED",
+			"action": "retain unchanged",
+			"reason": "Transitive Academy/test dependency, containment alias, build/configuration or license.",
+			"sourceGitBlob": "e69b1bec70f44f037e96b250e101b7215b9634ad",
+			"sourceSha256": "af63d4e43f0e1dcf7800756e6e1de18f1125c7b6d5f3520d29c836a843d0d219",
+			"targetPath": "src/lib/components/AcademyVideo.svelte",
+			"targetSha256": "af63d4e43f0e1dcf7800756e6e1de18f1125c7b6d5f3520d29c836a843d0d219"
+		},
+		{
+			"sourcePath": "src/lib/components/CoinTicker.svelte",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "692d433bd4f46a26e5713002b0aefa3d1093d321",
+			"sourceSha256": "044ce41260e46861520d42d8cdeee309419d9928625ec5fdfc4f27b592334b44"
+		},
+		{
+			"sourcePath": "src/lib/components/CommunityGallery.svelte",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "cee0cea9fc58d143d18a2290173913813ef1b6f8",
+			"sourceSha256": "30d62a499444ad2cbc3e206f4501882c271dd9ca9a8830941810680d8217fd9d"
+		},
+		{
+			"sourcePath": "src/lib/components/FAQ.svelte",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "95ff5e6812b29305606008607e164ccb6f40f33e",
+			"sourceSha256": "b6c0bbb69895e7a58aae2c333b50d6ca08e69ac99b50142769a39ac738b940ce"
+		},
+		{
+			"sourcePath": "src/lib/components/FeaturedIn.svelte",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "88b57a8a86d44df7425311d82a5e5aa138d2dbf6",
+			"sourceSha256": "ec4e59d2f306198ed248ce596505a424c05dc7a4a2cc43d1f627a751241d38ea"
+		},
+		{
+			"sourcePath": "src/lib/components/Footer.svelte",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "bd2b8cd026f2f18b225116276e1da10dcb23ad8f",
+			"sourceSha256": "c387d55fffe79d9d72fb1c8167644130491f9e1bbcc90c3a5e7c884f40859d5e"
+		},
+		{
+			"sourcePath": "src/lib/components/Hero.svelte",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "4cd5d8103eac9fdff54b43d430760824dbf6b026",
+			"sourceSha256": "d355b892d4266ba43c96ac79f1f573472b4c74ade97b0d07d7ea77c8f880a118"
+		},
+		{
+			"sourcePath": "src/lib/components/Instructors.svelte",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "c0d8f61f7cbd4593fbd29c437d6086fa45b13d1b",
+			"sourceSha256": "16f5764bb1a768077775b7edb7e4722d1c7c938bf4fcaa5086ded3e4dad04c4a"
+		},
+		{
+			"sourcePath": "src/lib/components/Investors.svelte",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "809ae6c763bd904f146489c40317debde32ab673",
+			"sourceSha256": "e412d364997a67353f02b1ca18a75e2be6ae94fd07ae12437c5c0864ae8c12aa"
+		},
+		{
+			"sourcePath": "src/lib/components/Navbar.svelte",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "ae8e8ac21bb5b9f0652e817f3e45c8095ba62e25",
+			"sourceSha256": "207f4db7f292f197b1dfe326bba9a2294bb9d406db47541cd7a2c72b44058f6c"
+		},
+		{
+			"sourcePath": "src/lib/components/Partners.svelte",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "3f8310cacea59f7d7ad2041fc06478df4cbf99dd",
+			"sourceSha256": "d9645e11e156cb3069d5f7c6a8f5eae8efe58846b09633fb31ee641319d48c79"
+		},
+		{
+			"sourcePath": "src/lib/components/Programs.svelte",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "e4c307403cc57f64aa9b2ede7e2403d0355cdbef",
+			"sourceSha256": "db1b0eff5896fdd36eeb949ddddb4ddacbb32b95131beab99244d6460e58b110"
+		},
+		{
+			"sourcePath": "src/lib/components/StatsBar.svelte",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "477982c93d95b1ec2359c52aff63bf5d2c8ad87f",
+			"sourceSha256": "0f52ab4333263627e1b875aa6aab1d7b2c13cb46ce866624cdb50e7c75c41ec1"
+		},
+		{
+			"sourcePath": "src/lib/components/SyariahPrinciples.svelte",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "ae09fbd57fe349844d383b9ed0915d68867cd52b",
+			"sourceSha256": "92b5ea997196560e5110153865056bdf4ef1e7ea2d66fcbb2816aeec76d323e5"
+		},
+		{
+			"sourcePath": "src/lib/components/TestimonialCarousel.svelte",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "4f3208a140974d51945cc92d0e43d59ceb5fb771",
+			"sourceSha256": "5c2879902ca7f30348d16b50a88a90dc08d3e8bef4a8a33be8e1ff3077de3607"
+		},
+		{
+			"sourcePath": "src/lib/components/Testimonials.svelte",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "60801d961473d11d985bc8b769bfd109e9e24707",
+			"sourceSha256": "eb23b4135904ac473f610b72012df1a0dcab5c5189c2a246d3235c9fd3535ea9"
+		},
+		{
+			"sourcePath": "src/lib/components/landing/SpecialOfferSection.svelte",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "89920822fb03253d9585d6d02241479137fa6cf9",
+			"sourceSha256": "dd988dbf4040c138b0cbc73f8a6a3c818963742568cf913705a8b15c9ec2015a"
+		},
+		{
+			"sourcePath": "src/lib/firebase.ts",
+			"category": "SHARED DEPENDENCY",
+			"action": "retain adapted",
+			"reason": "Use the standalone-only resolver before SDK creation; explicit loopback remains unchanged.",
+			"sourceGitBlob": "bd26e680b59bb9fe812bfebd5934308d77624684",
+			"sourceSha256": "1172046e36ff2c16b47c466935a9b2748f9a557aef74834d9b671ba0f52ae820",
+			"targetPath": "src/lib/firebase.ts",
+			"targetSha256": "5f8053eea53095f0dce343fd5d08f82c6bedddb01756d74d06cff4b1352e06ea"
+		},
+		{
+			"sourcePath": "src/lib/firebaseClient.ts",
+			"category": "SHARED DEPENDENCY",
+			"action": "retain unchanged",
+			"reason": "Academy runtime dependency; remove marketing coupling only where necessary.",
+			"sourceGitBlob": "339b00655baefe15db531eb9e463b7607da68225",
+			"sourceSha256": "bd152ad1e7a8c85462b115a06283ae1167ac7cf5c73093a287e9d87841f2b7a1",
+			"targetPath": "src/lib/firebaseClient.ts",
+			"targetSha256": "bd152ad1e7a8c85462b115a06283ae1167ac7cf5c73093a287e9d87841f2b7a1"
+		},
+		{
+			"sourcePath": "src/lib/firebaseConfig.ts",
+			"category": "SHARED DEPENDENCY",
+			"action": "retain adapted",
+			"reason": "Preserve baseline resolver and add standalone disabled/emulator wrapper rejecting live before SDK creation.",
+			"sourceGitBlob": "6238344de37ec4834eb6ea63944b01fa72fdbfb6",
+			"sourceSha256": "70312210f74f619cb03e5d91b0ca5c89927cb6ce3f9e1009a57d0e91671a45ce",
+			"targetPath": "src/lib/firebaseConfig.ts",
+			"targetSha256": "2b5294cac56ff4f5dd017be584083610cc1584d58e83a4edc9af8b41fca8dc52"
+		},
+		{
+			"sourcePath": "src/lib/index.ts",
+			"category": "SHARED DEPENDENCY",
+			"action": "exclude unused",
+			"reason": "No reachable Academy import or runtime reference; CSS enters via src/app.css.",
+			"sourceGitBlob": "856f2b6c38aec1085db88189bcf492dbb49a1c45",
+			"sourceSha256": "4beec0ade3bea5be651939b305bccf69d48506c74eda0a1a50a0dd6c79c4e91a"
+		},
+		{
+			"sourcePath": "src/lib/landingContent.ts",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "5efb187be46ad4f0e48a1428152565fd303cbaf2",
+			"sourceSha256": "6ec1e6155b689cda1cb3ace36559096d6e1d5c16c27bc0716d0f69b1d80970cd"
+		},
+		{
+			"sourcePath": "src/lib/server/firebaseAuth.ts",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "51782fd27ce6eb22faed455f598eab1395b69bfb",
+			"sourceSha256": "b5d2b49ff54c91b23799749bd60fe8042ee1784074e310ad310c00cfd714c35a"
+		},
+		{
+			"sourcePath": "src/lib/theme.svelte.ts",
+			"category": "SHARED DEPENDENCY",
+			"action": "retain unchanged",
+			"reason": "Academy runtime dependency; remove marketing coupling only where necessary.",
+			"sourceGitBlob": "925d89d0beaa4be6d16049555176ee36b64b8038",
+			"sourceSha256": "9dec71c2e678c56e53f48304bad7a49c0b066384e0ef4e4c1d1eb614fc0bdec3",
+			"targetPath": "src/lib/theme.svelte.ts",
+			"targetSha256": "9dec71c2e678c56e53f48304bad7a49c0b066384e0ef4e4c1d1eb614fc0bdec3"
+		},
+		{
+			"sourcePath": "src/lib/youtube.ts",
+			"category": "SHARED DEPENDENCY",
+			"action": "retain unchanged",
+			"reason": "Academy runtime dependency; remove marketing coupling only where necessary.",
+			"sourceGitBlob": "497ebd26bd573d0f029bff4023aeb8f465d8ae47",
+			"sourceSha256": "02f3335f98041a1ea646eab19df1ec7fa39ff2fb309814d0add151155f26eead",
+			"targetPath": "src/lib/youtube.ts",
+			"targetSha256": "02f3335f98041a1ea646eab19df1ec7fa39ff2fb309814d0add151155f26eead"
+		},
+		{
+			"sourcePath": "src/routes/+layout.svelte",
+			"category": "SHARED DEPENDENCY",
+			"action": "retain adapted",
+			"reason": "Replace Navbar/Footer marketing imports with Academy-only navigation; preserve theme/Auth with listener cleanup.",
+			"sourceGitBlob": "0289e5b5c24abbbce807614f23de43f6fc165a53",
+			"sourceSha256": "85d24cf00091f25d1b9967a50d3d451a176ee315e08747906753617061111c63",
+			"targetPath": "src/routes/+layout.svelte",
+			"targetSha256": "2aa2e69a8759a93d44f95ad17b40951b0e12881b22edc5e90ec5bdb5000177ea"
+		},
+		{
+			"sourcePath": "src/routes/+page.svelte",
+			"category": "SHARED DEPENDENCY",
+			"action": "retain adapted",
+			"reason": "Replace Masterclass sales entry with existing Academy catalog/OFF component; no legacy sales code retained.",
+			"sourceGitBlob": "c10b834869148b670f72f43801c9003f7bef48fd",
+			"sourceSha256": "aeaf1d5feee5bee51946a720030da0bddb0a2ed3b3967a157328fe1ef068936c",
+			"targetPath": "src/routes/+page.svelte",
+			"targetSha256": "fc804e5df46aee84a8baf8e725ae8d9ea095d2f82fea5d9de3a2cc2aff23b1cb"
+		},
+		{
+			"sourcePath": "src/routes/admin/courses/+page.svelte",
+			"category": "ACADEMY REQUIRED",
+			"action": "retain unchanged",
+			"reason": "Transitive Academy/test dependency, containment alias, build/configuration or license.",
+			"sourceGitBlob": "2bf1354a928328eea01680660cc50fafb9461830",
+			"sourceSha256": "62967beab614a14f5a49f2300422337ae4be22d9abdd37dd8a1e7d8fd9990302",
+			"targetPath": "src/routes/admin/courses/+page.svelte",
+			"targetSha256": "62967beab614a14f5a49f2300422337ae4be22d9abdd37dd8a1e7d8fd9990302"
+		},
+		{
+			"sourcePath": "src/routes/admin/landing/+page.svelte",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "66d2e6927140203f33433e6e1fc404679a453a91",
+			"sourceSha256": "ac0dbbd2b2266f6e28b3268e5d99a7f84673d336f4385c5d9aea1d651e79beeb"
+		},
+		{
+			"sourcePath": "src/routes/admin/orders/+page.svelte",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "9d913a3849f4ff7fdd7bbca4fb11c78d4ef49ac4",
+			"sourceSha256": "afe4d6827ac1d5456b20826ce1017f85f3cba0033e602000e9f54b9a9e0b5fa6"
+		},
+		{
+			"sourcePath": "src/routes/admin/vouchers/+page.svelte",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "9d913a3849f4ff7fdd7bbca4fb11c78d4ef49ac4",
+			"sourceSha256": "afe4d6827ac1d5456b20826ce1017f85f3cba0033e602000e9f54b9a9e0b5fa6"
+		},
+		{
+			"sourcePath": "src/routes/api/blob/upload/+server.ts",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "b37d8567f801b36e08ca321bb0a47c813c57bb51",
+			"sourceSha256": "90d6dfdd1eb38fc94c385ad8c1d92c64af9084a231b5ba32d2eba9a38e7aa44b"
+		},
+		{
+			"sourcePath": "src/routes/auth/+layout.svelte",
+			"category": "SHARED DEPENDENCY",
+			"action": "retain adapted",
+			"reason": "Root owns Auth/theme initialization; remove duplicate leaked Auth listener.",
+			"sourceGitBlob": "7f3ce127227195b29f59e531f9e7ab5c9be95882",
+			"sourceSha256": "463277ae429a0a922b3234096e539dcde76bbeb6b34cd5699cd0dd26dbc722f2",
+			"targetPath": "src/routes/auth/+layout.svelte",
+			"targetSha256": "3e86c136b60c40a0e557434a2b61c1fc048b458964ddc568d168d972349ade7f"
+		},
+		{
+			"sourcePath": "src/routes/auth/login/+page.svelte",
+			"category": "ACADEMY REQUIRED",
+			"action": "retain adapted",
+			"reason": "Auth behavior unchanged; Tailwind class order formatted against retained app.css.",
+			"sourceGitBlob": "fc1b4249a801a7b9dcfc5a12b4912b40e77fbd38",
+			"sourceSha256": "f645d24f33eb8d941579af5cd627cba6175926be480b5fbead4f265ed12085c3",
+			"targetPath": "src/routes/auth/login/+page.svelte",
+			"targetSha256": "022687b7c33807c390786756e22452ced01c400dc1d38927cf34f0fa843ec96b"
+		},
+		{
+			"sourcePath": "src/routes/auth/register/+page.svelte",
+			"category": "ACADEMY REQUIRED",
+			"action": "retain adapted",
+			"reason": "Auth behavior unchanged; Tailwind class order formatted against retained app.css.",
+			"sourceGitBlob": "85c5f2b55391f73f261d179e2847596bd062cbe6",
+			"sourceSha256": "8ed8d0be9d00643827b0718c5c6aa48da0e82c003bc649c7ca5fe19a54283b9c",
+			"targetPath": "src/routes/auth/register/+page.svelte",
+			"targetSha256": "95bc4c747c36f4351ce2adf82c869f22bf40f0bc5f975e9e5255fef1c4ba8cba"
+		},
+		{
+			"sourcePath": "src/routes/bootcamp/+page.svelte",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "a0f85b02029e7438d760209162363600137d70f0",
+			"sourceSha256": "7f0501dbe4b80a75051cd61d66d4af9e6e809453e6fe28584dde4d1fb71f75df"
+		},
+		{
+			"sourcePath": "src/routes/e-learning/+page.svelte",
+			"category": "ACADEMY REQUIRED",
+			"action": "retain unchanged",
+			"reason": "Transitive Academy/test dependency, containment alias, build/configuration or license.",
+			"sourceGitBlob": "a1aaf62b1beba4614db426a5afb78b6b6cf664a2",
+			"sourceSha256": "1e7039c14f675ac42608f8bb17cc8a356b0fd7458254bd10d0daa80bd00e331e",
+			"targetPath": "src/routes/e-learning/+page.svelte",
+			"targetSha256": "1e7039c14f675ac42608f8bb17cc8a356b0fd7458254bd10d0daa80bd00e331e"
+		},
+		{
+			"sourcePath": "src/routes/e-learning/[id]/+page.svelte",
+			"category": "ACADEMY REQUIRED",
+			"action": "retain unchanged",
+			"reason": "Transitive Academy/test dependency, containment alias, build/configuration or license.",
+			"sourceGitBlob": "7ca14c19fdd9d2d69b43da101d8f2b39373cbae1",
+			"sourceSha256": "190106d22f06d9eca64e00b5350c149e9501223c5a5591e16e8a1d6d2a626864",
+			"targetPath": "src/routes/e-learning/[id]/+page.svelte",
+			"targetSha256": "190106d22f06d9eca64e00b5350c149e9501223c5a5591e16e8a1d6d2a626864"
+		},
+		{
+			"sourcePath": "src/routes/e-learning/course/[slug]/+page.svelte",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "9d913a3849f4ff7fdd7bbca4fb11c78d4ef49ac4",
+			"sourceSha256": "afe4d6827ac1d5456b20826ce1017f85f3cba0033e602000e9f54b9a9e0b5fa6"
+		},
+		{
+			"sourcePath": "src/routes/layout.css",
+			"category": "SHARED DEPENDENCY",
+			"action": "exclude unused",
+			"reason": "No reachable Academy import or runtime reference; CSS enters via src/app.css.",
+			"sourceGitBlob": "d4b5078586e291f9dc7d6f04a380aa3c1b52b84b",
+			"sourceSha256": "11b8e69e89a31e87e25ec43c92ffcddd0cb794db757d6167ae31ee058f9ea425"
+		},
+		{
+			"sourcePath": "src/routes/payment/e-learning/[id]/+page.svelte",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "9d913a3849f4ff7fdd7bbca4fb11c78d4ef49ac4",
+			"sourceSha256": "afe4d6827ac1d5456b20826ce1017f85f3cba0033e602000e9f54b9a9e0b5fa6"
+		},
+		{
+			"sourcePath": "src/routes/payment/subscription/[id]/+page.svelte",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "9d913a3849f4ff7fdd7bbca4fb11c78d4ef49ac4",
+			"sourceSha256": "afe4d6827ac1d5456b20826ce1017f85f3cba0033e602000e9f54b9a9e0b5fa6"
+		},
+		{
+			"sourcePath": "src/routes/profile/+page.svelte",
+			"category": "ACADEMY REQUIRED",
+			"action": "retain unchanged",
+			"reason": "Transitive Academy/test dependency, containment alias, build/configuration or license.",
+			"sourceGitBlob": "df4150b886e68beaad1a7535895708ba77932ee7",
+			"sourceSha256": "3fb21315239aa6269382cd77ca302a9ea348d101f5df24da58e4516e4e3236b0",
+			"targetPath": "src/routes/profile/+page.svelte",
+			"targetSha256": "3fb21315239aa6269382cd77ca302a9ea348d101f5df24da58e4516e4e3236b0"
+		},
+		{
+			"sourcePath": "src/routes/subscription/+page.svelte",
+			"category": "ACADEMY REQUIRED",
+			"action": "retain unchanged",
+			"reason": "Transitive Academy/test dependency, containment alias, build/configuration or license.",
+			"sourceGitBlob": "a1aaf62b1beba4614db426a5afb78b6b6cf664a2",
+			"sourceSha256": "1e7039c14f675ac42608f8bb17cc8a356b0fd7458254bd10d0daa80bd00e331e",
+			"targetPath": "src/routes/subscription/+page.svelte",
+			"targetSha256": "1e7039c14f675ac42608f8bb17cc8a356b0fd7458254bd10d0daa80bd00e331e"
+		},
+		{
+			"sourcePath": "src/routes/subscription/[id]/+page.svelte",
+			"category": "ACADEMY REQUIRED",
+			"action": "retain unchanged",
+			"reason": "Transitive Academy/test dependency, containment alias, build/configuration or license.",
+			"sourceGitBlob": "7ca14c19fdd9d2d69b43da101d8f2b39373cbae1",
+			"sourceSha256": "190106d22f06d9eca64e00b5350c149e9501223c5a5591e16e8a1d6d2a626864",
+			"targetPath": "src/routes/subscription/[id]/+page.svelte",
+			"targetSha256": "190106d22f06d9eca64e00b5350c149e9501223c5a5591e16e8a1d6d2a626864"
+		},
+		{
+			"sourcePath": "src/routes/units/+page.svelte",
+			"category": "ACADEMY REQUIRED",
+			"action": "retain unchanged",
+			"reason": "Transitive Academy/test dependency, containment alias, build/configuration or license.",
+			"sourceGitBlob": "a1aaf62b1beba4614db426a5afb78b6b6cf664a2",
+			"sourceSha256": "1e7039c14f675ac42608f8bb17cc8a356b0fd7458254bd10d0daa80bd00e331e",
+			"targetPath": "src/routes/units/+page.svelte",
+			"targetSha256": "1e7039c14f675ac42608f8bb17cc8a356b0fd7458254bd10d0daa80bd00e331e"
+		},
+		{
+			"sourcePath": "src/routes/units/[id]/+page.svelte",
+			"category": "ACADEMY REQUIRED",
+			"action": "retain unchanged",
+			"reason": "Transitive Academy/test dependency, containment alias, build/configuration or license.",
+			"sourceGitBlob": "9d913a3849f4ff7fdd7bbca4fb11c78d4ef49ac4",
+			"sourceSha256": "afe4d6827ac1d5456b20826ce1017f85f3cba0033e602000e9f54b9a9e0b5fa6",
+			"targetPath": "src/routes/units/[id]/+page.svelte",
+			"targetSha256": "afe4d6827ac1d5456b20826ce1017f85f3cba0033e602000e9f54b9a9e0b5fa6"
+		},
+		{
+			"sourcePath": "static/background-beranda.png",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "fbb085fa5612f62f09a1e4011c3f01dee1607a5d",
+			"sourceSha256": "ed312cd9fc14acf7e7b78a04f3ab8f1d8fc2f38009be69a56ee6037138b0ee07"
+		},
+		{
+			"sourcePath": "static/coins/fhe.png",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "be301c7f00a0015f1ba3fef89ea24bace65466c9",
+			"sourceSha256": "80c68a21f2764d57cef23ec30822198fe5bf1198817516919ef1a766d5bc12a3"
+		},
+		{
+			"sourcePath": "static/coins/humanity.png",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "780c55b6b79a4f8a87be3bf022e64ec560b2515d",
+			"sourceSha256": "b626b76fd4c57d28467f1745bb0200bb66d1bd290b2bf317d55f1d81fe1af397"
+		},
+		{
+			"sourcePath": "static/coins/light.png",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "b2d36981be0e749fc1c167592df15997f4f879aa",
+			"sourceSha256": "347deeec0d2ea96cedea535f31591c577b80735cdf6082740eca90714c081fe0"
+		},
+		{
+			"sourcePath": "static/coins/umbra.png",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "77b0eb7b8dde88e0fa360e5091f6590c919047cc",
+			"sourceSha256": "bb3f6732f47045ce0f7a5a3e1843eac3d24d8b2a19e178c579164b7cdf4c3a9d"
+		},
+		{
+			"sourcePath": "static/events/bootcamp-2.png",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "9289d369803065c0b2fa275cc4a85741ef3f2d86",
+			"sourceSha256": "e04553ea927d63d09a1997614e5ae13ec1e453f4e6d3bad9b41be8301b5be654"
+		},
+		{
+			"sourcePath": "static/events/bootcamp.png",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "daa92d7ddeacf731078236f5fa63cd3fd8bc4cc6",
+			"sourceSha256": "8accce0e248bca6df5a03a044d7410389aed7d19a402072d57d18178890b1407"
+		},
+		{
+			"sourcePath": "static/events/halalkulture-2.png",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "3d5a620725fef90df8d14d856769447a9cd08ff2",
+			"sourceSha256": "060baa5ba95710c0023d67e9a98e56860a2ff2eb8267fa1964236836229b3422"
+		},
+		{
+			"sourcePath": "static/events/halalkulture.png",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "f97eea5deb20d21507a00a602b6ae886edbca51f",
+			"sourceSha256": "f74a05ea102796bf50ac36a35073c99d079d33390db7bb980cd2cca40ca1f622"
+		},
+		{
+			"sourcePath": "static/events/kopdar.png",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "3fff9ca30e77a6f307fc798103bb609e62f6fa79",
+			"sourceSha256": "877a4202ebb7785dce3807ec64f9dfd3abe29eef61965852ea60249ab508e4f6"
+		},
+		{
+			"sourcePath": "static/events/nushafest-2.png",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "29d22730eb06f01f29bbc7e40dc2e69102dff959",
+			"sourceSha256": "355c06c9555f00f7b55b6703f83e932ab4f484a9c98ddadc650dba42452f4b91"
+		},
+		{
+			"sourcePath": "static/events/nushafest-3.jpeg",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "b18d6df9186206fbed68ddbbde65e5c3f4c64bb8",
+			"sourceSha256": "cf71bd57b2cd1a4d620bb2e6d30b167b6820db833cecb45a423578780fe9dab4"
+		},
+		{
+			"sourcePath": "static/events/nushafest.png",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "2fdc8c47867c180cabc5dc4673b4467803ebf289",
+			"sourceSha256": "559c0499ec085a3aaf754e5536889cdf8a0ab9366de5342ab76ef5ab12cffe12"
+		},
+		{
+			"sourcePath": "static/favicon.png",
+			"category": "SHARED DEPENDENCY",
+			"action": "retain unchanged",
+			"reason": "Academy runtime dependency; remove marketing coupling only where necessary.",
+			"sourceGitBlob": "94d2603f091ea8d8f6a4aab89199f6a9a48a7f1e",
+			"sourceSha256": "6a942978fc5d7807c3d17b3af3586c03cfd9c3ce96008dcdb460a882cd454086",
+			"targetPath": "static/favicon.png",
+			"targetSha256": "6a942978fc5d7807c3d17b3af3586c03cfd9c3ce96008dcdb460a882cd454086"
+		},
+		{
+			"sourcePath": "static/hero-human.png",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "a3cf3abd21ae75422bfa87a291ba6063a9b5ba2d",
+			"sourceSha256": "48c5e24598584becc249c5467ff4b2a6e739b0ae20583f6fea67ecd214aab7f3"
+		},
+		{
+			"sourcePath": "static/images/packages/paket-a-fundamental.jpeg",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "a5d124215cff389c13f8c34ff321354cdbb236df",
+			"sourceSha256": "77f87c969f679fe84bbfa3087f27b4b6c544edc469d568ec5969466f1a12cd4e"
+		},
+		{
+			"sourcePath": "static/images/packages/paket-b-market-analysis.jpeg",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "72fadb5850cf9086561a9fd37f4f20bcf115d4b8",
+			"sourceSha256": "c143284a7708ff1364542c67344a4ed5bbf52e7e501f4d39437c82f4753c150f"
+		},
+		{
+			"sourcePath": "static/images/packages/paket-c-technical-analysis.jpeg",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "48cd6dbca492b7c91b82c11470da0ab61bdf23a6",
+			"sourceSha256": "e52d44a7b2e1c0b567785d0e815cf938defe4ef982e984dcf06d7c0336a1166b"
+		},
+		{
+			"sourcePath": "static/images/packages/paket-d-sharia-screening.jpeg",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "41949b4b57d36938eadd9e68e636e8939b0c1136",
+			"sourceSha256": "26e67257930a0e5a184a4d62e903b37ca6780cb218835e692b3b195e44e255b5"
+		},
+		{
+			"sourcePath": "static/images/testimonials/001.png",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "f627110a9e91a8e412f9fc67f1cd524812cc5b7f",
+			"sourceSha256": "25e191fc116d5c2dfdbac7faafd036257c3930163cf47ab3e2a4a84ce693905d"
+		},
+		{
+			"sourcePath": "static/images/testimonials/002.png",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "0e0b8e442c3d36bb6ee149a27cebaac150a4e4f6",
+			"sourceSha256": "77c171485e3d8077928e0a2fd7ba0b2c62b82625bfe0076cba03b9492adb04b4"
+		},
+		{
+			"sourcePath": "static/images/testimonials/003.png",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "4f64efa410c48dd350d81c6f41ba0786720ccefb",
+			"sourceSha256": "17e2151de5c3a3c722922b2da2109118f47dc1744e6c9bad40a1f56513a9f16c"
+		},
+		{
+			"sourcePath": "static/images/testimonials/004.png",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "7a3050d1c028b892783aee14e366cb66fed620d8",
+			"sourceSha256": "b2fc8fcdc9a6d28499b145db02a1744c339a0ec7b75a92e8f43fef8bdb815457"
+		},
+		{
+			"sourcePath": "static/images/testimonials/005.png",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "7294165c2052e2827185e95a556982d9cf659ffc",
+			"sourceSha256": "df5d528776e2a0d99754abdddd80eabde32ea368e884d815139be76f325f4d9d"
+		},
+		{
+			"sourcePath": "static/images/testimonials/Aizul.png",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "02242d94abd1c5b77d1c61f53b61b40751c1bef2",
+			"sourceSha256": "647523ed1de8c1777d1e3d971ea4461b3c55ce27eab50a58817c7d337d3a6a37"
+		},
+		{
+			"sourcePath": "static/images/testimonials/Antii.png",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "0b9c90d8f30cdd17934fafb7c0f96106a84f0675",
+			"sourceSha256": "70f401112c36ecea547320afa985c6acfd52bd0b2d9696bb8eb4607ce30fd515"
+		},
+		{
+			"sourcePath": "static/images/testimonials/Arief Adjie Wicaksono.png",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "0d30a308a22073487d4c939ff91ddfa3a832ee79",
+			"sourceSha256": "c91be38ab156e049dee0a4328a427cc7f603332d3d16fb782ecd7dacfe5a7d0a"
+		},
+		{
+			"sourcePath": "static/images/testimonials/Faqih.png",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "cfba7bfe60f49b4a09f60705d38da1087dd55b16",
+			"sourceSha256": "4581d3efda54d0474b452b3e8853965d71c611028ba12da135d72e8368bc4e5c"
+		},
+		{
+			"sourcePath": "static/images/testimonials/Firman.png",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "a0fa0e10061430c23910340136246a9c21b06cdc",
+			"sourceSha256": "3e4230b2751bdb0594bec5ae95e430ea1d96fa09b92342420f9ba7ed21e5a505"
+		},
+		{
+			"sourcePath": "static/images/testimonials/Ibrahim.png",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "67cebcd4d47bb810a08731129f2290196a989ba1",
+			"sourceSha256": "1bb6fe3a77f8a0835a4ee386b63783e10219054e69daba6e7100e0f88c12fd02"
+		},
+		{
+			"sourcePath": "static/images/testimonials/Kang Ayip.png",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "7a3050d1c028b892783aee14e366cb66fed620d8",
+			"sourceSha256": "b2fc8fcdc9a6d28499b145db02a1744c339a0ec7b75a92e8f43fef8bdb815457"
+		},
+		{
+			"sourcePath": "static/images/testimonials/Muhamad Cholid.png",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "6c24f56460cbdd5762f59397042a165c3d2764fc",
+			"sourceSha256": "b4e38162984ef844d082e5d89d3ada83a5550f9483e33754710c44da0073d8c4"
+		},
+		{
+			"sourcePath": "static/images/testimonials/Rainsha Sinna.png",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "26d53889f80b550bb88143392f247845908b960d",
+			"sourceSha256": "333ec8459972dcc557894fbbd9700b0af093eedc5651bd840ca9b8fec5328825"
+		},
+		{
+			"sourcePath": "static/images/testimonials/Suarabangjan.png",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "f627110a9e91a8e412f9fc67f1cd524812cc5b7f",
+			"sourceSha256": "25e191fc116d5c2dfdbac7faafd036257c3930163cf47ab3e2a4a84ce693905d"
+		},
+		{
+			"sourcePath": "static/images/testimonials/Syaukah NAORIS.png",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "7294165c2052e2827185e95a556982d9cf659ffc",
+			"sourceSha256": "df5d528776e2a0d99754abdddd80eabde32ea368e884d815139be76f325f4d9d"
+		},
+		{
+			"sourcePath": "static/images/testimonials/Syaukah TNSR.png",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "0e0b8e442c3d36bb6ee149a27cebaac150a4e4f6",
+			"sourceSha256": "77c171485e3d8077928e0a2fd7ba0b2c62b82625bfe0076cba03b9492adb04b4"
+		},
+		{
+			"sourcePath": "static/images/testimonials/Thoriq.png",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "4f64efa410c48dd350d81c6f41ba0786720ccefb",
+			"sourceSha256": "17e2151de5c3a3c722922b2da2109118f47dc1744e6c9bad40a1f56513a9f16c"
+		},
+		{
+			"sourcePath": "static/images/testimonials/excellentmous.png",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "35f16e7927cc397b633071f121d2140d0197f11f",
+			"sourceSha256": "1f098ef61c5b37ebb46e9c85ea8d1dfc42d76cf5d61b53866e235fc4ba1bcbcb"
+		},
+		{
+			"sourcePath": "static/images/testimonials/image.png",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "7caa12eda6498e036980af85ce06d05fc261639e",
+			"sourceSha256": "aa9beda1883b92077ea62a7ec76b5aa3036b8a10f248eaf1af07941b00b7b94c"
+		},
+		{
+			"sourcePath": "static/images/testimonials/sir.png",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "139885da365e085230e2c39506a240c2198e23b4",
+			"sourceSha256": "61a60f428dd2fdae02f9cafe480b560be4c86869a20b4544af5c4dd27de0582d"
+		},
+		{
+			"sourcePath": "static/images/warren-buffett.LICENSE.txt",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "f587d894053cbc3c6ee407cbf4b2752119003b7b",
+			"sourceSha256": "cf59c5e983a4263328f576331d36296aac18d33046ef65c8680da44a27245b96"
+		},
+		{
+			"sourcePath": "static/images/warren-buffett.jpg",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "5f96826981f5dc40721e799b6ee244ba4c88ee2e",
+			"sourceSha256": "3c366c4e8f704335c3d45aff9d3c8becd0b076f8a5fa2a398b1d0aa3705bfed2"
+		},
+		{
+			"sourcePath": "static/instructors/devin-halim.jpeg",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "42fc603283c0819e092418a3c7ab4103ab2778e1",
+			"sourceSha256": "497efcf0386d2a9199cf3aabb54cf54d8e1819cf9d66c73ba510a33c3d1a5249"
+		},
+		{
+			"sourcePath": "static/instructors/muhammad-ghithrif.jpeg",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "92df1e9e02b228c01a4c6fc42f5e1e0e48d12725",
+			"sourceSha256": "fe64750ca26a5d0d2dc1ca4df58518ad638ab78b6d9c48ca5f2e7ff8ae4f44a9"
+		},
+		{
+			"sourcePath": "static/instructors/sholahuddin-al-ayyubi.jpeg",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "49af849b5805af07eb580c5b8adcb3a260d4b8cb",
+			"sourceSha256": "13b2858faab8bbc9a6ec7ea12926ed1bafd8414eff5a791c5f1166717779f858"
+		},
+		{
+			"sourcePath": "static/logo.png",
+			"category": "SHARED DEPENDENCY",
+			"action": "retain unchanged",
+			"reason": "Academy runtime dependency; remove marketing coupling only where necessary.",
+			"sourceGitBlob": "94d2603f091ea8d8f6a4aab89199f6a9a48a7f1e",
+			"sourceSha256": "6a942978fc5d7807c3d17b3af3586c03cfd9c3ce96008dcdb460a882cd454086",
+			"targetPath": "static/logo.png",
+			"targetSha256": "6a942978fc5d7807c3d17b3af3586c03cfd9c3ce96008dcdb460a882cd454086"
+		},
+		{
+			"sourcePath": "static/robots.txt",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "b6dd6670cbb07772618c4449c41f90d72edb8a74",
+			"sourceSha256": "b033243267bcbdab84cb01e940811d6d77a894d78f0470faaf0eb43f8e4efcc9"
+		},
+		{
+			"sourcePath": "static/uploads/courses/1778937241464-logo.png",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "94d2603f091ea8d8f6a4aab89199f6a9a48a7f1e",
+			"sourceSha256": "6a942978fc5d7807c3d17b3af3586c03cfd9c3ce96008dcdb460a882cd454086"
+		},
+		{
+			"sourcePath": "static/uploads/courses/1778937648764-ChatGPTImageMay16202608_20_41PM.png",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "0d3d554741c1dda6194aa5b7d940858e7ca309ee",
+			"sourceSha256": "056d864534f6dca68a6c12d684816c4907223d9ad73e155aed29e87bbfedee7b"
+		},
+		{
+			"sourcePath": "static/uploads/courses/1778942696021-ChatGPTImageMay16202608_20_41PM.png",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "0d3d554741c1dda6194aa5b7d940858e7ca309ee",
+			"sourceSha256": "056d864534f6dca68a6c12d684816c4907223d9ad73e155aed29e87bbfedee7b"
+		},
+		{
+			"sourcePath": "svelte.config.js",
+			"category": "ACADEMY REQUIRED",
+			"action": "retain adapted",
+			"reason": "Transitive Academy/test dependency, containment alias, build/configuration or license.",
+			"sourceGitBlob": "0c838878f6c346fdb94fa1cb985ada216f47b2e2",
+			"sourceSha256": "4cc618560cf5620ae8957343a5558a0064a4ea31adce6730a13e5343691eb437",
+			"targetPath": "svelte.config.js",
+			"targetSha256": "db0999fe38a92e16453ca37f889ada2576f5d3a16a101c5a91651ceffabe00d3"
+		},
+		{
+			"sourcePath": "testimoni.txt",
+			"category": "MASTERCLASS ONLY",
+			"action": "exclude",
+			"reason": "Outside Academy dependency closure: marketing/bootcamp/legacy Blob upload, assets or internal planning. Contained transaction URLs remain denied by hook.",
+			"sourceGitBlob": "ede6114c393c58d36c896a9dfe66a2a2d073ca61",
+			"sourceSha256": "5b417f0ffbdc8896ead3ef3d1d81769af0989e36ce38f056f0db4093e8a8a128"
+		},
+		{
+			"sourcePath": "tests/academy-fixtures.ts",
+			"category": "ACADEMY REQUIRED",
+			"action": "retain unchanged",
+			"reason": "Transitive Academy/test dependency, containment alias, build/configuration or license.",
+			"sourceGitBlob": "8a2aaf82aaed06fc06855d48fc0c7d236640e5b5",
+			"sourceSha256": "f22682d61584014acbf30e072bd333499fb255ba9efacdf2cd55de2e6ebc97c4",
+			"targetPath": "tests/academy-fixtures.ts",
+			"targetSha256": "f22682d61584014acbf30e072bd333499fb255ba9efacdf2cd55de2e6ebc97c4"
+		},
+		{
+			"sourcePath": "tests/academy-isolation.test.ts",
+			"category": "ACADEMY REQUIRED",
+			"action": "retain unchanged",
+			"reason": "Transitive Academy/test dependency, containment alias, build/configuration or license.",
+			"sourceGitBlob": "1ffb59d5846964ca483f959bcad77d978dc151e3",
+			"sourceSha256": "2a6721ce2401faddb2021d32df5de116d6c814f89c25797303d8c46ba07f55b7",
+			"targetPath": "tests/academy-isolation.test.ts",
+			"targetSha256": "2a6721ce2401faddb2021d32df5de116d6c814f89c25797303d8c46ba07f55b7"
+		},
+		{
+			"sourcePath": "tests/academy-learning.test.ts",
+			"category": "ACADEMY REQUIRED",
+			"action": "retain unchanged",
+			"reason": "Transitive Academy/test dependency, containment alias, build/configuration or license.",
+			"sourceGitBlob": "faf4779b3681883334736d7332ded180e863eaa3",
+			"sourceSha256": "fc0a2c9b6c6229d37077aa5a5fd8312cda8c5bcbd9edc70778737b3966d8f1a1",
+			"targetPath": "tests/academy-learning.test.ts",
+			"targetSha256": "fc0a2c9b6c6229d37077aa5a5fd8312cda8c5bcbd9edc70778737b3966d8f1a1"
+		},
+		{
+			"sourcePath": "tests/academy-readiness.test.ts",
+			"category": "ACADEMY REQUIRED",
+			"action": "retain unchanged",
+			"reason": "Transitive Academy/test dependency, containment alias, build/configuration or license.",
+			"sourceGitBlob": "4e32eddc24d5dd1ca84d1a395eafa4f00277d0d4",
+			"sourceSha256": "9b39e2c54d6673f3778ce7b597862073bc5db910856030bd87d3fee1a249cf3d",
+			"targetPath": "tests/academy-readiness.test.ts",
+			"targetSha256": "9b39e2c54d6673f3778ce7b597862073bc5db910856030bd87d3fee1a249cf3d"
+		},
+		{
+			"sourcePath": "tests/academy.browser.mjs",
+			"category": "ACADEMY REQUIRED",
+			"action": "retain adapted",
+			"reason": "All 33 scenarios/assertions retained; evidence location becomes independent outside directory/temp.",
+			"sourceGitBlob": "aadff0c5378692c0b002f18c80dd6c24a7c3c38b",
+			"sourceSha256": "1ab33fd6d223e273041149681643c904adea81bef57ee0acc6377c84f3f1635d",
+			"targetPath": "tests/academy.browser.mjs",
+			"targetSha256": "766b8a3f918834cf9f768054bffb90dd4b9c52dc9b9a2f2d3b0f8c4a99430b44"
+		},
+		{
+			"sourcePath": "tests/academy.recovery.ts",
+			"category": "ACADEMY REQUIRED",
+			"action": "retain unchanged",
+			"reason": "Transitive Academy/test dependency, containment alias, build/configuration or license.",
+			"sourceGitBlob": "1b13033c0d28fa833eedf508f21cad9f760ca201",
+			"sourceSha256": "332a55da6548834bc228292be5d9aa0e9130bb02ae98f6435c73783345c8daa8",
+			"targetPath": "tests/academy.recovery.ts",
+			"targetSha256": "332a55da6548834bc228292be5d9aa0e9130bb02ae98f6435c73783345c8daa8"
+		},
+		{
+			"sourcePath": "tests/academy.rules.ts",
+			"category": "ACADEMY REQUIRED",
+			"action": "retain unchanged",
+			"reason": "Transitive Academy/test dependency, containment alias, build/configuration or license.",
+			"sourceGitBlob": "44a371fe41a8d3214f015119b7ab11296d1f2534",
+			"sourceSha256": "c29f29479bb6bd312ec18a896e1c0680d581656cd0f86951330def2edcd4011d",
+			"targetPath": "tests/academy.rules.ts",
+			"targetSha256": "c29f29479bb6bd312ec18a896e1c0680d581656cd0f86951330def2edcd4011d"
+		},
+		{
+			"sourcePath": "tests/firebase-config.test.ts",
+			"category": "ACADEMY REQUIRED",
+			"action": "retain unchanged",
+			"reason": "Transitive Academy/test dependency, containment alias, build/configuration or license.",
+			"sourceGitBlob": "f856880052a323c66d9d85833e419f8f111897da",
+			"sourceSha256": "cc1a15646b27661241b31241ebef3b769ec34ae182dd6eb179dcd2863934bb70",
+			"targetPath": "tests/firebase-config.test.ts",
+			"targetSha256": "cc1a15646b27661241b31241ebef3b769ec34ae182dd6eb179dcd2863934bb70"
+		},
+		{
+			"sourcePath": "tests/fixtures/firestore.synthetic.rules",
+			"category": "ACADEMY REQUIRED",
+			"action": "retain unchanged",
+			"reason": "Transitive Academy/test dependency, containment alias, build/configuration or license.",
+			"sourceGitBlob": "102975bd9ad6bf6035fc822e4c5913d4fd5e7b69",
+			"sourceSha256": "3d69e8a927a31e9e6ddb3bbc8cb79f023abb4cc8ca77ba0256903dc5a7e9812a",
+			"targetPath": "tests/fixtures/firestore.synthetic.rules",
+			"targetSha256": "3d69e8a927a31e9e6ddb3bbc8cb79f023abb4cc8ca77ba0256903dc5a7e9812a"
+		},
+		{
+			"sourcePath": "tests/rules.emulator.ts",
+			"category": "ACADEMY REQUIRED",
+			"action": "retain unchanged",
+			"reason": "Transitive Academy/test dependency, containment alias, build/configuration or license.",
+			"sourceGitBlob": "f3a86c1d92204aa8d761b08697e10cdc6667738e",
+			"sourceSha256": "cc7f96e1a7c3a2dc43b29876a3a1413baf09e2a9ef9b6e3d74ff873fe7299aca",
+			"targetPath": "tests/rules.emulator.ts",
+			"targetSha256": "cc7f96e1a7c3a2dc43b29876a3a1413baf09e2a9ef9b6e3d74ff873fe7299aca"
+		},
+		{
+			"sourcePath": "tests/youtube.test.ts",
+			"category": "ACADEMY REQUIRED",
+			"action": "retain unchanged",
+			"reason": "Transitive Academy/test dependency, containment alias, build/configuration or license.",
+			"sourceGitBlob": "c53af08a99baebaaafab860f1c98f4e5ea22887c",
+			"sourceSha256": "c81d2bb4079cbb225502cf6eb9c763daf061a95c2d51d553e5e76b1cecf32a1c",
+			"targetPath": "tests/youtube.test.ts",
+			"targetSha256": "c81d2bb4079cbb225502cf6eb9c763daf061a95c2d51d553e5e76b1cecf32a1c"
+		},
+		{
+			"sourcePath": "tsconfig.json",
+			"category": "ACADEMY REQUIRED",
+			"action": "retain unchanged",
+			"reason": "Transitive Academy/test dependency, containment alias, build/configuration or license.",
+			"sourceGitBlob": "2c2ed3c4d85da301c40654bdf3ac2872b1a87621",
+			"sourceSha256": "7a19bf2d57ef51ed3d7ddb0ed6ac3c4aa89025ab1cc2b0271132477905763134",
+			"targetPath": "tsconfig.json",
+			"targetSha256": "7a19bf2d57ef51ed3d7ddb0ed6ac3c4aa89025ab1cc2b0271132477905763134"
+		},
+		{
+			"sourcePath": "vite.config.ts",
+			"category": "ACADEMY REQUIRED",
+			"action": "retain unchanged",
+			"reason": "Transitive Academy/test dependency, containment alias, build/configuration or license.",
+			"sourceGitBlob": "56f40c72280eb7d9e2fe34ed1573379b0bc70944",
+			"sourceSha256": "b022b29985ec8d7920f1b7a7998e73964b359cf38a810179848cb7f611810a6d",
+			"targetPath": "vite.config.ts",
+			"targetSha256": "b022b29985ec8d7920f1b7a7998e73964b359cf38a810179848cb7f611810a6d"
+		}
+	]
+}

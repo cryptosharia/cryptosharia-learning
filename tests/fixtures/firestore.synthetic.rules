@@ -1,0 +1,44 @@
+// SYNTHETIC TEST DESIGN ONLY. Not production rules; never deploy this fixture.
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function admin() { return signedIn() && request.auth.token.admin == true && request.auth.token.email_verified == true; }
+    function member(courseId) {
+      let grant = /databases/$(database)/documents/test_entitlements/$(request.auth.uid)/courses/$(courseId);
+      return signedIn() && exists(grant) && get(grant).data.state == 'active'
+        && get(grant).data.startsAt <= request.time && get(grant).data.expiresAt > request.time;
+    }
+    function published(courseId) {
+      return get(/databases/$(database)/documents/test_catalog/$(courseId)).data.status == 'published';
+    }
+    match /test_catalog/{courseId} {
+      allow read: if resource.data.status == 'published' || admin();
+      allow write: if false;
+    }
+    match /test_lessons/{courseId}/items/{lessonId} {
+      allow read: if admin() || (published(courseId) && member(courseId));
+      allow write: if false;
+    }
+    match /test_video_assets/{courseId}/items/{assetId} {
+      allow read: if admin() || (published(courseId) && member(courseId));
+      allow write: if false;
+    }
+    match /test_entitlements/{uid}/courses/{courseId} {
+      allow read: if admin() || (signedIn() && request.auth.uid == uid);
+      allow write: if false;
+    }
+    match /test_progress/{uid}/lessons/{lessonId} {
+      allow read: if signedIn() && request.auth.uid == uid;
+      allow create, update: if signedIn() && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['courseId', 'positionSeconds'])
+        && request.resource.data.courseId is string && request.resource.data.positionSeconds is int
+        && request.resource.data.positionSeconds >= 0 && request.resource.data.positionSeconds <= 86400
+        && exists(/databases/$(database)/documents/test_lessons/$(request.resource.data.courseId)/items/$(lessonId))
+        && published(request.resource.data.courseId) && member(request.resource.data.courseId);
+      allow delete: if false;
+    }
+    // All existing application collections remain denied by this synthetic design.
+    match /{document=**} { allow read, write: if false; }
+  }
+}

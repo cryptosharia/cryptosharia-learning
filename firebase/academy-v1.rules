@@ -1,0 +1,169 @@
+rules_version = '2';
+service cloud.firestore {
+ match /databases/{database}/documents {
+  function signed() { return request.auth != null; }
+  function role(r) { return signed() && request.auth.token.email_verified == true && request.auth.token.get(r, false) == true; }
+  function admin() { return role('academyAdmin'); }
+  function reviewer() { return role('academyReviewer'); }
+  function publisher() { return role('academyPublisher'); }
+  function profile(d) {
+   return d.displayName is string && d.displayName.size() <= 200
+    && (d.photoURL == null || (d.photoURL is string && d.photoURL.size() <= 2000));
+  }
+  function editor(id) { return /databases/$(database)/documents/academy_editorial/$(id); }
+  function catalog(id) { return /databases/$(database)/documents/academy_catalog/$(id); }
+  function grant(scope) { return /databases/$(database)/documents/academy_grants/$(request.auth.uid)/scopes/$(scope); }
+  function access(scope) {
+   return signed() && exists(grant(scope)) && get(grant(scope)).data.state == 'active'
+    && get(grant(scope)).data.uid == request.auth.uid && get(grant(scope)).data.scopeId == scope
+    && get(grant(scope)).data.startsAt <= request.time && request.time < get(grant(scope)).data.expiresAt;
+  }
+  function metadata(m, id) {
+   return m.keys().hasAll(['id','kind','parentId','subjectId','chapterNumber','scopeId','subject','level','chapter','title','description','thumbnail','durationSeconds','order','instructor'])
+    && m.keys().hasOnly(['id','kind','parentId','subjectId','chapterNumber','scopeId','subject','level','chapter','title','description','thumbnail','durationSeconds','order','instructor'])
+    && m.id == id && m.id.matches('^[a-zA-Z0-9_-]{1,80}$') && m.scopeId is string && m.scopeId.matches('^[a-zA-Z0-9_-]{1,80}$')
+    && m.subject is string && m.subject.size() <= 100 && m.level is int && m.level >= 1 && m.level <= 6
+    && m.chapter is string && m.chapter.size() <= 200 && m.title is string && m.title.size() > 0 && m.title.size() <= 200
+    && m.description is string && m.description.size() <= 2000
+    && m.thumbnail is string && m.thumbnail.matches('^/[a-zA-Z0-9_-][a-zA-Z0-9_./-]*$')
+    && m.durationSeconds is int && m.durationSeconds <= 86400 && ((m.kind == 'lesson' && m.durationSeconds >= 1) || (m.kind != 'lesson' && m.durationSeconds == 0))
+    && m.order is int && m.order >= 0 && m.order <= 10000 && m.instructor is string && m.instructor.size() <= 200
+    && m.kind in ['subject','level','chapter','lesson'] && m.parentId is string && m.parentId.matches('^[a-zA-Z0-9_-]{1,80}$')
+    && m.subjectId in ['fundamental','technical','muamalah','web3'] && m.chapterNumber is int && m.chapterNumber >= 1 && m.chapterNumber <= 7
+    && (m.kind != 'level' || m.order == m.level) && (m.kind != 'chapter' || m.order == m.chapterNumber);
+  }
+  function sameTree(m,p) { return m.scopeId == p.scopeId && m.subjectId == p.subjectId; }
+  function hierarchy(m) {
+   return (m.kind == 'subject' && m.id == m.subjectId && m.parentId == 'root')
+    || (m.kind == 'level' && getAfter(editor(m.parentId)).data.metadata.kind == 'subject'
+     && m.parentId == m.subjectId && sameTree(m,getAfter(editor(m.parentId)).data.metadata))
+    || (m.kind == 'chapter' && getAfter(editor(m.parentId)).data.metadata.kind == 'level'
+     && m.level == getAfter(editor(m.parentId)).data.metadata.level && sameTree(m,getAfter(editor(m.parentId)).data.metadata))
+    || (m.kind == 'lesson' && getAfter(editor(m.parentId)).data.metadata.kind == 'chapter'
+     && m.level == getAfter(editor(m.parentId)).data.metadata.level
+     && m.chapterNumber == getAfter(editor(m.parentId)).data.metadata.chapterNumber && sameTree(m,getAfter(editor(m.parentId)).data.metadata));
+  }
+  function publishedParent(m) { return m.kind == 'subject' || (existsAfter(catalog(m.parentId)) && getAfter(catalog(m.parentId)).data.status == 'published'); }
+  function fixedStructure(m,p) {
+   return m.kind == p.kind && m.parentId == p.parentId && m.scopeId == p.scopeId
+    && m.subjectId == p.subjectId && m.level == p.level && m.chapterNumber == p.chapterNumber && m.order == p.order;
+  }
+  function media(m) {
+   // ponytail: references are opaque strings; no attachment renderer or storage service in this phase.
+   return m.keys().hasAll(['videoId','readingRefs','slideRefs','subtitleRefs','attachmentRefs','internalNote'])
+    && m.keys().hasOnly(['videoId','readingRefs','slideRefs','subtitleRefs','attachmentRefs','internalNote'])
+    && m.videoId is string && m.videoId.matches('^[a-zA-Z0-9_-]{11}$')
+    && m.readingRefs is list && m.readingRefs.size() <= 10 && m.slideRefs is list && m.slideRefs.size() <= 10
+    && m.subtitleRefs is list && m.subtitleRefs.size() <= 10 && m.attachmentRefs is list && m.attachmentRefs.size() <= 10
+    && m.internalNote is string && m.internalNote.size() <= 2000;
+  }
+  function audited(d, id) {
+   let a = getAfter(/databases/$(database)/documents/academy_audit/$(d.auditId)).data;
+   return a.contentId == id && a.version == d.version && a.status == d.status
+    && a.actor == request.auth.uid && a.at == request.time;
+  }
+  function shape(d,id) {
+   return d.keys().hasAll(['metadata','media','version','status','approval','syariahRequired','auditId','updatedAt','updatedBy'])
+    && d.keys().hasOnly(['metadata','media','version','status','approval','syariahRequired','auditId','updatedAt','updatedBy'])
+    && metadata(d.metadata,id) && hierarchy(d.metadata)
+    && ((d.metadata.kind == 'lesson' && media(d.media)) || (d.metadata.kind != 'lesson' && d.media == null)) && d.version is int && d.version >= 1
+    && d.syariahRequired is bool && d.updatedBy == request.auth.uid && d.updatedAt == request.time
+    && d.auditId is string && audited(d,id)
+    && (d.status != 'published' || publishedParent(d.metadata))
+    && (d.metadata.kind == 'lesson' || !exists(catalog(id)) || fixedStructure(d.metadata,get(catalog(id)).data))
+    && (d.status == 'published' || d.metadata.kind != 'lesson' || !existsAfter(catalog(id)));
+  }
+  function approval(a,id,v,required) {
+   return a is map && a.keys().hasAll(['contentId','version','reviewer','syariahReviewer','rights','decision','at'])
+    && a.keys().hasOnly(['contentId','version','reviewer','syariahReviewer','rights','decision','at'])
+    && a.contentId == id && a.version == v && a.reviewer == request.auth.uid
+    && a.rights == 'confirmed' && a.decision == 'approved' && a.at == request.time
+    && ((!required && a.syariahReviewer == null) || (required && role('academySyariah') && a.syariahReviewer == request.auth.uid));
+  }
+  match /academy_editorial/{id} {
+   allow read: if admin() || reviewer() || publisher();
+   allow create: if admin() && shape(request.resource.data,id) && request.resource.data.status == 'draft'
+    && request.resource.data.version == 1 && request.resource.data.approval == null;
+   allow update: if shape(request.resource.data,id) && request.resource.data.metadata.kind == resource.data.metadata.kind && request.resource.data.auditId != resource.data.auditId && (
+    (admin() && request.resource.data.version == resource.data.version + 1 && request.resource.data.status == 'draft' && request.resource.data.approval == null)
+    || (request.resource.data.version == resource.data.version && request.resource.data.metadata == resource.data.metadata
+     && request.resource.data.media == resource.data.media && request.resource.data.syariahRequired == resource.data.syariahRequired && (
+      (admin() && resource.data.status == 'draft' && request.resource.data.status == 'review' && request.resource.data.approval == null)
+      || (reviewer() && resource.data.status == 'review' && request.resource.data.status == 'approved'
+       && approval(request.resource.data.approval,id,resource.data.version,resource.data.syariahRequired))
+      || (reviewer() && resource.data.status in ['review','approved'] && request.resource.data.status == 'draft' && request.resource.data.approval == null)
+      || (publisher() && resource.data.status == 'approved' && request.resource.data.status == 'published'
+       && request.resource.data.approval == resource.data.approval)
+     )));
+   // ponytail: parent removal needs an approved cascade policy; preserve IDs to prevent orphan descendants.
+   allow delete: if admin() && resource.data.metadata.kind == 'lesson' && resource.data.status == 'draft' && !existsAfter(catalog(id))
+    && !existsAfter(/databases/$(database)/documents/academy_lessons/$(id))
+    && getAfter(/databases/$(database)/documents/academy_audit/$(request.auth.uid + '_' + id + '_delete')).data ==
+     {'contentId':id,'version':resource.data.version,'status':'deleted','actor':request.auth.uid,'at':request.time};
+  }
+  match /academy_catalog/{id} {
+   allow read: if resource.data.status == 'published';
+   allow create, update: if publisher() && getAfter(editor(id)).data.status == 'published'
+    && publishedParent(request.resource.data)
+    && getAfter(/databases/$(database)/documents/academy_positions/$(request.resource.data.parentId + '_' + string(request.resource.data.order))).data.id == id
+    && request.resource.data.keys().hasAll(getAfter(editor(id)).data.metadata.keys()) && request.resource.data.diff(getAfter(editor(id)).data.metadata).affectedKeys().hasOnly(['status','version']) && request.resource.data.status == 'published' && request.resource.data.version == getAfter(editor(id)).data.version;
+   allow delete: if (admin() || reviewer()) && (!exists(catalog(id)) || resource.data.kind == 'lesson') && (!existsAfter(editor(id)) || getAfter(editor(id)).data.status != 'published');
+  }
+  match /academy_positions/{position} {
+   allow read: if admin() || reviewer() || publisher();
+   allow create, update: if publisher() && request.resource.data.keys().hasOnly(['id'])
+    && (!exists(/databases/$(database)/documents/academy_positions/$(position)) || resource.data.id == request.resource.data.id)
+    && getAfter(editor(request.resource.data.id)).data.status == 'published'
+    && position == getAfter(editor(request.resource.data.id)).data.metadata.parentId + '_' + string(getAfter(editor(request.resource.data.id)).data.metadata.order);
+   allow delete: if (admin() || reviewer()) && !existsAfter(catalog(resource.data.id));
+  }
+  match /academy_lessons/{id} {
+   allow get: if admin() || (get(editor(id)).data.status == 'published'
+    && resource.data.id == id && resource.data.scopeId == get(editor(id)).data.metadata.scopeId
+    && resource.data.version == get(editor(id)).data.version && access(resource.data.scopeId));
+   allow list: if false;
+   allow create, update: if publisher() && getAfter(editor(id)).data.status == 'published' && getAfter(editor(id)).data.metadata.kind == 'lesson'
+    && request.resource.data.keys().hasAll(getAfter(editor(id)).data.media.keys()) && request.resource.data.diff(getAfter(editor(id)).data.media).affectedKeys().hasOnly(['id','scopeId','version']) && request.resource.data.id == id && request.resource.data.scopeId == getAfter(editor(id)).data.metadata.scopeId && request.resource.data.version == getAfter(editor(id)).data.version;
+   allow delete: if admin() && (!existsAfter(editor(id)) || getAfter(editor(id)).data.status != 'published');
+  }
+  match /academy_grants/{uid}/scopes/{scope} {
+   allow read: if signed() && (request.auth.uid == uid || admin());
+   allow create, update: if admin()
+    && request.resource.data.keys().hasAll(['uid','scopeId','state','startsAt','expiresAt','source','updatedBy','updatedAt','auditId'])
+    && request.resource.data.keys().hasOnly(['uid','scopeId','state','startsAt','expiresAt','source','updatedBy','updatedAt','auditId'])
+    && request.resource.data.uid == uid && request.resource.data.scopeId == scope && scope.matches('^[a-zA-Z0-9_-]{1,80}$')
+    && request.resource.data.state in ['active','revoked'] && request.resource.data.startsAt is timestamp
+    && request.resource.data.expiresAt is timestamp && request.resource.data.expiresAt > request.resource.data.startsAt
+    && request.resource.data.source == 'synthetic-local' && request.resource.data.updatedBy == request.auth.uid && request.resource.data.updatedAt == request.time
+    && getAfter(/databases/$(database)/documents/academy_audit/$(request.resource.data.auditId)).data ==
+     {'uid':uid,'scopeId':scope,'state':request.resource.data.state,'actor':request.auth.uid,'at':request.time};
+  }
+  match /academy_audit/{id} {
+   allow read: if admin() || reviewer() || publisher();
+   allow create: if (admin() || reviewer() || publisher()) && request.resource.data.actor == request.auth.uid && request.resource.data.at == request.time
+    && (request.resource.data.keys().hasOnly(['contentId','version','status','actor','at']) || (admin() && request.resource.data.keys().hasOnly(['uid','scopeId','state','actor','at'])));
+  }
+  match /users/{uid} {
+   allow read: if signed() && request.auth.uid == uid;
+   allow create: if signed() && request.auth.uid == uid && request.resource.data.uid == uid
+    && request.resource.data.email == request.auth.token.email
+    && profile(request.resource.data) && request.resource.data.provider in ['email','google']
+    && request.resource.data.createdAt == request.time && request.resource.data.lastLoginAt == request.time
+    && request.resource.data.keys().hasOnly(['uid','email','displayName','photoURL','provider','createdAt','lastLoginAt']);
+   allow update: if signed() && request.auth.uid == uid
+    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['displayName','photoURL','lastLoginAt','updatedAt'])
+    && profile(request.resource.data);
+  }
+  match /academy_progress/{uid}/lessons/{id} {
+   allow read: if signed() && request.auth.uid == uid;
+   allow create, update: if signed() && request.auth.uid == uid && get(editor(id)).data.status == 'published' && get(editor(id)).data.metadata.kind == 'lesson'
+    && access(get(editor(id)).data.metadata.scopeId)
+    && request.resource.data.keys().hasAll(['lessonId','version','positionSeconds','updatedAt'])
+    && request.resource.data.keys().hasOnly(['lessonId','version','positionSeconds','updatedAt'])
+    && request.resource.data.lessonId == id && request.resource.data.version == get(editor(id)).data.version
+    && request.resource.data.positionSeconds is number && request.resource.data.positionSeconds >= 0
+    && request.resource.data.positionSeconds <= get(editor(id)).data.metadata.durationSeconds && request.resource.data.updatedAt == request.time;
+  }
+  match /{document=**} { allow read, write: if false; }
+ }
+}

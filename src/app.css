@@ -1,0 +1,264 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+	--default-transition-duration: 300ms;
+
+	--font-sans: ui-sans-serif, system-ui, sans-serif;
+	--font-serif: ui-serif, serif;
+	--font-display: ui-sans-serif, system-ui, sans-serif;
+
+	/* CryptoSharia Brand Colors — ORANGE primary */
+	--color-primary-50: var(--color-orange-50);
+	--color-primary-100: var(--color-orange-100);
+	--color-primary-200: var(--color-orange-200);
+	--color-primary-300: var(--color-orange-300);
+	--color-primary-400: var(--color-orange-400);
+	--color-primary-500: var(--color-orange-500);
+	--color-primary-600: var(--color-orange-600);
+	--color-primary-700: var(--color-orange-700);
+	--color-primary-800: var(--color-orange-800);
+	--color-primary-900: var(--color-orange-900);
+	--color-primary-950: var(--color-orange-950);
+
+	--color-primary: var(--color-primary-600);
+	--color-on-primary: var(--color-white);
+
+	/* Semantic tokens */
+	--color-background: var(--color-white);
+	--color-surface: var(--color-white);
+	--color-foreground: var(--color-gray-600);
+	--color-faded: var(--color-gray-400);
+	--color-line: var(--color-gray-200);
+	--color-shade: rgba(0, 0, 0, 0.25);
+
+	/* Accent — Amber for CTAs */
+	--color-accent-50: #fffbeb;
+	--color-accent-100: #fef3c7;
+	--color-accent-200: #fde68a;
+	--color-accent-300: #fcd34d;
+	--color-accent-400: #fbbf24;
+	--color-accent-500: #f59e0b;
+	--color-accent-600: #d97706;
+	--color-accent-700: #b45309;
+
+	/* Glass / Glow */
+	--color-glass-bg: rgba(255, 255, 255, 0.7);
+	--color-glass-border: rgba(0, 0, 0, 0.05);
+	--color-glow: rgba(249, 113, 22, 0.1);
+}
+
+.dark {
+	--color-background: var(--color-gray-950);
+	--color-surface: var(--color-gray-900);
+	--color-foreground: var(--color-gray-300);
+	--color-faded: var(--color-gray-500);
+	--color-line: var(--color-gray-700);
+	--color-shade: rgba(255, 255, 255, 0.05);
+	--color-glass-bg: rgba(15, 23, 42, 0.4);
+	--color-glass-border: rgba(255, 255, 255, 0.05);
+	--color-glow: rgba(249, 113, 22, 0.2);
+}
+
+@layer base {
+	html {
+		@apply scroll-smooth font-sans text-foreground;
+		scrollbar-gutter: stable;
+	}
+
+	body {
+		@apply bg-background antialiased transition-colors;
+	}
+
+	*,
+	::before,
+	::after {
+		@apply border-line shadow-shade;
+	}
+
+	::selection {
+		@apply bg-primary text-on-primary;
+	}
+
+	/* ── Dark mode global overrides ── */
+	/* Section backgrounds */
+	.dark section:where([class*='bg-white']),
+	.dark div:where([class*='bg-white']:not([class*='from-'])) {
+		background-color: var(--color-gray-950) !important;
+	}
+
+	.dark :where([class*='bg-gray-50']) {
+		background-color: var(--color-gray-900) !important;
+	}
+
+	.dark :where([class*='bg-gray-100']) {
+		background-color: var(--color-gray-800) !important;
+	}
+
+	/* Card backgrounds */
+	.dark .rounded-2xl:where([class*='bg-white']:not([class*='from-'])),
+	.dark .rounded-xl:where([class*='bg-white']:not([class*='from-'])) {
+		background-color: var(--color-gray-800) !important;
+	}
+
+	/* Text colors */
+	.dark :where([class*='text-gray-900']),
+	.dark :where([class*='text-slate-900']) {
+		color: var(--color-gray-50) !important;
+	}
+
+	.dark :where([class*='text-gray-800']),
+	.dark :where([class*='text-slate-800']) {
+		color: var(--color-gray-50) !important;
+	}
+
+	.dark :where([class*='text-gray-700']),
+	.dark :where([class*='text-slate-700']) {
+		color: var(--color-gray-100) !important;
+	}
+
+	.dark :where([class*='text-gray-600']),
+	.dark :where([class*='text-slate-600']) {
+		color: var(--color-gray-200) !important;
+	}
+
+	.dark :where([class*='text-gray-500']),
+	.dark :where([class*='text-slate-500']) {
+		color: var(--color-gray-300) !important;
+	}
+
+	.dark :where([class*='text-gray-400']),
+	.dark :where([class*='text-slate-400']) {
+		color: var(--color-gray-400) !important;
+	}
+
+	/* Border colors */
+	.dark :where([class*='border-gray-200']),
+	.dark :where([class*='border-slate-200']),
+	.dark :where([class*='border-gray-100']),
+	.dark :where([class*='border-slate-100']) {
+		border-color: var(--color-gray-700) !important;
+	}
+
+	/* Input & form backgrounds */
+	.dark input:where([class*='bg-white']),
+	.dark input:where([class*='bg-gray-50']) {
+		background-color: var(--color-gray-800) !important;
+		color: var(--color-gray-100) !important;
+	}
+
+	/* Shadow adjustments */
+	.dark :where([class*='shadow-lg']),
+	.dark :where([class*='shadow-xl']) {
+		--tw-shadow-color: rgba(0, 0, 0, 0.4);
+	}
+}
+
+/* Utility classes matching CryptoSharia ecosystem */
+.text-gradient {
+	background: linear-gradient(to bottom, var(--color-foreground) 30%, var(--color-faded) 100%);
+	-webkit-background-clip: text;
+	background-clip: text;
+	-webkit-text-fill-color: transparent;
+}
+
+.text-gradient-orange {
+	@apply bg-gradient-to-r from-orange-600 to-orange-400 bg-clip-text text-transparent;
+}
+
+.glass-card {
+	background: var(--color-glass-bg);
+	backdrop-filter: blur(16px);
+	border: 1px solid var(--color-glass-border);
+	transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card:hover {
+	border-color: var(--color-primary);
+	background: color-mix(in srgb, var(--color-glass-bg), var(--color-primary) 5%);
+}
+
+.orange-glow {
+	box-shadow: 0 4px 20px -2px var(--color-glow);
+}
+
+.orange-glow:hover {
+	box-shadow: 0 8px 30px -4px rgba(249, 113, 22, 0.4);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+	width: 6px;
+}
+::-webkit-scrollbar-track {
+	@apply bg-transparent;
+}
+::-webkit-scrollbar-thumb {
+	background: rgba(0, 0, 0, 0.15);
+	border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+	background: rgba(0, 0, 0, 0.3);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+	background: rgba(255, 255, 255, 0.15);
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+	background: rgba(255, 255, 255, 0.3);
+}
+
+/* Animations */
+@keyframes fadeInUp {
+	from {
+		opacity: 0;
+		transform: translateY(30px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.animate-fade-in-up {
+	animation: fadeInUp 0.6s ease-out forwards;
+}
+
+@keyframes marquee {
+	0% {
+		transform: translateX(0);
+	}
+	100% {
+		transform: translateX(-50%);
+	}
+}
+
+.animate-marquee {
+	animation: marquee 30s linear infinite;
+}
+
+.animate-marquee:hover {
+	animation-play-state: paused;
+}
+
+.heading-gradient {
+	background-image: linear-gradient(
+		to right,
+		var(--tw-gradient-from),
+		var(--tw-gradient-via),
+		var(--tw-gradient-to)
+	);
+	-webkit-background-clip: text;
+	background-clip: text;
+	color: transparent;
+	--tw-gradient-from: #ffffff;
+	--tw-gradient-via: #ffedd5;
+	--tw-gradient-to: #fdba74;
+}
+
+:root:not(.dark) .heading-gradient {
+	--tw-gradient-from: #0f172a;
+	--tw-gradient-via: #7c2d12;
+	--tw-gradient-to: #c2410c;
+}

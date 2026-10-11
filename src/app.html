@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="id">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta
+			name="description"
+			content="CryptoSharia Academy — Pembelajaran mandiri berbasis modul: Analisis Fundamental, Analisis Teknikal, Fikih Muamalah, dan Web3 &amp; Blockchain."
+		/>
+		<meta name="theme-color" content="#EA580C" />
+		<link rel="icon" href="%sveltekit.assets%/favicon.png" />
+		<title>CryptoSharia Academy | Pembelajaran Mandiri</title>
+		%sveltekit.head%
+	</head>
+	<body data-sveltekit-preload-data="hover">
+		<script>
+			(function () {
+				localStorage.setItem('cryptosharia-theme', 'dark');
+				document.documentElement.classList.add('dark');
+			})();
+		</script>
+		<div style="display: contents">%sveltekit.body%</div>
+	</body>
+</html>

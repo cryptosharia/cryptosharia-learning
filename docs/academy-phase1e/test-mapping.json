@@ -1,0 +1,113 @@
+{
+	"baseline": {
+		"unit": 54,
+		"rules": 90,
+		"browser": 33,
+		"http": 22
+	},
+	"standalone": {
+		"unit": 56,
+		"rules": 90,
+		"browser": 33,
+		"httpBaseline": 22,
+		"httpAdded": 8,
+		"recovery": 1
+	},
+	"removedTests": [],
+	"changedAssertions": [],
+	"files": [
+		{
+			"sourcePath": "tests/academy-fixtures.ts",
+			"targetPath": "tests/academy-fixtures.ts",
+			"sourceSha256": "f22682d61584014acbf30e072bd333499fb255ba9efacdf2cd55de2e6ebc97c4",
+			"targetSha256": "f22682d61584014acbf30e072bd333499fb255ba9efacdf2cd55de2e6ebc97c4",
+			"assertions": "byte-identical",
+			"execution": "PASS in required suite"
+		},
+		{
+			"sourcePath": "tests/academy-isolation.test.ts",
+			"targetPath": "tests/academy-isolation.test.ts",
+			"sourceSha256": "2a6721ce2401faddb2021d32df5de116d6c814f89c25797303d8c46ba07f55b7",
+			"targetSha256": "2a6721ce2401faddb2021d32df5de116d6c814f89c25797303d8c46ba07f55b7",
+			"assertions": "byte-identical",
+			"execution": "PASS in required suite"
+		},
+		{
+			"sourcePath": "tests/academy-learning.test.ts",
+			"targetPath": "tests/academy-learning.test.ts",
+			"sourceSha256": "fc0a2c9b6c6229d37077aa5a5fd8312cda8c5bcbd9edc70778737b3966d8f1a1",
+			"targetSha256": "fc0a2c9b6c6229d37077aa5a5fd8312cda8c5bcbd9edc70778737b3966d8f1a1",
+			"assertions": "byte-identical",
+			"execution": "PASS in required suite"
+		},
+		{
+			"sourcePath": "tests/academy-readiness.test.ts",
+			"targetPath": "tests/academy-readiness.test.ts",
+			"sourceSha256": "9b39e2c54d6673f3778ce7b597862073bc5db910856030bd87d3fee1a249cf3d",
+			"targetSha256": "9b39e2c54d6673f3778ce7b597862073bc5db910856030bd87d3fee1a249cf3d",
+			"assertions": "byte-identical",
+			"execution": "PASS in required suite"
+		},
+		{
+			"sourcePath": "tests/academy.browser.mjs",
+			"targetPath": "tests/academy.browser.mjs",
+			"sourceSha256": "1ab33fd6d223e273041149681643c904adea81bef57ee0acc6377c84f3f1635d",
+			"targetSha256": "766b8a3f918834cf9f768054bffb90dd4b9c52dc9b9a2f2d3b0f8c4a99430b44",
+			"assertions": "unchanged; browser output path/imports only adapted",
+			"execution": "PASS in required suite"
+		},
+		{
+			"sourcePath": "tests/academy.recovery.ts",
+			"targetPath": "tests/academy.recovery.ts",
+			"sourceSha256": "332a55da6548834bc228292be5d9aa0e9130bb02ae98f6435c73783345c8daa8",
+			"targetSha256": "332a55da6548834bc228292be5d9aa0e9130bb02ae98f6435c73783345c8daa8",
+			"assertions": "byte-identical",
+			"execution": "PASS in required suite"
+		},
+		{
+			"sourcePath": "tests/academy.rules.ts",
+			"targetPath": "tests/academy.rules.ts",
+			"sourceSha256": "c29f29479bb6bd312ec18a896e1c0680d581656cd0f86951330def2edcd4011d",
+			"targetSha256": "c29f29479bb6bd312ec18a896e1c0680d581656cd0f86951330def2edcd4011d",
+			"assertions": "byte-identical",
+			"execution": "PASS in required suite"
+		},
+		{
+			"sourcePath": "tests/firebase-config.test.ts",
+			"targetPath": "tests/firebase-config.test.ts",
+			"sourceSha256": "cc1a15646b27661241b31241ebef3b769ec34ae182dd6eb179dcd2863934bb70",
+			"targetSha256": "cc1a15646b27661241b31241ebef3b769ec34ae182dd6eb179dcd2863934bb70",
+			"assertions": "byte-identical",
+			"execution": "PASS in required suite"
+		},
+		{
+			"sourcePath": "tests/fixtures/firestore.synthetic.rules",
+			"targetPath": "tests/fixtures/firestore.synthetic.rules",
+			"sourceSha256": "3d69e8a927a31e9e6ddb3bbc8cb79f023abb4cc8ca77ba0256903dc5a7e9812a",
+			"targetSha256": "3d69e8a927a31e9e6ddb3bbc8cb79f023abb4cc8ca77ba0256903dc5a7e9812a",
+			"assertions": "byte-identical",
+			"execution": "auxiliary preserved, not part of 54/90/33 baseline"
+		},
+		{
+			"sourcePath": "tests/rules.emulator.ts",
+			"targetPath": "tests/rules.emulator.ts",
+			"sourceSha256": "cc7f96e1a7c3a2dc43b29876a3a1413baf09e2a9ef9b6e3d74ff873fe7299aca",
+			"targetSha256": "cc7f96e1a7c3a2dc43b29876a3a1413baf09e2a9ef9b6e3d74ff873fe7299aca",
+			"assertions": "byte-identical",
+			"execution": "auxiliary preserved, not part of 54/90/33 baseline"
+		},
+		{
+			"sourcePath": "tests/youtube.test.ts",
+			"targetPath": "tests/youtube.test.ts",
+			"sourceSha256": "c81d2bb4079cbb225502cf6eb9c763daf061a95c2d51d553e5e76b1cecf32a1c",
+			"targetSha256": "c81d2bb4079cbb225502cf6eb9c763daf061a95c2d51d553e5e76b1cecf32a1c",
+			"assertions": "byte-identical",
+			"execution": "PASS in required suite"
+		}
+	],
+	"httpReplacement": {
+		"origin": "external Phase 1D-A http-check.ps1",
+		"target": "tests/academy.http.mjs",
+		"preserved": "All 11 enabled + 6 default-OFF + 5 offline paths/statuses; no-store and 8 new separation/Auth cases added."
+	}
+}

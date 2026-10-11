@@ -1,0 +1,285 @@
+{
+	"src/app.css": {
+		"local": [],
+		"external": ["tailwindcss"]
+	},
+	"src/app.d.ts": {
+		"local": [],
+		"external": []
+	},
+	"src/hooks.server.ts": {
+		"local": ["src/lib/academyAccess.ts", "src/lib/firebaseConfig.ts"],
+		"external": ["$env/static/public", "@sveltejs/kit"]
+	},
+	"src/lib/academyAccess.ts": {
+		"local": ["src/lib/firebaseConfig.ts"],
+		"external": []
+	},
+	"src/lib/academyCurriculum.ts": {
+		"local": ["src/lib/academyData.ts"],
+		"external": []
+	},
+	"src/lib/academyData.ts": {
+		"local": [],
+		"external": ["firebase/auth", "firebase/firestore"]
+	},
+	"src/lib/academyPlayer.ts": {
+		"local": ["src/lib/academyData.ts", "src/lib/youtube.ts"],
+		"external": ["firebase/auth", "firebase/firestore", "firebase/firestore/lite"]
+	},
+	"src/lib/academyProgress.ts": {
+		"local": ["src/lib/academyData.ts"],
+		"external": ["firebase/firestore/lite"]
+	},
+	"src/lib/auth.svelte.ts": {
+		"local": ["src/lib/firebase.ts"],
+		"external": ["firebase/app", "firebase/auth", "firebase/firestore"]
+	},
+	"src/lib/components/AcademyCatalog.svelte": {
+		"local": ["src/lib/academyCurriculum.ts", "src/lib/academyData.ts", "src/lib/firebase.ts"],
+		"external": ["$app/paths", "svelte"]
+	},
+	"src/lib/components/AcademyDashboard.svelte": {
+		"local": [
+			"src/lib/academyCurriculum.ts",
+			"src/lib/academyData.ts",
+			"src/lib/academyProgress.ts",
+			"src/lib/firebase.ts"
+		],
+		"external": [
+			"$app/paths",
+			"firebase/auth",
+			"firebase/firestore",
+			"firebase/firestore/lite",
+			"svelte"
+		]
+	},
+	"src/lib/components/AcademyPlayer.svelte": {
+		"local": [
+			"src/lib/academyData.ts",
+			"src/lib/academyPlayer.ts",
+			"src/lib/academyProgress.ts",
+			"src/lib/components/AcademyVideo.svelte",
+			"src/lib/firebase.ts",
+			"src/lib/youtube.ts"
+		],
+		"external": ["$app/navigation", "$app/paths", "$app/state", "firebase/auth", "svelte"]
+	},
+	"src/lib/components/AcademyUnavailable.svelte": {
+		"local": [],
+		"external": ["$app/paths"]
+	},
+	"src/lib/components/AcademyVideo.svelte": {
+		"local": ["src/lib/academyData.ts", "src/lib/academyProgress.ts", "src/lib/firebase.ts"],
+		"external": ["svelte"]
+	},
+	"src/lib/firebase.ts": {
+		"local": ["src/lib/firebaseClient.ts", "src/lib/firebaseConfig.ts"],
+		"external": ["$env/static/public"]
+	},
+	"src/lib/firebaseClient.ts": {
+		"local": ["src/lib/firebaseConfig.ts"],
+		"external": ["firebase/app", "firebase/auth", "firebase/firestore", "firebase/firestore/lite"]
+	},
+	"src/lib/firebaseConfig.ts": {
+		"local": [],
+		"external": []
+	},
+	"src/lib/theme.svelte.ts": {
+		"local": [],
+		"external": []
+	},
+	"src/lib/youtube.ts": {
+		"local": [],
+		"external": []
+	},
+	"src/routes/+layout.svelte": {
+		"local": ["src/app.css", "src/lib/auth.svelte.ts", "src/lib/theme.svelte.ts"],
+		"external": ["$app/paths"]
+	},
+	"src/routes/+page.svelte": {
+		"local": [
+			"src/lib/academyAccess.ts",
+			"src/lib/components/AcademyCatalog.svelte",
+			"src/lib/components/AcademyUnavailable.svelte",
+			"src/lib/firebaseConfig.ts"
+		],
+		"external": ["$env/static/public"]
+	},
+	"src/routes/admin/courses/+page.svelte": {
+		"local": [
+			"src/lib/academyCurriculum.ts",
+			"src/lib/academyData.ts",
+			"src/lib/firebase.ts",
+			"src/lib/youtube.ts"
+		],
+		"external": ["firebase/auth", "firebase/firestore", "svelte"]
+	},
+	"src/routes/auth/+layout.svelte": {
+		"local": [],
+		"external": []
+	},
+	"src/routes/auth/login/+page.svelte": {
+		"local": ["src/lib/auth.svelte.ts"],
+		"external": ["$app/navigation", "$app/paths"]
+	},
+	"src/routes/auth/register/+page.svelte": {
+		"local": ["src/lib/auth.svelte.ts"],
+		"external": ["$app/navigation", "$app/paths"]
+	},
+	"src/routes/e-learning/+page.svelte": {
+		"local": ["src/lib/components/AcademyCatalog.svelte"],
+		"external": []
+	},
+	"src/routes/e-learning/[id]/+page.svelte": {
+		"local": ["src/lib/components/AcademyPlayer.svelte"],
+		"external": []
+	},
+	"src/routes/profile/+page.svelte": {
+		"local": [
+			"src/lib/auth.svelte.ts",
+			"src/lib/components/AcademyDashboard.svelte",
+			"src/lib/firebase.ts"
+		],
+		"external": ["$app/paths", "firebase/auth", "firebase/firestore", "svelte"]
+	},
+	"src/routes/subscription/+page.svelte": {
+		"local": ["src/lib/components/AcademyCatalog.svelte"],
+		"external": []
+	},
+	"src/routes/subscription/[id]/+page.svelte": {
+		"local": ["src/lib/components/AcademyPlayer.svelte"],
+		"external": []
+	},
+	"src/routes/units/+page.svelte": {
+		"local": ["src/lib/components/AcademyCatalog.svelte"],
+		"external": []
+	},
+	"src/routes/units/[id]/+page.svelte": {
+		"local": ["src/lib/components/AcademyUnavailable.svelte"],
+		"external": []
+	},
+	"tests/academy-fixtures.ts": {
+		"local": ["src/lib/academyData.ts", "src/lib/firebaseConfig.ts"],
+		"external": [
+			"@firebase/rules-unit-testing",
+			"firebase/firestore",
+			"node:assert/strict",
+			"node:fs"
+		]
+	},
+	"tests/academy-isolation.test.ts": {
+		"local": ["tests/academy-fixtures.ts"],
+		"external": ["node:assert/strict", "node:test"]
+	},
+	"tests/academy-learning.test.ts": {
+		"local": [
+			"src/lib/academyCurriculum.ts",
+			"src/lib/academyData.ts",
+			"src/lib/academyProgress.ts",
+			"tests/academy-fixtures.ts"
+		],
+		"external": ["firebase/firestore", "node:assert/strict", "node:test"]
+	},
+	"tests/academy-readiness.test.ts": {
+		"local": [
+			"scripts/verify-test-build.mjs",
+			"src/lib/academyAccess.ts",
+			"src/lib/firebaseConfig.ts",
+			"tests/academy-fixtures.ts"
+		],
+		"external": ["node:assert/strict", "node:test"]
+	},
+	"tests/academy-separation.test.ts": {
+		"local": ["src/lib/firebaseConfig.ts"],
+		"external": ["node:assert/strict", "node:test"]
+	},
+	"tests/academy.browser.mjs": {
+		"local": ["src/lib/academyData.ts", "tests/academy-fixtures.ts"],
+		"external": [
+			"/node_modules/@sveltejs/kit/src/runtime/app/navigation.js",
+			"/src/lib/academyData.ts",
+			"/src/lib/academyProgress.ts",
+			"/src/lib/auth.svelte.ts",
+			"/src/lib/firebase.ts",
+			"firebase/firestore",
+			"node:assert/strict",
+			"node:fs/promises",
+			"node:os",
+			"node:path",
+			"node:timers/promises",
+			"node:url"
+		]
+	},
+	"tests/academy.http.mjs": {
+		"local": [],
+		"external": ["node:assert/strict"]
+	},
+	"tests/academy.recovery.ts": {
+		"local": ["src/lib/academyData.ts", "tests/academy-fixtures.ts"],
+		"external": [
+			"@firebase/rules-unit-testing",
+			"firebase/firestore",
+			"node:assert/strict",
+			"node:crypto",
+			"node:fs",
+			"node:path",
+			"node:test"
+		]
+	},
+	"tests/academy.rules.ts": {
+		"local": ["src/lib/academyData.ts", "src/lib/firebaseClient.ts", "tests/academy-fixtures.ts"],
+		"external": [
+			"firebase/app",
+			"firebase/auth",
+			"firebase/firestore",
+			"firebase/firestore/lite",
+			"node:assert/strict",
+			"node:test"
+		]
+	},
+	"tests/firebase-config.test.ts": {
+		"local": ["src/lib/academyAccess.ts", "src/lib/firebaseConfig.ts"],
+		"external": ["node:assert/strict", "node:test"]
+	},
+	"tests/rules.emulator.ts": {
+		"local": ["src/lib/firebaseClient.ts", "src/lib/firebaseConfig.ts"],
+		"external": [
+			"@firebase/rules-unit-testing",
+			"firebase/app",
+			"firebase/auth",
+			"firebase/firestore",
+			"node:assert/strict",
+			"node:fs",
+			"node:test"
+		]
+	},
+	"tests/youtube.test.ts": {
+		"local": ["src/lib/youtube.ts"],
+		"external": ["node:assert/strict", "node:test"]
+	},
+	"scripts/academy-hosted-qa.mjs": {
+		"local": [],
+		"external": ["node:assert/strict", "node:fs", "node:readline/promises", "node:url"]
+	},
+	"scripts/run-local.mjs": {
+		"local": ["src/lib/firebaseConfig.ts"],
+		"external": ["node:child_process"]
+	},
+	"scripts/scan-repository.mjs": {
+		"local": [],
+		"external": ["node:assert/strict", "node:child_process", "node:fs", "node:path"]
+	},
+	"scripts/start-emulators.mjs": {
+		"local": [],
+		"external": ["node:child_process", "node:fs", "node:os", "node:path", "node:url"]
+	},
+	"scripts/verify-separation.mjs": {
+		"local": [],
+		"external": ["node:assert/strict", "node:child_process", "node:fs", "node:path"]
+	},
+	"scripts/verify-test-build.mjs": {
+		"local": [],
+		"external": ["node:assert/strict", "node:crypto", "node:fs", "node:path", "node:url"]
+	}
+}
