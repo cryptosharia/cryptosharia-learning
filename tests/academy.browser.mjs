@@ -9,8 +9,8 @@ if (!process.env.ACADEMY_PLAYWRIGHT_MODULE)
 	throw new Error('Set ACADEMY_PLAYWRIGHT_MODULE to an installed Playwright module.');
 const { chromium } = await import(pathToFileURL(process.env.ACADEMY_PLAYWRIGHT_MODULE).href);
 import { seed, password, claims, rulesDb } from './academy-fixtures.ts';
-import { writeGrant } from '../src/lib/academyData.ts';
-import { Timestamp } from 'firebase/firestore';
+import { writeGrant, saveEditorial, transitionEditorial } from '../src/lib/academyData.ts';
+import { Timestamp, doc, getDocFromServer } from 'firebase/firestore';
 const fixture = await seed();
 const adminUid = fixture.users['verified-admin'].uid;
 const adminDb = rulesDb(fixture.environment.authenticatedContext(adminUid, claims));
@@ -165,6 +165,45 @@ async function sdk(page, operation, args) {
 					positionSeconds: p.positionSeconds,
 					version: p.version
 				}));
+			}
+			if (operation === 'completions') {
+				const progress = await import('/src/lib/academyProgress.ts');
+				return (
+					await progress.freshCompletions(client.lessonDb, args.uid ?? client.auth.currentUser.uid)
+				).map((c) => ({
+					lessonId: c.lessonId,
+					version: c.version,
+					completedAt: c.completedAt.toMillis()
+				}));
+			}
+			if (operation === 'complete' || operation === 'writeCompletion') {
+				try {
+					const lesson = (await data.readCatalog(client.db)).find((l) => l.id === args.id);
+					if (operation === 'complete')
+						await data.completeLesson(client.db, args.uid ?? client.auth.currentUser.uid, lesson);
+					else {
+						const lite = await import(
+							source.match(/from\s+["']([^"']+firebase_firestore_lite[^"']+)["']/)[1]
+						);
+						await lite.setDoc(
+							lite.doc(
+								client.lessonDb,
+								'academy_completion',
+								args.uid ?? client.auth.currentUser.uid,
+								'lessons',
+								args.id
+							),
+							{
+								lessonId: args.id,
+								version: lesson.version,
+								completedAt: lite.serverTimestamp()
+							}
+						);
+					}
+					return 'allowed';
+				} catch (e) {
+					return e.code;
+				}
 			}
 			if (operation === 'writeProgress') {
 				try {
@@ -516,14 +555,60 @@ try {
 	);
 	console.log('PASS actual nonzero event persists through protected SDK');
 	pass++;
+	await learner.page
+		.locator('[data-testid="completion-status"]')
+		.getByText('Belum ditandai selesai.', { exact: true })
+		.waitFor();
+	await learner.page.evaluate(() => window.__fakePlayers.findLast((p) => !p.dead).event(57, 0));
+	assert.equal((await sdk(learner.page, 'completions', {})).length, 0);
+	await learner.page.getByRole('button', { name: 'Tandai Selesai', exact: true }).click();
+	await learner.page
+		.locator('[data-testid="completion-status"]')
+		.getByText('Selesai', { exact: true })
+		.waitFor();
+	assert.equal(
+		await learner.page.getByRole('button', { name: 'Selesai', exact: true }).isDisabled(),
+		true
+	);
+	const firstCompletion = await sdk(learner.page, 'completions', {});
+	assert.equal(firstCompletion.length, 1);
+	assert.equal(await sdk(learner.page, 'complete', { id: 'lesson-a1' }), 'allowed');
+	assert.deepEqual(await sdk(learner.page, 'completions', {}), firstCompletion);
+	assert.equal(
+		(await sdk(learner.page, 'progress', {})).find((p) => p.lessonId === 'lesson-a1')
+			.positionSeconds,
+		57
+	);
+	console.log(
+		'PASS explicit completion persists once, preserves position and never follows video end automatically'
+	);
+	pass++;
+	await learner.page.getByRole('button', { name: 'Pelajaran berikutnya', exact: true }).click();
+	await status(learner.page, 'ready');
+	await learner.page
+		.locator('[data-testid="completion-status"]')
+		.getByText('Belum ditandai selesai.', { exact: true })
+		.waitFor();
+	await learner.page.getByRole('button', { name: 'Pelajaran sebelumnya', exact: true }).click();
+	await status(learner.page, 'ready');
+	await learner.page
+		.locator('[data-testid="completion-status"]')
+		.getByText('Selesai', { exact: true })
+		.waitFor();
+	console.log('PASS lesson switches clear prior completion and restore the correct lesson status');
+	pass++;
 	await learner.page.reload();
 	await status(learner.page, 'ready');
+	await learner.page
+		.locator('[data-testid="completion-status"]')
+		.getByText('Selesai', { exact: true })
+		.waitFor();
 	await learner.page.waitForFunction(() =>
 		window.__fakePlayers?.some((p) => !p.dead && p.seeked === 57)
 	);
 	console.log('PASS reload seeks to database position');
 	pass++;
-	await learner.page.screenshot({ path: evidence + '/player-desktop.png' });
+	await learner.page.screenshot({ path: evidence + '/player-desktop.png', fullPage: true });
 	const resume = await session(secondBrowser);
 	await login(resume.page, 'active');
 	await resume.page.goto(base + '/e-learning/scope-a');
@@ -541,6 +626,34 @@ try {
 	pass++;
 	await learner.page.goto(base + '/profile');
 	await learner.page
+		.locator('[data-testid="completion-summary"]')
+		.getByText('1 dari 2 lesson selesai (50%)', { exact: true })
+		.waitFor();
+	await learner.page.reload();
+	await learner.page
+		.locator('[data-testid="completion-summary"]')
+		.getByText('1 dari 2 lesson selesai (50%)', { exact: true })
+		.waitFor();
+	await learner.page.goto(base + '/e-learning');
+	await learner.page
+		.locator('[data-testid="catalog-completed"]')
+		.getByText('Selesai', { exact: true })
+		.waitFor();
+	await learner.page.getByRole('link', { name: 'Synthetic lesson-a1', exact: true }).click();
+	await status(learner.page, 'ready');
+	await learner.page
+		.locator('[data-testid="completion-status"]')
+		.getByText('Selesai', { exact: true })
+		.waitFor();
+	await learner.page.waitForFunction(() =>
+		window.__fakePlayers?.some((p) => !p.dead && p.seeked === 57)
+	);
+	console.log(
+		'PASS completion survives dashboard reload and catalog return alongside video resume'
+	);
+	pass++;
+	await learner.page.goto(base + '/profile');
+	await learner.page
 		.locator('[data-testid="learning-dashboard"]')
 		.getByText('Posisi belajar terakhir: 57 detik', { exact: true })
 		.waitFor();
@@ -550,9 +663,13 @@ try {
 		.locator('[data-testid="learning-dashboard"]')
 		.getByText('Posisi belajar terakhir: 57 detik', { exact: true })
 		.waitFor();
-	await dashboardTab.screenshot({ path: evidence + '/dashboard-desktop.png' });
+	await dashboardTab.screenshot({ path: evidence + '/dashboard-desktop.png', fullPage: true });
 	await sdk(learner.page, 'login', { ...fixture.users['no-grant'], password });
 	for (const page of [learner.page, dashboardTab]) {
+		await page
+			.locator('[data-testid="completion-summary"]')
+			.getByText('0 dari 0 lesson selesai (0%)', { exact: true })
+			.waitFor();
 		await page
 			.locator('[data-testid="learning-dashboard"]')
 			.getByText('Posisi belajar terakhir: 10 detik', { exact: true })
@@ -563,6 +680,15 @@ try {
 		);
 	}
 	console.log('PASS dashboard and second tab clear A progress on account switch');
+	pass++;
+	assert.equal(
+		await sdk(learner.page, 'writeCompletion', { id: 'lesson-a2', uid: fixture.users.active.uid }),
+		'permission-denied'
+	);
+	await learner.page.goto(base + '/e-learning');
+	await learner.page.getByRole('link', { name: 'Synthetic lesson-a1', exact: true }).waitFor();
+	assert.equal(await learner.page.locator('[data-testid="catalog-completed"]').count(), 0);
+	console.log('PASS completion is isolated across accounts and cross-user writes deny');
 	pass++;
 	const stale = await session();
 	await login(stale.page, 'active');
@@ -634,6 +760,9 @@ try {
 		Timestamp.fromMillis(Date.now() + 300000)
 	);
 	await status(resume.page, 'revoked');
+	assert.equal(await resume.page.locator('[data-testid="lesson-completion"]').count(), 0);
+	assert.equal(await sdk(resume.page, 'writeCompletion', { id: 'lesson-a2' }), 'permission-denied');
+	assert.deepEqual(await sdk(resume.page, 'completions', {}), firstCompletion);
 	await resume.page.evaluate(() => window.__lastDestroyed.event(99, 2));
 	await delay(3500);
 	assert.deepEqual(await sdk(resume.page, 'progress', {}), before);
@@ -642,6 +771,15 @@ try {
 		'permission-denied'
 	);
 	console.log('PASS revoke destroys adapter, cancels samples and backend denies new progress');
+	pass++;
+	await resume.page.goto(base + '/profile');
+	await resume.page
+		.locator('[data-testid="completion-summary"]')
+		.getByText('0 dari 0 lesson selesai (0%)', { exact: true })
+		.waitFor();
+	console.log(
+		'PASS revoked access removes completion action and active denominator without deleting history'
+	);
 	pass++;
 	await management.page.bringToFront();
 	await item.getByRole('button', { name: 'Edit', exact: true }).click();
@@ -715,6 +853,111 @@ try {
 		console.log('PASS CMS ' + kind + ' uses protected reviewed publishing');
 		pass++;
 	}
+	// A new published version invalidates old completion, independently of resume history.
+	await writeGrant(
+		adminDb,
+		adminUid,
+		fixture.users.active.uid,
+		'scope-a',
+		'active',
+		Timestamp.fromMillis(Date.now() - 1000),
+		Timestamp.fromMillis(Date.now() + 300000)
+	);
+	const oldLesson = (await getDocFromServer(doc(adminDb, 'academy_editorial', 'lesson-a1'))).data();
+	await saveEditorial(
+		adminDb,
+		adminUid,
+		{
+			metadata: oldLesson.metadata,
+			media: oldLesson.media,
+			syariahRequired: oldLesson.syariahRequired
+		},
+		1
+	);
+	for (const state of ['review', 'approved', 'published'])
+		await transitionEditorial(adminDb, adminUid, 'lesson-a1', 2, state);
+	const revisedLearner = await session();
+	await login(revisedLearner.page, 'active');
+	await revisedLearner.page.goto(base + '/profile');
+	await revisedLearner.page
+		.locator('[data-testid="completion-summary"]')
+		.getByText('0 dari 2 lesson selesai (0%)', { exact: true })
+		.waitFor();
+	assert.equal(
+		(await sdk(revisedLearner.page, 'progress', {})).find((p) => p.lessonId === 'lesson-a1')
+			.positionSeconds,
+		75
+	);
+	await revisedLearner.page.goto(base + '/e-learning/scope-a?lesson=lesson-a1');
+	await status(revisedLearner.page, 'ready');
+	await revisedLearner.page
+		.locator('[data-testid="completion-status"]')
+		.getByText('Belum ditandai selesai.', { exact: true })
+		.waitFor();
+	await revisedLearner.page.waitForFunction(() =>
+		window.__fakePlayers?.some((p) => !p.dead && p.seeked === 0)
+	);
+	console.log(
+		'PASS republished version excludes stale completion and preserves historical resume document'
+	);
+	pass++;
+	let deniedCompletion = false;
+	const denyCompletion = async (route) => {
+		if (
+			route.request().postData()?.includes('academy_completion') &&
+			/commit/i.test(route.request().url())
+		) {
+			deniedCompletion = true;
+			await route.fulfill({
+				status: 403,
+				contentType: 'application/json',
+				body: JSON.stringify({
+					error: { code: 403, status: 'PERMISSION_DENIED', message: 'Synthetic completion denial' }
+				})
+			});
+		} else await route.fallback();
+	};
+	await revisedLearner.page.route('**/*', denyCompletion);
+	await revisedLearner.page.getByRole('button', { name: 'Tandai Selesai', exact: true }).click();
+	await revisedLearner.page
+		.getByRole('alert')
+		.getByText('Penyelesaian belum tersimpan.', { exact: false })
+		.waitFor();
+	assert(deniedCompletion);
+	assert.equal((await sdk(revisedLearner.page, 'completions', {}))[0].version, 1);
+	await revisedLearner.page.unroute('**/*', denyCompletion);
+	await revisedLearner.page
+		.getByRole('button', { name: 'Periksa status kembali', exact: true })
+		.click();
+	await revisedLearner.page.getByRole('button', { name: 'Tandai Selesai', exact: true }).click();
+	await revisedLearner.page
+		.locator('[data-testid="completion-status"]')
+		.getByText('Selesai', { exact: true })
+		.waitFor();
+	assert.equal((await sdk(revisedLearner.page, 'completions', {}))[0].version, 2);
+	await revisedLearner.page.goto(base + '/profile');
+	await revisedLearner.page
+		.locator('[data-testid="completion-summary"]')
+		.getByText('1 dari 2 lesson selesai (50%)', { exact: true })
+		.waitFor();
+	console.log(
+		'PASS failed completion reports failure without optimistic success; retry completes current version'
+	);
+	pass++;
+	await revisedLearner.page.goto(base + '/e-learning/scope-a?lesson=lesson-a2');
+	await status(revisedLearner.page, 'ready');
+	await revisedLearner.page.getByRole('button', { name: 'Tandai Selesai', exact: true }).click();
+	await revisedLearner.page
+		.locator('[data-testid="completion-status"]')
+		.getByText('Selesai', { exact: true })
+		.waitFor();
+	await revisedLearner.page.goto(base + '/profile');
+	await revisedLearner.page
+		.locator('[data-testid="completion-summary"]')
+		.getByText('2 dari 2 lesson selesai (100%)', { exact: true })
+		.waitFor();
+	console.log('PASS completion needs no playback event and all eligible lessons aggregate to 100%');
+	pass++;
 	console.log(
 		JSON.stringify({
 			pass,

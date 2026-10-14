@@ -6,7 +6,59 @@ import {
 	serverTimestamp,
 	type Firestore
 } from 'firebase/firestore/lite';
-import type { CatalogLesson, Progress } from './academyData.ts';
+import type { CatalogLesson, Completion, Grant, Progress } from './academyData.ts';
+
+export async function freshCompletions(db: Firestore, uid: string): Promise<Completion[]> {
+	const snap = await getDocs(collection(db, 'academy_completion', uid, 'lessons'));
+	return snap.docs.map((d) => d.data() as Completion);
+}
+
+export function activeScope(grants: Grant[], scopeId: string, now = Date.now()): boolean {
+	return grants.some(
+		(g) =>
+			g.scopeId === scopeId &&
+			g.state === 'active' &&
+			g.startsAt.toMillis() <= now &&
+			now < g.expiresAt.toMillis()
+	);
+}
+
+export function isCompleted(lesson: CatalogLesson, completions: Completion[]): boolean {
+	return (
+		lesson.kind === 'lesson' &&
+		lesson.status === 'published' &&
+		completions.some((c) => c.lessonId === lesson.id && c.version === lesson.version)
+	);
+}
+
+// ponytail: derive counts from current published metadata; no stored counters.
+export function completionSummary(
+	lessons: CatalogLesson[],
+	completions: Completion[],
+	grants: Grant[],
+	now = Date.now(),
+	scopeId?: string
+) {
+	const eligible = [
+		...new Map(
+			lessons
+				.filter(
+					(l) =>
+						l.kind === 'lesson' &&
+						l.status === 'published' &&
+						(!scopeId || l.scopeId === scopeId) &&
+						activeScope(grants, l.scopeId, now)
+				)
+				.map((l) => [l.id, l])
+		).values()
+	];
+	const completed = eligible.filter((l) => isCompleted(l, completions)).length;
+	return {
+		completed,
+		total: eligible.length,
+		percentage: eligible.length ? Math.round((completed / eligible.length) * 100) : 0
+	};
+}
 
 export async function freshProgress(db: Firestore, uid: string): Promise<Progress[]> {
 	const snap = await getDocs(collection(db, 'academy_progress', uid, 'lessons'));

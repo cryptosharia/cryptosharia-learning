@@ -2,18 +2,33 @@
 	import { onMount } from 'svelte';
 	import { resolve } from '$app/paths';
 	import { onAuthStateChanged } from 'firebase/auth';
-	import { collection, onSnapshot } from 'firebase/firestore';
+	import { collection, onSnapshot, query, where } from 'firebase/firestore';
 	import { collection as liteCollection, getDocs } from 'firebase/firestore/lite';
 	import { auth, db, lessonDb, ensureFirebaseReady } from '$lib/firebase';
-	import { readCurriculum, type CatalogLesson, type Grant, type Progress } from '$lib/academyData';
-	import { freshProgress, resumePosition } from '$lib/academyProgress';
+	import {
+		readCurriculum,
+		type CatalogLesson,
+		type Grant,
+		type Progress,
+		type Completion
+	} from '$lib/academyData';
+	import {
+		freshProgress,
+		resumePosition,
+		freshCompletions,
+		completionSummary,
+		isCompleted
+	} from '$lib/academyProgress';
 	import { subjects } from '$lib/academyCurriculum';
 	let history = $state<Progress[]>([]),
+		completions = $state<Completion[]>([]),
 		lessons = $state<CatalogLesson[]>([]),
 		grants = $state<Grant[]>([]);
 	let status = $state('Memuat pembelajaran…'),
 		now = $state(Date.now()),
 		ready = $state(false);
+	const summary = $derived(completionSummary(lessons, completions, grants, now));
+	const scopes = $derived([...new Set(grants.map((g) => g.scopeId))]);
 	const studied = $derived([
 		...new Set(
 			history
@@ -43,6 +58,7 @@
 		let listeners: (() => void)[] = [];
 		const clear = () => {
 			history = [];
+			completions = [];
 			lessons = [];
 			grants = [];
 			ready = false;
@@ -59,13 +75,15 @@
 				const r = ++request;
 				try {
 					await ensureFirebaseReady();
-					const [positions, catalog, rights] = await Promise.all([
+					const [positions, catalog, rights, completed] = await Promise.all([
 						freshProgress(lessonDb, uid),
 						readCurriculum(db),
-						getDocs(liteCollection(lessonDb, 'academy_grants', uid, 'scopes'))
+						getDocs(liteCollection(lessonDb, 'academy_grants', uid, 'scopes')),
+						freshCompletions(lessonDb, uid)
 					]);
 					if (g !== generation || r !== request || auth.currentUser?.uid !== uid) return;
 					history = positions;
+					completions = completed;
 					lessons = catalog.filter((l) => l.kind === 'lesson');
 					grants = rights.docs.map((d) => d.data() as Grant);
 					ready = true;
@@ -77,14 +95,21 @@
 					}
 				}
 			};
-			for (const path of ['academy_progress', 'academy_grants'])
+			for (const path of [
+				'academy_progress',
+				'academy_grants',
+				'academy_completion',
+				'academy_catalog'
+			])
 				listeners.push(
 					onSnapshot(
-						collection(db, path, uid, path === 'academy_progress' ? 'lessons' : 'scopes'),
+						path === 'academy_catalog'
+							? query(collection(db, path), where('status', '==', 'published'))
+							: collection(db, path, uid, path === 'academy_grants' ? 'scopes' : 'lessons'),
 						{ includeMetadataChanges: true },
 						(snap) => {
 							if (g !== generation) return;
-							if (snap.metadata.fromCache) {
+							if (snap.metadata.fromCache || snap.metadata.hasPendingWrites) {
 								request++;
 								clear();
 								status = 'Menunggu data server pembelajaran…';
@@ -124,6 +149,32 @@
 	<h2 class="text-xl font-bold">Dashboard pembelajaran</h2>
 	<p role="status">{status}</p>
 	{#if ready}
+		<h3 class="mt-4 font-semibold">Progres penyelesaian</h3>
+		<p>Hanya lesson terbit dengan akses aktif yang dihitung. Posisi video tersimpan terpisah.</p>
+		<p data-testid="completion-summary">
+			{summary.completed} dari {summary.total} lesson selesai ({summary.percentage}%)
+		</p>
+		<progress
+			class="my-3 w-full"
+			aria-label="Progres penyelesaian"
+			max="100"
+			value={summary.percentage}
+		></progress>
+		{#if !summary.total}<p>Belum ada lesson terbit dengan akses aktif.</p>{/if}
+		{#each scopes as scope (scope)}
+			{@const scoped = completionSummary(lessons, completions, grants, now, scope)}
+			<div class="my-3 rounded border p-3">
+				<p>
+					{lessons.find((l) => l.scopeId === scope)?.subject ?? 'Materi belum tersedia'} · {access(
+						scope
+					)}
+				</p>
+				{#if access(scope) === 'Akses tersedia'}<p>
+						{scoped.completed} dari {scoped.total} lesson selesai ({scoped.percentage}%)
+					</p>
+				{:else}<p>Materi ini tidak dihitung dalam progres aktif.</p>{/if}
+			</div>
+		{/each}
 		{#if !history.length}<p>Belum ada aktivitas belajar. Mulai dari katalog Academy.</p>{:else}
 			<h3 class="mt-4 font-semibold">Lanjutkan belajar</h3>
 			{#each history as progress, index (progress.lessonId)}{@const lesson = lessons.find(
@@ -161,6 +212,7 @@
 						href={resolve(`/e-learning/${lesson.scopeId}?lesson=${encodeURIComponent(lesson.id)}`)}
 						>{lesson.title}</a
 					>
+					{#if isCompleted(lesson, completions)}<span class="ml-2">Selesai</span>{/if}
 				</li>{:else}<li>Belum ada materi dengan akses aktif.</li>{/each}
 		</ul>
 	{/if}

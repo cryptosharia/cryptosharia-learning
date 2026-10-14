@@ -8,6 +8,7 @@
 	import { readCatalog, readCurriculum, type CatalogLesson } from '$lib/academyData';
 	import { freshProgress } from '$lib/academyProgress';
 	import AcademyVideo from './AcademyVideo.svelte';
+	import AcademyCompletion from './AcademyCompletion.svelte';
 	import { createAcademyPlayer, type PlayerState } from '$lib/academyPlayer';
 	import { parseYouTubeUrl } from '$lib/youtube';
 	let lessons = $state<CatalogLesson[]>([]);
@@ -145,6 +146,11 @@
 						videoId={video.videoId}
 						{uid}
 					/>{/key}
+			{/if}
+			{#if view.status === 'ready' && selected && uid}
+				{#key `${uid}_${selected.id}_${selected.version}`}
+					<AcademyCompletion lesson={selected} {uid} />
+				{/key}
 			{/if}
 			<nav class="my-5 flex gap-3" aria-label="Navigasi pelajaran">
 				<button

@@ -1,13 +1,104 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import { onMount } from 'svelte';
-	import { readCurriculum, type CatalogLesson } from '$lib/academyData';
+	import { onAuthStateChanged } from 'firebase/auth';
+	import { collection, onSnapshot } from 'firebase/firestore';
+	import { collection as liteCollection, getDocs } from 'firebase/firestore/lite';
+	import {
+		readCurriculum,
+		type CatalogLesson,
+		type Completion,
+		type Grant
+	} from '$lib/academyData';
+	import { activeScope, freshCompletions, isCompleted } from '$lib/academyProgress';
 	import { curriculumTree } from '$lib/academyCurriculum';
-	import { db, ensureFirebaseReady } from '$lib/firebase';
+	import { auth, db, lessonDb, ensureFirebaseReady } from '$lib/firebase';
+	let completions = $state<Completion[]>([]),
+		grants = $state<Grant[]>([]);
+	let progressReady = $state(false),
+		now = $state(Date.now());
 	let items = $state<CatalogLesson[]>([]),
 		loading = $state(true),
 		error = $state('');
 	let tree = $state<ReturnType<typeof curriculumTree>>([]);
+	// Participant data loads independently; a denied read never blocks the public catalog.
+	onMount(() => {
+		let generation = 0,
+			request = 0;
+		let listeners: (() => void)[] = [];
+		const clear = () => {
+			completions = [];
+			grants = [];
+			progressReady = false;
+		};
+		const stop = onAuthStateChanged(auth, (user) => {
+			const g = ++generation;
+			listeners.forEach((stop) => stop());
+			listeners = [];
+			clear();
+			if (!user) return;
+			const uid = user.uid;
+			const load = async () => {
+				const r = ++request;
+				try {
+					await ensureFirebaseReady();
+					const [records, rights] = await Promise.all([
+						freshCompletions(lessonDb, uid),
+						getDocs(liteCollection(lessonDb, 'academy_grants', uid, 'scopes'))
+					]);
+					if (
+						g !== generation ||
+						r !== request ||
+						auth.currentUser?.uid !== uid ||
+						!navigator.onLine
+					)
+						return;
+					completions = records;
+					grants = rights.docs.map((d) => d.data() as Grant);
+					progressReady = true;
+				} catch {
+					if (g === generation && r === request) clear();
+				}
+			};
+			for (const path of ['academy_completion', 'academy_grants']) {
+				listeners.push(
+					onSnapshot(
+						collection(db, path, uid, path === 'academy_grants' ? 'scopes' : 'lessons'),
+						{ includeMetadataChanges: true },
+						(snap) => {
+							if (g !== generation) return;
+							if (snap.metadata.fromCache || snap.metadata.hasPendingWrites) {
+								request++;
+								clear();
+							} else void load();
+						},
+						() => {
+							if (g === generation) {
+								request++;
+								clear();
+							}
+						}
+					)
+				);
+			}
+			void load();
+		});
+		const timer = setInterval(() => {
+			now = Date.now();
+		}, 1000);
+		const offline = () => {
+			request++;
+			clear();
+		};
+		window.addEventListener('offline', offline);
+		return () => {
+			generation++;
+			stop();
+			listeners.forEach((stop) => stop());
+			clearInterval(timer);
+			window.removeEventListener('offline', offline);
+		};
+	});
 	onMount(() => {
 		let alive = true;
 		async function load() {
@@ -104,6 +195,9 @@
 														`/e-learning/${lesson.scopeId}?lesson=${encodeURIComponent(lesson.id)}`
 													)}>{lesson.title}</a
 												>
+												{#if progressReady && activeScope(grants, lesson.scopeId, now) && isCompleted(lesson, completions)}
+													<span class="ml-2" data-testid="catalog-completed">Selesai</span>
+												{/if}
 												<p>{lesson.description}</p>
 												<p>
 													{lesson.durationSeconds} detik{lesson.instructor

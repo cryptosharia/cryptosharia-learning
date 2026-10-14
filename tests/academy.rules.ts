@@ -21,7 +21,8 @@ import {
 	deleteDraft,
 	writeGrant,
 	readCatalog,
-	saveProgress
+	saveProgress,
+	completeLesson
 } from '../src/lib/academyData.ts';
 import { initializeFirebaseClient } from '../src/lib/firebaseClient.ts';
 import { settings, password } from './academy-fixtures.ts';
@@ -541,4 +542,155 @@ test('progress nonzero history remains readable after revoke, but writes and cro
 	await denied(saveProgress(db, uid, lesson, 43));
 	const other = rulesDb(fixture.environment.authenticatedContext(fixture.users['no-grant'].uid));
 	await denied(getDocsFromServer(collection(other, 'academy_progress', uid, 'lessons')));
+});
+
+test('explicit completion enforces actor, grant, publication, version and trusted timestamp without altering resume', async (t) => {
+	const { environment, users } = fixture;
+	const uid = users.active.uid,
+		adminUid = users['verified-admin'].uid;
+	const admin = rulesDb(environment.authenticatedContext(adminUid, claims));
+	const member = rulesDb(environment.authenticatedContext(uid));
+	const lesson = { ...metadata('completion-only'), version: 1, status: 'published' as const };
+	await writeGrant(
+		admin,
+		adminUid,
+		uid,
+		'scope-a',
+		'active',
+		Timestamp.fromMillis(Date.now() - 1000),
+		Timestamp.fromMillis(Date.now() + 300000)
+	);
+	await saveEditorial(admin, adminUid, input(lesson.id), null);
+	for (const state of ['review', 'approved', 'published'] as const)
+		await transitionEditorial(admin, adminUid, lesson.id, 1, state);
+	const ref = doc(member, 'academy_completion', uid, 'lessons', lesson.id);
+	const payload = () => ({ lessonId: lesson.id, version: 1, completedAt: serverTimestamp() });
+	await t.test(
+		'authorized transaction is idempotent, including concurrent clicks; position writes are independent',
+		async () => {
+			await saveProgress(member, uid, lesson, 57);
+			await Promise.all([completeLesson(member, uid, lesson), completeLesson(member, uid, lesson)]);
+			const first = (await getDocFromServer(ref)).data()!;
+			await completeLesson(member, uid, lesson);
+			assert.deepEqual((await getDocFromServer(ref)).data(), first);
+			assert.equal(
+				(await getDocFromServer(doc(member, 'academy_progress', uid, 'lessons', lesson.id))).data()
+					?.positionSeconds,
+				57
+			);
+			await saveProgress(member, uid, lesson, 75);
+			assert.deepEqual((await getDocFromServer(ref)).data(), first);
+		}
+	);
+	await t.test(
+		'anonymous, cross-user, missing, expired, revoked and future grants deny writes',
+		async () => {
+			for (const actor of ['guest', 'no-grant', 'expired', 'revoked']) {
+				const actorUid = actor === 'guest' ? 'guest' : users[actor].uid;
+				const db = rulesDb(
+					actor === 'guest'
+						? environment.unauthenticatedContext()
+						: environment.authenticatedContext(actorUid)
+				);
+				await denied(
+					setDoc(doc(db, 'academy_completion', actorUid, 'lessons', lesson.id), payload())
+				);
+				await denied(setDoc(doc(db, 'academy_completion', uid, 'lessons', lesson.id), payload()));
+				await denied(getDocsFromServer(collection(db, 'academy_completion', uid, 'lessons')));
+			}
+			await writeGrant(
+				admin,
+				adminUid,
+				users['no-grant'].uid,
+				'scope-a',
+				'active',
+				Timestamp.fromMillis(Date.now() + 60000),
+				Timestamp.fromMillis(Date.now() + 120000)
+			);
+			const future = rulesDb(environment.authenticatedContext(users['no-grant'].uid));
+			await denied(
+				setDoc(
+					doc(future, 'academy_completion', users['no-grant'].uid, 'lessons', lesson.id),
+					payload()
+				)
+			);
+		}
+	);
+	await t.test(
+		'unpublished, structural and missing lessons, stale versions, forged timestamps and extra fields deny',
+		async () => {
+			for (const id of ['draft-only', 'chapter-a', 'missing'])
+				await denied(
+					setDoc(doc(member, 'academy_completion', uid, 'lessons', id), {
+						...payload(),
+						lessonId: id
+					})
+				);
+			for (const changed of [
+				{ version: 0 },
+				{ version: 2 },
+				{ lessonId: 'forged' },
+				{ completedAt: Timestamp.fromMillis(0) },
+				{ completedAt: null },
+				{ positionSeconds: 0 },
+				{ academyAdmin: true },
+				{ uid: 'forged' },
+				{ status: 'published' }
+			])
+				await denied(
+					setDoc(doc(member, 'academy_completion', uid, 'lessons', 'lesson-a1'), {
+						...payload(),
+						lessonId: 'lesson-a1',
+						...changed
+					})
+				);
+			await denied(
+				setDoc(doc(member, 'academy_completion', uid, 'lessons', 'lesson-a1'), {
+					lessonId: 'lesson-a1',
+					version: 1
+				})
+			);
+			await denied(setDoc(ref, payload())); // Direct same-version timestamp rewrite is forbidden.
+			await denied(deleteDoc(ref));
+		}
+	);
+	await t.test(
+		'withdrawal prevents writes; republished version requires explicit completion and preserves old position',
+		async () => {
+			await saveEditorial(admin, adminUid, input(lesson.id), 1);
+			await denied(setDoc(ref, { ...payload(), version: 2 }));
+			for (const state of ['review', 'approved', 'published'] as const)
+				await transitionEditorial(admin, adminUid, lesson.id, 2, state);
+			await denied(setDoc(ref, payload()));
+			await completeLesson(member, uid, { ...lesson, version: 2 });
+			assert.equal((await getDocFromServer(ref)).data()?.version, 2);
+			assert.equal(
+				(await getDocFromServer(doc(member, 'academy_progress', uid, 'lessons', lesson.id))).data()
+					?.positionSeconds,
+				75
+			);
+		}
+	);
+	await t.test(
+		'revocation blocks new completion while own historical record remains readable',
+		async () => {
+			await writeGrant(
+				admin,
+				adminUid,
+				uid,
+				'scope-a',
+				'revoked',
+				Timestamp.fromMillis(Date.now() - 1000),
+				Timestamp.fromMillis(Date.now() + 300000)
+			);
+			await denied(
+				setDoc(doc(member, 'academy_completion', uid, 'lessons', 'lesson-a1'), {
+					lessonId: 'lesson-a1',
+					version: 1,
+					completedAt: serverTimestamp()
+				})
+			);
+			assert.equal((await getDocFromServer(ref)).data()?.version, 2);
+		}
+	);
 });

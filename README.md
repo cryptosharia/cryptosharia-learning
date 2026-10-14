@@ -113,6 +113,11 @@ live in `academy_lessons`. Draft/review/approval lives in `academy_editorial`.
 `academy_positions` atomically reserves sibling order; `academy_audit` is append-only.
 `academy_grants/{uid}/scopes/{scope}` owns explicit bounded access.
 `academy_progress/{uid}/lessons/{lesson}` owns versioned resume position.
+`academy_completion/{uid}/lessons/{lesson}` owns explicit completion for the latest
+completed published version, with a server completion timestamp. Completion uses
+a transaction and never modifies the separate resume document. Repeating the
+same version preserves its timestamp; a newly published version requires another
+explicit **Tandai Selesai** action. Video playback/end events never complete lessons.
 `users/{uid}` permits own allowlisted profile fields, never roles or grants.
 Default-deny candidate Rules enforce direct SDK access, not hidden UI controls.
 Private listing is always denied; public queries constrain published status.
@@ -131,6 +136,15 @@ listeners/timers invalidate stale state. Progress saves bounded observed positio
 with version/server time and resumes after reload or a second browser. It is
 self-reported history, not completion, graduation or an entitlement. No offline
 write queue or persistent private-media cache is used. YouTube IDs are not DRM.
+
+Dashboard completion is derived from distinct published lessons in scopes with
+currently active grants (also shown per scope), never from planned curriculum
+slots. Expired/revoked/future grants and unpublished lessons leave the denominator;
+zero eligible lessons displays 0 of 0, 0%. Historical records remain readable by
+their owner, but catalog completion badges require current access. Completion does
+not grant access or certify learning. The UI clears participant state on account
+changes and unavailable data; Rules enforce identity, grants, published versions
+and server timestamps independently of browser checks.
 
 ## Release prerequisites and limitations
 

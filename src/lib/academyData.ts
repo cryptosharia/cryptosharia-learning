@@ -274,6 +274,26 @@ export type Progress = {
 	updatedAt: Timestamp;
 };
 
+// UID is bound by the document path, not a client-supplied field.
+export type Completion = {
+	lessonId: string;
+	version: number;
+	completedAt: Timestamp;
+};
+
+export async function completeLesson(db: Firestore, uid: string, lesson: CatalogLesson) {
+	const ref = doc(db, 'academy_completion', uid, 'lessons', lesson.id);
+	await runTransaction(db, async (tx) => {
+		const current = await tx.get(ref);
+		if (current.exists() && current.data().version === lesson.version) return;
+		tx.set(ref, {
+			lessonId: lesson.id,
+			version: lesson.version,
+			completedAt: serverTimestamp()
+		});
+	});
+}
+
 export const readEditorial = async (db: Firestore, id: string) => {
 	const snap = await getDocFromServer(doc(db, 'academy_editorial', id));
 	return snap.exists() ? (snap.data() as Editorial) : null;
