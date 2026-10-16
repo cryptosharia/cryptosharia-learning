@@ -43,3 +43,6 @@ storage-state*.json
 .DS_Store
 Thumbs.db
 vite.config.*.timestamp-*
+
+# Temporary cross-repository validation harness
+/tests/academy-api.real-browser.mjs
