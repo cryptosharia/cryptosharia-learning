@@ -4,6 +4,8 @@
 	import { onAuthStateChanged } from 'firebase/auth';
 	import { collection, onSnapshot, query, where } from 'firebase/firestore';
 	import { collection as liteCollection, getDocs } from 'firebase/firestore/lite';
+	import * as publicEnv from '$env/static/public';
+	import { isApiMode } from '$lib/academyConfig';
 	import { auth, db, lessonDb, ensureFirebaseReady } from '$lib/firebase';
 	import {
 		readCurriculum,
@@ -20,6 +22,16 @@
 		isCompleted
 	} from '$lib/academyProgress';
 	import { subjects } from '$lib/academyCurriculum';
+	import { onAuthChange } from '$lib/auth.svelte';
+	import {
+		fetchApiCompletions,
+		fetchApiCurriculum,
+		fetchApiGrants,
+		fetchApiProgress
+	} from '$lib/academyApi';
+
+	const apiMode = isApiMode(publicEnv);
+
 	let history = $state<Progress[]>([]),
 		completions = $state<Completion[]>([]),
 		lessons = $state<CatalogLesson[]>([]),
@@ -63,6 +75,52 @@
 			grants = [];
 			ready = false;
 		};
+
+		if (apiMode) {
+			const stopAuth = onAuthChange((user) => {
+				const g = ++generation;
+				clear();
+				status = user ? 'Memuat pembelajaran…' : 'Masuk untuk melihat pembelajaran.';
+				if (!user) return;
+
+				const loadUserData = async () => {
+					const r = ++request;
+					try {
+						const [positions, catalog, rights, completed] = await Promise.all([
+							fetchApiProgress(),
+							fetchApiCurriculum(),
+							fetchApiGrants(),
+							fetchApiCompletions()
+						]);
+						if (g !== generation || r !== request) return;
+						history = positions;
+						completions = completed.completions;
+						lessons = catalog.filter((l) => l.kind === 'lesson');
+						grants = rights;
+						ready = true;
+						status = 'Pembelajaran siap.';
+					} catch {
+						if (g === generation && r === request) {
+							clear();
+							status = 'Pembelajaran tidak dapat dimuat. Periksa koneksi.';
+						}
+					}
+				};
+
+				void loadUserData();
+			});
+
+			const timer = setInterval(() => {
+				now = Date.now();
+			}, 1000);
+
+			return () => {
+				generation++;
+				stopAuth();
+				clearInterval(timer);
+			};
+		}
+
 		const stop = onAuthStateChanged(auth, (user) => {
 			const g = ++generation;
 			listeners.forEach((stop) => stop());

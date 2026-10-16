@@ -19,6 +19,7 @@
 		"dev:test": "node scripts/run-local.mjs dev",
 		"emulators": "node scripts/start-emulators.mjs",
 		"test:browser": "node tests/academy.browser.mjs",
+		"test:api:mock": "node tests/academy-api.browser.mjs",
 		"test:http": "node tests/academy.http.mjs",
 		"test:recovery": "node --test tests/academy.recovery.ts",
 		"verify:build": "node scripts/verify-test-build.mjs"

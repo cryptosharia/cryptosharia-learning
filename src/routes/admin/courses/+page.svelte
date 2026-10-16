@@ -3,6 +3,8 @@
 	import { onAuthStateChanged } from 'firebase/auth';
 	import { collection, getDocsFromServer, Timestamp } from 'firebase/firestore';
 	import { auth, db, ensureFirebaseReady } from '$lib/firebase';
+	import * as publicEnv from '$env/static/public';
+	import { isApiMode } from '$lib/academyConfig';
 	import {
 		academyRoles,
 		saveEditorial,
@@ -14,6 +16,9 @@
 	} from '$lib/academyData';
 	import { parseYouTubeUrl } from '$lib/youtube';
 	import { subjects } from '$lib/academyCurriculum';
+
+	const apiMode = isApiMode(publicEnv);
+
 	let roles = $state({ admin: false, reviewer: false, publisher: false, syariah: false });
 	let items = $state<Editorial[]>([]),
 		loading = $state(true),
@@ -41,6 +46,7 @@
 		grantHours = $state(1);
 	let generation = 0;
 	async function refresh() {
+		if (apiMode) return;
 		const g = ++generation,
 			uid = auth.currentUser?.uid;
 		items = [];
@@ -65,6 +71,10 @@
 		}
 	}
 	onMount(() => {
+		if (apiMode) {
+			loading = false;
+			return;
+		}
 		const stop = onAuthStateChanged(auth, () => {
 			void refresh();
 		});
@@ -171,132 +181,153 @@
 <svelte:head><title>Kelola Materi | CryptoSharia Academy</title></svelte:head>
 <section class="mx-auto max-w-5xl px-6 py-24">
 	<h1 class="text-2xl font-bold">Kelola Materi Academy</h1>
-	<p>Lingkungan lokal sintetis. Role organisasi dan materi nyata belum disetujui.</p>
-	{#if loading}<p role="status">
-			Memuat otoritas…
-		</p>{:else if !roles.admin && !roles.reviewer && !roles.publisher}<p role="status">
-			Akses pengelolaan ditolak.
-		</p>{:else}
-		<ul class="my-6 space-y-4">
-			{#each items as item (item.metadata.id)}<li class="rounded border p-4">
-					<strong>{item.metadata.title}</strong>
-					<p>{item.status} · versi {item.version}</p>
-					{#if roles.admin}<button onclick={() => choose(item)}>Edit</button>{/if}
-					{#if roles.admin && item.status === 'draft'}<button
-							disabled={busy}
-							onclick={() =>
-								perform((uid) =>
-									transitionEditorial(db, uid, item.metadata.id, item.version, 'review')
-								)}>Ajukan review</button
-						>{#if item.metadata.kind === 'lesson'}<button
+	{#if apiMode}
+		<div
+			class="my-6 rounded-xl border border-amber-200 bg-amber-50 p-6 text-amber-800 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-200"
+			data-testid="cms-api-gated"
+		>
+			<h2 class="text-lg font-bold">CMS Editorial Belum Tersedia di API Mode</h2>
+			<p class="mt-2 text-sm leading-relaxed">
+				Fasilitas pengelolaan kurikulum dan publikasi materi untuk CryptoSharia API v2 akan
+				diintegrasikan pada <strong>Package 4</strong>. Pada Package 3, sistem berfokus pada katalog
+				pembelajaran, autentikasi sesi OTP, pemutar YouTube terotorisasi, resume playback, dan
+				pencatatan penyelesaian peserta.
+			</p>
+		</div>
+	{:else}
+		<p>Lingkungan lokal sintetis. Role organisasi dan materi nyata belum disetujui.</p>
+		{#if loading}<p role="status">
+				Memuat otoritas…
+			</p>{:else if !roles.admin && !roles.reviewer && !roles.publisher}<p role="status">
+				Akses pengelolaan ditolak.
+			</p>{:else}
+			<ul class="my-6 space-y-4">
+				{#each items as item (item.metadata.id)}<li class="rounded border p-4">
+						<strong>{item.metadata.title}</strong>
+						<p>{item.status} · versi {item.version}</p>
+						{#if roles.admin}<button onclick={() => choose(item)}>Edit</button>{/if}
+						{#if roles.admin && item.status === 'draft'}<button
 								disabled={busy}
 								onclick={() =>
-									perform((uid) => deleteDraft(db, uid, item.metadata.id, item.version))}
-								>Hapus draft</button
-							>{/if}{/if}
-					{#if roles.reviewer && item.status === 'review'}<button
-							disabled={busy}
-							onclick={() =>
-								perform((uid) =>
-									transitionEditorial(db, uid, item.metadata.id, item.version, 'approved')
-								)}>Setujui rights dan review</button
-						>{/if}
-					{#if roles.reviewer && ['review', 'approved'].includes(item.status)}<button
-							disabled={busy}
-							onclick={() =>
-								perform((uid) =>
-									transitionEditorial(db, uid, item.metadata.id, item.version, 'draft')
-								)}>Tolak / kembali ke draft</button
-						>{/if}
-					{#if roles.publisher && item.status === 'approved'}<button
-							disabled={busy}
-							onclick={() =>
-								perform((uid) =>
-									transitionEditorial(db, uid, item.metadata.id, item.version, 'published')
-								)}>Terbitkan versi disetujui</button
-						>{/if}
-				</li>{/each}
-		</ul>
-		{#if roles.admin}
-			<button onclick={() => choose(null)}>Draft baru</button>
-			<form
-				class="my-6 grid gap-3"
-				onsubmit={(e) => {
-					e.preventDefault();
-					void perform(save);
-				}}
-			>
-				<h2>{edit ? 'Edit materi (review ulang)' : 'Draft baru'}</h2>
-				{#if edit}<p>ID tetap: {edit.metadata.id}</p>{/if}
-				<label for="curriculum-kind">Jenis kurikulum</label><select
-					id="curriculum-kind"
-					disabled={!!edit}
-					bind:value={kind}
-					><option value="subject">Bidang</option><option value="level">Level</option><option
-						value="chapter">Bab</option
-					><option value="lesson">Lesson</option></select
+									perform((uid) =>
+										transitionEditorial(db, uid, item.metadata.id, item.version, 'review')
+									)}>Ajukan review</button
+							>{#if item.metadata.kind === 'lesson'}<button
+									disabled={busy}
+									onclick={() =>
+										perform((uid) => deleteDraft(db, uid, item.metadata.id, item.version))}
+									>Hapus draft</button
+								>{/if}{/if}
+						{#if roles.reviewer && item.status === 'review'}<button
+								disabled={busy}
+								onclick={() =>
+									perform((uid) =>
+										transitionEditorial(db, uid, item.metadata.id, item.version, 'approved')
+									)}>Setujui rights dan review</button
+							>{/if}
+						{#if roles.reviewer && ['review', 'approved'].includes(item.status)}<button
+								disabled={busy}
+								onclick={() =>
+									perform((uid) =>
+										transitionEditorial(db, uid, item.metadata.id, item.version, 'draft')
+									)}>Tolak / kembali ke draft</button
+							>{/if}
+						{#if roles.publisher && item.status === 'approved'}<button
+								disabled={busy}
+								onclick={() =>
+									perform((uid) =>
+										transitionEditorial(db, uid, item.metadata.id, item.version, 'published')
+									)}>Terbitkan versi disetujui</button
+							>{/if}
+					</li>{/each}
+			</ul>
+			{#if roles.admin}
+				<button onclick={() => choose(null)}>Draft baru</button>
+				<form
+					class="my-6 grid gap-3"
+					onsubmit={(e) => {
+						e.preventDefault();
+						void perform(save);
+					}}
 				>
-				{#if kind === 'subject'}<label for="subject-id">Identitas bidang</label><select
-						id="subject-id"
-						bind:value={subjectId}
-						>{#each subjects as s (s.id)}<option value={s.id}>{s.title}</option>{/each}</select
+					<h2>{edit ? 'Edit materi (review ulang)' : 'Draft baru'}</h2>
+					{#if edit}<p>ID tetap: {edit.metadata.id}</p>{/if}
+					<label for="curriculum-kind">Jenis kurikulum</label><select
+						id="curriculum-kind"
+						disabled={!!edit}
+						bind:value={kind}
+						><option value="subject">Bidang</option><option value="level">Level</option><option
+							value="chapter">Bab</option
+						><option value="lesson">Lesson</option></select
 					>
-				{:else}<label for="curriculum-parent">Parent kurikulum</label><select
-						id="curriculum-parent"
-						required
-						bind:value={parentId}
-						><option value="">Pilih parent</option
-						>{#each items.filter((i) => i.metadata.kind === { subject: 'root', level: 'subject', chapter: 'level', lesson: 'chapter' }[kind]) as p (p.metadata.id)}<option
-								value={p.metadata.id}>{p.metadata.title} · {p.status} · {p.metadata.id}</option
-							>{/each}</select
-					>{/if}
-				<label
-					>Deskripsi / learning outcomes<textarea maxlength="2000" bind:value={description}
-					></textarea></label
+					{#if kind === 'subject'}<label for="subject-id">Identitas bidang</label><select
+							id="subject-id"
+							bind:value={subjectId}
+							>{#each subjects as s (s.id)}<option value={s.id}>{s.title}</option>{/each}</select
+						>
+					{:else}<label for="curriculum-parent">Parent kurikulum</label><select
+							id="curriculum-parent"
+							required
+							bind:value={parentId}
+							><option value="">Pilih parent</option
+							>{#each items.filter((i) => i.metadata.kind === { subject: 'root', level: 'subject', chapter: 'level', lesson: 'chapter' }[kind]) as p (p.metadata.id)}<option
+									value={p.metadata.id}>{p.metadata.title} · {p.status} · {p.metadata.id}</option
+								>{/each}</select
+						>{/if}
+					<label
+						>Deskripsi / learning outcomes<textarea maxlength="2000" bind:value={description}
+						></textarea></label
+					>
+					<label
+						>Urutan<input type="number" min="0" max="10000" required bind:value={order} /></label
+					>
+					<label
+						>Nomor bab<input
+							type="number"
+							min="1"
+							max="7"
+							required
+							bind:value={chapterNumber}
+						/></label
+					>
+					<label>Judul<input required bind:value={title} /></label><label
+						>Scope ID<input required pattern={'[a-zA-Z0-9_-]{1,80}'} bind:value={scope} /></label
+					>
+					<label>Bidang<input required bind:value={subject} /></label><label
+						>Level<input type="number" min="1" max="6" bind:value={level} /></label
+					><label>Bab<input required bind:value={chapter} /></label>
+					{#if kind === 'lesson'}<label
+							>Pemateri disetujui<input required bind:value={instructor} /></label
+						><label
+							>Durasi detik<input type="number" min="1" max="86400" bind:value={duration} /></label
+						><label>Tautan video<input required type="url" bind:value={videoUrl} /></label>{/if}
+					<label><input type="checkbox" bind:checked={required} /> Memerlukan review syariah</label
+					><button disabled={busy}>Simpan draft</button>
+				</form>
+				<form
+					class="my-6 grid gap-3"
+					onsubmit={(e) => {
+						e.preventDefault();
+						void perform((uid) => grant(uid, 'active'));
+					}}
 				>
-				<label>Urutan<input type="number" min="0" max="10000" required bind:value={order} /></label>
-				<label
-					>Nomor bab<input
-						type="number"
-						min="1"
-						max="7"
-						required
-						bind:value={chapterNumber}
-					/></label
-				>
-				<label>Judul<input required bind:value={title} /></label><label
-					>Scope ID<input required pattern={'[a-zA-Z0-9_-]{1,80}'} bind:value={scope} /></label
-				>
-				<label>Bidang<input required bind:value={subject} /></label><label
-					>Level<input type="number" min="1" max="6" bind:value={level} /></label
-				><label>Bab<input required bind:value={chapter} /></label>
-				{#if kind === 'lesson'}<label
-						>Pemateri disetujui<input required bind:value={instructor} /></label
+					<h2>Grant sintetis per scope</h2>
+					<label>UID peserta<input required bind:value={grantUid} /></label><label
+						>Scope ID<input
+							required
+							pattern={'[a-zA-Z0-9_-]{1,80}'}
+							bind:value={grantScope}
+						/></label
 					><label
-						>Durasi detik<input type="number" min="1" max="86400" bind:value={duration} /></label
-					><label>Tautan video<input required type="url" bind:value={videoUrl} /></label>{/if}
-				<label><input type="checkbox" bind:checked={required} /> Memerlukan review syariah</label
-				><button disabled={busy}>Simpan draft</button>
-			</form>
-			<form
-				class="my-6 grid gap-3"
-				onsubmit={(e) => {
-					e.preventDefault();
-					void perform((uid) => grant(uid, 'active'));
-				}}
-			>
-				<h2>Grant sintetis per scope</h2>
-				<label>UID peserta<input required bind:value={grantUid} /></label><label
-					>Scope ID<input required pattern={'[a-zA-Z0-9_-]{1,80}'} bind:value={grantScope} /></label
-				><label
-					>Masa akses (jam)<input type="number" min="1" max="24" bind:value={grantHours} /></label
-				><button disabled={busy}>Berikan grant</button><button
-					type="button"
-					disabled={busy}
-					onclick={() => perform((uid) => grant(uid, 'revoked'))}>Cabut grant</button
-				>
-			</form>
-		{/if}{/if}
+						>Masa akses (jam)<input type="number" min="1" max="24" bind:value={grantHours} /></label
+					><button disabled={busy}>Berikan grant</button><button
+						type="button"
+						disabled={busy}
+						onclick={() => perform((uid) => grant(uid, 'revoked'))}>Cabut grant</button
+					>
+				</form>
+			{/if}{/if}
+	{/if}
 	{#if error}<p role="alert">{error}</p>{/if}
 	<p role="status">{result}</p>
 </section>

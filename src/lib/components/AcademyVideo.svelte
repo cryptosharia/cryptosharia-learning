@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { auth, lessonDb } from '$lib/firebase';
+	import * as publicEnv from '$env/static/public';
+	import { isApiMode } from '$lib/academyConfig';
 	import type { CatalogLesson } from '$lib/academyData';
 	import {
 		attachVideo,
@@ -9,6 +11,11 @@
 		progressRecorder,
 		writePosition
 	} from '$lib/academyProgress';
+	import { userAuth } from '$lib/auth.svelte';
+	import { fetchApiProgress, saveApiProgress } from '$lib/academyApi';
+
+	const apiMode = isApiMode(publicEnv);
+
 	let { lesson, videoId, uid }: { lesson: CatalogLesson; videoId: string; uid: string } = $props();
 	let iframe = $state<HTMLIFrameElement>();
 	let message = $state('Memuat posisi belajar…');
@@ -18,17 +25,23 @@
 		let alive = true;
 		let close: (() => void) | undefined;
 		const valid = () =>
-			alive && auth.currentUser?.uid === uid && navigator.onLine && !document.hidden;
+			alive &&
+			(apiMode ? userAuth.user?.uid === uid : auth.currentUser?.uid === uid) &&
+			navigator.onLine &&
+			!document.hidden;
 		const recorder = progressRecorder({
 			lesson,
 			allowed: valid,
-			write: (p) => writePosition(lessonDb, uid, lesson, p),
+			write: (p) =>
+				apiMode
+					? saveApiProgress(lesson.id, lesson.version, p)
+					: writePosition(lessonDb, uid, lesson, p),
 			emit: (m) => {
 				if (valid()) message = m;
 			}
 		});
 		const initialize = async () => {
-			const history = await freshProgress(lessonDb, uid);
+			const history = apiMode ? await fetchApiProgress() : await freshProgress(lessonDb, uid);
 			if (!valid()) return;
 			position = resumePosition(
 				lesson,

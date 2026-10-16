@@ -23,6 +23,12 @@ test('hierarchy has four official subjects, six planned levels and real lesson c
 	assert.equal(parsed[0].levels[0].chapters[0].lessons.length, 1);
 	assert.equal(parsed[1].levels[0].chapters.length, 0);
 });
+test('API curriculum allows an unscoped subject to group scoped levels', () => {
+	const apiTree = [{ ...subject, scopeId: '' }, level, chapter, lesson];
+	assert.throws(() => curriculumTree(apiTree));
+	const parsed = curriculumTree(apiTree, { allowGlobalSubjectScope: true });
+	assert.equal(parsed[0].levels[0].chapters[0].lessons[0].id, lesson.id);
+});
 for (const [name, change] of [
 	['duplicate order', { id: 'duplicate' }],
 	['invalid parent', { parentId: 'fundamental' }],

@@ -4,6 +4,8 @@
 	import { onAuthStateChanged } from 'firebase/auth';
 	import { collection, onSnapshot } from 'firebase/firestore';
 	import { collection as liteCollection, getDocs } from 'firebase/firestore/lite';
+	import * as publicEnv from '$env/static/public';
+	import { isApiMode } from '$lib/academyConfig';
 	import {
 		readCurriculum,
 		type CatalogLesson,
@@ -13,6 +15,11 @@
 	import { activeScope, freshCompletions, isCompleted } from '$lib/academyProgress';
 	import { curriculumTree } from '$lib/academyCurriculum';
 	import { auth, db, lessonDb, ensureFirebaseReady } from '$lib/firebase';
+	import { onAuthChange } from '$lib/auth.svelte';
+	import { fetchApiCurriculum, fetchApiGrants, fetchApiCompletions } from '$lib/academyApi';
+
+	const apiMode = isApiMode(publicEnv);
+
 	let completions = $state<Completion[]>([]),
 		grants = $state<Grant[]>([]);
 	let progressReady = $state(false),
@@ -21,6 +28,7 @@
 		loading = $state(true),
 		error = $state('');
 	let tree = $state<ReturnType<typeof curriculumTree>>([]);
+
 	// Participant data loads independently; a denied read never blocks the public catalog.
 	onMount(() => {
 		let generation = 0,
@@ -31,6 +39,43 @@
 			grants = [];
 			progressReady = false;
 		};
+
+		if (apiMode) {
+			const stopAuth = onAuthChange((user) => {
+				const g = ++generation;
+				clear();
+				if (!user) return;
+
+				const loadUserData = async () => {
+					const r = ++request;
+					try {
+						const [rights, completionRes] = await Promise.all([
+							fetchApiGrants(),
+							fetchApiCompletions()
+						]);
+						if (g !== generation || r !== request || !navigator.onLine) return;
+						grants = rights;
+						completions = completionRes.completions;
+						progressReady = true;
+					} catch {
+						if (g === generation && r === request) clear();
+					}
+				};
+
+				void loadUserData();
+			});
+
+			const timer = setInterval(() => {
+				now = Date.now();
+			}, 1000);
+
+			return () => {
+				generation++;
+				stopAuth();
+				clearInterval(timer);
+			};
+		}
+
 		const stop = onAuthStateChanged(auth, (user) => {
 			const g = ++generation;
 			listeners.forEach((stop) => stop());
@@ -99,18 +144,28 @@
 			window.removeEventListener('offline', offline);
 		};
 	});
+
 	onMount(() => {
 		let alive = true;
 		async function load() {
 			loading = true;
 			error = '';
 			try {
-				await ensureFirebaseReady();
-				const data = await readCurriculum(db);
-				const parsed = curriculumTree(data);
-				if (alive) {
-					items = data;
-					tree = parsed;
+				if (apiMode) {
+					const data = await fetchApiCurriculum();
+					const parsed = curriculumTree(data, { allowGlobalSubjectScope: true });
+					if (alive) {
+						items = data;
+						tree = parsed;
+					}
+				} else {
+					await ensureFirebaseReady();
+					const data = await readCurriculum(db);
+					const parsed = curriculumTree(data);
+					if (alive) {
+						items = data;
+						tree = parsed;
+					}
 				}
 			} catch {
 				if (alive)

@@ -56,15 +56,16 @@ export type Editorial = {
 	approval: Approval | null;
 	syariahRequired: boolean;
 	auditId: string;
-	updatedAt: Timestamp;
+	updatedAt: LearningTimestamp;
 	updatedBy: string;
 };
+export type LearningTimestamp = { toMillis(): number; toDate(): Date };
 export type Grant = {
 	uid: string;
 	scopeId: string;
 	state: 'active' | 'revoked';
-	startsAt: Timestamp;
-	expiresAt: Timestamp;
+	startsAt: LearningTimestamp;
+	expiresAt: LearningTimestamp;
 };
 
 export async function readCatalog(db: Firestore, scopeId?: string): Promise<CatalogLesson[]> {
@@ -231,8 +232,8 @@ export async function writeGrant(
 	uid: string,
 	scopeId: string,
 	state: Grant['state'],
-	startsAt: Timestamp,
-	expiresAt: Timestamp
+	startsAt: LearningTimestamp,
+	expiresAt: LearningTimestamp
 ) {
 	const audit = doc(collection(db, 'academy_audit'));
 	const batch = writeBatch(db);
@@ -271,14 +272,14 @@ export type Progress = {
 	lessonId: string;
 	version: number;
 	positionSeconds: number;
-	updatedAt: Timestamp;
+	updatedAt: LearningTimestamp;
 };
 
 // UID is bound by the document path, not a client-supplied field.
 export type Completion = {
 	lessonId: string;
 	version: number;
-	completedAt: Timestamp;
+	completedAt: LearningTimestamp;
 };
 
 export async function completeLesson(db: Firestore, uid: string, lesson: CatalogLesson) {

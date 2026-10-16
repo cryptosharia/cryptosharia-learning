@@ -1,8 +1,15 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { auth, db, lessonDb } from '$lib/firebase';
+	import * as publicEnv from '$env/static/public';
+	import { isApiMode } from '$lib/academyConfig';
 	import { completeLesson, type CatalogLesson } from '$lib/academyData';
 	import { freshCompletions, isCompleted } from '$lib/academyProgress';
+	import { userAuth } from '$lib/auth.svelte';
+	import { fetchApiCompletions, markApiCompletion } from '$lib/academyApi';
+
+	const apiMode = isApiMode(publicEnv);
+
 	let { lesson, uid }: { lesson: CatalogLesson; uid: string } = $props();
 	let loading = $state(true),
 		pending = $state(false),
@@ -10,12 +17,17 @@
 	let message = $state('Memuat status penyelesaian…'),
 		error = $state('');
 	let alive = false;
-	const valid = () => alive && auth.currentUser?.uid === uid && navigator.onLine;
+	const valid = () =>
+		alive &&
+		(apiMode ? userAuth.user?.uid === uid : auth.currentUser?.uid === uid) &&
+		navigator.onLine;
 	async function load() {
 		loading = true;
 		error = '';
 		try {
-			const records = await freshCompletions(lessonDb, uid);
+			const records = apiMode
+				? (await fetchApiCompletions()).completions
+				: await freshCompletions(lessonDb, uid);
 			if (!valid()) return;
 			completed = isCompleted(lesson, records);
 			message = completed ? 'Selesai' : 'Belum ditandai selesai.';
@@ -38,7 +50,11 @@
 		error = '';
 		message = 'Menyimpan penyelesaian…';
 		try {
-			await completeLesson(db, uid, lesson);
+			if (apiMode) {
+				await markApiCompletion(lesson.id, lesson.version);
+			} else {
+				await completeLesson(db, uid, lesson);
+			}
 			if (!valid()) return;
 			completed = true;
 			message = 'Selesai';

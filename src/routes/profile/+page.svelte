@@ -4,13 +4,23 @@
 	import { doc, getDocFromServer, setDoc, serverTimestamp } from 'firebase/firestore';
 	import { resolve } from '$app/paths';
 	import { auth, db, ensureFirebaseReady } from '$lib/firebase';
-	import { userAuth } from '$lib/auth.svelte';
+	import { userAuth, onAuthChange } from '$lib/auth.svelte';
+	import * as publicEnv from '$env/static/public';
+	import { isApiMode } from '$lib/academyConfig';
+	const apiMode = isApiMode(publicEnv);
 	import AcademyDashboard from '$lib/components/AcademyDashboard.svelte';
 	let name = $state(''),
 		status = $state('Memuat akun…'),
 		signed = $state(false);
 	let generation = 0;
 	onMount(() => {
+		if (apiMode) {
+			return onAuthChange((user) => {
+				signed = !!user;
+				name = user?.displayName ?? '';
+				status = user ? `Profil: ${name}` : 'Masuk untuk melihat profil.';
+			});
+		}
 		const stop = onAuthStateChanged(auth, (user) => {
 			const g = ++generation;
 			name = '';
@@ -57,7 +67,7 @@
 	<h1 class="text-2xl font-bold">Profil Academy</h1>
 	<AcademyDashboard />
 	<p role="status">{status}</p>
-	{#if signed}<form
+	{#if signed && !apiMode}<form
 			onsubmit={(e) => {
 				e.preventDefault();
 				void save();
@@ -71,8 +81,8 @@
 				/></label
 			><button class="rounded border p-2">Simpan profil</button>
 		</form>
-		<button class="my-4 rounded border p-2" onclick={() => userAuth.logout()}>Keluar</button>{/if}<a
-		class="block"
-		href={resolve('/e-learning')}>Katalog Academy</a
-	>
+	{/if}
+	{#if signed}<button class="my-4 rounded border p-2" onclick={() => userAuth.logout()}
+			>Keluar</button
+		>{/if}<a class="block" href={resolve('/e-learning')}>Katalog Academy</a>
 </section>

@@ -5,16 +5,36 @@
 	import { onMount } from 'svelte';
 	import { onAuthStateChanged } from 'firebase/auth';
 	import { auth, db, lessonDb, ensureFirebaseReady } from '$lib/firebase';
+	import * as publicEnv from '$env/static/public';
+	import { isApiMode } from '$lib/academyConfig';
 	import { readCatalog, readCurriculum, type CatalogLesson } from '$lib/academyData';
 	import { freshProgress } from '$lib/academyProgress';
 	import AcademyVideo from './AcademyVideo.svelte';
 	import AcademyCompletion from './AcademyCompletion.svelte';
 	import { createAcademyPlayer, type PlayerState } from '$lib/academyPlayer';
 	import { parseYouTubeUrl } from '$lib/youtube';
+	import { userAuth, onAuthChange } from '$lib/auth.svelte';
+	import {
+		createApiAcademyPlayer,
+		fetchApiCatalog,
+		fetchApiCurriculum,
+		fetchApiProgress
+	} from '$lib/academyApi';
+
+	const apiMode = isApiMode(publicEnv);
+
 	let lessons = $state<CatalogLesson[]>([]);
 	let selected = $state<CatalogLesson | null>(null);
 	let view = $state<PlayerState>({ status: 'loading', media: null });
-	let controller = $state<ReturnType<typeof createAcademyPlayer> | undefined>();
+	let controller = $state<
+		| {
+				open: (lesson: CatalogLesson | null) => void;
+				suspend: () => void;
+				resume: () => void;
+				dispose: () => void;
+		  }
+		| undefined
+	>();
 	let catalogReady = $state(false);
 	let uid = $state('');
 	let curriculum = $state<CatalogLesson[]>([]);
@@ -50,6 +70,33 @@
 	}
 	onMount(() => {
 		let alive = true;
+		if (apiMode) {
+			controller = createApiAcademyPlayer(
+				(next) => {
+					if (alive) view = next;
+				},
+				{ checkAuth: () => userAuth.isLoggedIn }
+			);
+			const stop = onAuthChange((user) => {
+				uid = user?.uid ?? '';
+				if (catalogReady) controller?.open(selected);
+			});
+			const offline = () => controller?.suspend();
+			const online = () => controller?.resume();
+			const visibility = () => (document.hidden ? offline() : online());
+			window.addEventListener('offline', offline);
+			window.addEventListener('online', online);
+			document.addEventListener('visibilitychange', visibility);
+			return () => {
+				alive = false;
+				stop();
+				controller?.dispose();
+				window.removeEventListener('offline', offline);
+				window.removeEventListener('online', online);
+				document.removeEventListener('visibilitychange', visibility);
+			};
+		}
+
 		controller = createAcademyPlayer(db, lessonDb, auth, (next) => {
 			if (alive) view = next;
 		});
@@ -85,6 +132,40 @@
 		selected = null;
 		player.suspend();
 		view = { status: 'loading', media: null };
+
+		if (apiMode) {
+			Promise.all([fetchApiCatalog(scope), fetchApiCurriculum()])
+				.then(async ([items, tree]) => {
+					if (cancelled) return;
+					curriculum = tree;
+					const actor = uid;
+					let last: string | undefined;
+					if (!requested && actor) {
+						try {
+							const history = await fetchApiProgress();
+							last = history.find((p) => items.some((l) => l.id === p.lessonId))?.lessonId;
+						} catch {
+							/* History cannot authorize media. */
+						}
+					}
+					if (cancelled || uid !== actorAtStart) return;
+					lessons = items;
+					selected =
+						items.find((l) => l.id === (requested ?? last)) ??
+						(requested ? null : (items[0] ?? null));
+					catalogReady = true;
+					player.open(selected);
+				})
+				.catch(() => {
+					if (!cancelled) view = { status: 'backend-unavailable', media: null };
+				});
+
+			return () => {
+				cancelled = true;
+				player.suspend();
+			};
+		}
+
 		void ensureFirebaseReady()
 			.then(() => Promise.all([readCatalog(db, scope), readCurriculum(db)]))
 			.then(async ([items, tree]) => {

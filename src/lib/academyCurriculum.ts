@@ -7,7 +7,10 @@ export const subjects = [
 ] as const;
 
 // Public metadata only. Planned slots never become invented Firestore records.
-export function curriculumTree(items: CatalogLesson[]) {
+export function curriculumTree(
+	items: CatalogLesson[],
+	options: { allowGlobalSubjectScope?: boolean } = {}
+) {
 	const byId = new Map(items.map((item) => [item.id, item]));
 	const positions = new Set<string>();
 	for (const item of items) {
@@ -36,7 +39,8 @@ export function curriculumTree(items: CatalogLesson[]) {
 				!parent ||
 				parent.status !== 'published' ||
 				parent.kind !== expected ||
-				parent.scopeId !== item.scopeId ||
+				(parent.scopeId !== item.scopeId &&
+					!(options.allowGlobalSubjectScope && parent.kind === 'subject' && !parent.scopeId)) ||
 				parent.subjectId !== item.subjectId ||
 				(item.kind !== 'level' && parent.level !== item.level) ||
 				(item.kind === 'lesson' && parent.chapterNumber !== item.chapterNumber)
