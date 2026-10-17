@@ -3,7 +3,12 @@ import type {
 	GrantDto,
 	ProgressDto,
 	CompletionsDto,
-	LessonDto
+	LessonDto,
+	ScopeDto,
+	AdminContentDto,
+	AdminStatsDto,
+	AdminGrantDto,
+	MediaDto
 } from '../academyDtos.ts';
 import { getApiConfig } from './apiConfig.ts';
 
@@ -220,3 +225,190 @@ export async function markLessonComplete(
 		body: payload
 	});
 }
+
+// ==========================================
+// Academy Admin CMS API methods (Package 4)
+// ==========================================
+
+export async function getAdminStats(accessToken: string) {
+	return apiFetch<AdminStatsDto>('/academy/admin/stats', {
+		accessToken
+	});
+}
+
+export async function getAdminScopes(accessToken: string) {
+	return apiFetch<ScopeDto[]>('/academy/admin/scopes', {
+		accessToken
+	});
+}
+
+export async function createAdminScope(
+	payload: { id: string; name: string; description?: string; isActive?: boolean },
+	accessToken: string
+) {
+	return apiFetch<ScopeDto>('/academy/admin/scopes', {
+		method: 'POST',
+		accessToken,
+		body: payload
+	});
+}
+
+export async function updateAdminScope(
+	id: string,
+	payload: { name?: string; description?: string; isActive?: boolean },
+	accessToken: string
+) {
+	return apiFetch<ScopeDto>(`/academy/admin/scopes/${encodeURIComponent(id)}`, {
+		method: 'PUT',
+		accessToken,
+		body: payload
+	});
+}
+
+export async function getAdminContent(
+	params: { status?: string; kind?: string; subjectId?: string; scopeId?: string },
+	accessToken: string
+) {
+	const queryParts: string[] = [];
+	if (params.status) queryParts.push(`status=${encodeURIComponent(params.status)}`);
+	if (params.kind) queryParts.push(`kind=${encodeURIComponent(params.kind)}`);
+	if (params.subjectId) queryParts.push(`subjectId=${encodeURIComponent(params.subjectId)}`);
+	if (params.scopeId) queryParts.push(`scopeId=${encodeURIComponent(params.scopeId)}`);
+	const query = queryParts.length > 0 ? `?${queryParts.join('&')}` : '';
+
+	return apiFetch<AdminContentDto[]>(`/academy/admin/content${query}`, {
+		accessToken
+	});
+}
+
+export async function getAdminContentById(id: string, accessToken: string) {
+	return apiFetch<AdminContentDto>(`/academy/admin/content/${encodeURIComponent(id)}`, {
+		accessToken
+	});
+}
+
+export async function createAdminContent(
+	payload: {
+		id: string;
+		kind: string;
+		parentId: string;
+		subjectId: string;
+		level: number;
+		chapterNumber: number;
+		order: number;
+		scopeId?: string | null;
+		title: string;
+		description?: string;
+		thumbnail?: string;
+		durationSeconds?: number;
+		instructor?: string;
+		syariahRequired?: boolean;
+	},
+	accessToken: string
+) {
+	return apiFetch<AdminContentDto>('/academy/admin/content', {
+		method: 'POST',
+		accessToken,
+		body: payload
+	});
+}
+
+export async function updateAdminContent(
+	id: string,
+	payload: {
+		title?: string;
+		description?: string;
+		thumbnail?: string;
+		durationSeconds?: number;
+		instructor?: string;
+		order?: number;
+		scopeId?: string | null;
+		syariahRequired?: boolean;
+	},
+	accessToken: string
+) {
+	return apiFetch<AdminContentDto>(`/academy/admin/content/${encodeURIComponent(id)}`, {
+		method: 'PUT',
+		accessToken,
+		body: payload
+	});
+}
+
+export async function deleteAdminContentDraft(id: string, accessToken: string) {
+	return apiFetch<void>(`/academy/admin/content/${encodeURIComponent(id)}`, {
+		method: 'DELETE',
+		accessToken
+	});
+}
+
+export async function transitionAdminContent(
+	id: string,
+	payload: { targetStatus: string; rightsConfirmed?: boolean },
+	accessToken: string
+) {
+	return apiFetch<AdminContentDto>(`/academy/admin/content/${encodeURIComponent(id)}/transition`, {
+		method: 'POST',
+		accessToken,
+		body: payload
+	});
+}
+
+export async function setAdminLessonMedia(
+	id: string,
+	payload: {
+		videoId: string;
+		readingRefs?: string[];
+		slideRefs?: string[];
+		subtitleRefs?: string[];
+		attachmentRefs?: string[];
+		internalNote?: string | null;
+	},
+	accessToken: string
+) {
+	return apiFetch<MediaDto>(`/academy/admin/content/${encodeURIComponent(id)}/media`, {
+		method: 'PUT',
+		accessToken,
+		body: payload
+	});
+}
+
+export async function getAdminGrants(
+	params: { userId?: string; scopeId?: string },
+	accessToken: string
+) {
+	const queryParts: string[] = [];
+	if (params.userId) queryParts.push(`userId=${encodeURIComponent(params.userId)}`);
+	if (params.scopeId) queryParts.push(`scopeId=${encodeURIComponent(params.scopeId)}`);
+	const query = queryParts.length > 0 ? `?${queryParts.join('&')}` : '';
+
+	return apiFetch<AdminGrantDto[]>(`/academy/admin/grants${query}`, {
+		accessToken
+	});
+}
+
+export async function createAdminGrant(
+	payload: {
+		userId: string;
+		scopeId: string;
+		state?: string;
+		startsAt?: string;
+		expiresAt?: string;
+		source?: string;
+		auditId?: string;
+	},
+	accessToken: string
+) {
+	return apiFetch<AdminGrantDto>('/academy/admin/grants', {
+		method: 'POST',
+		accessToken,
+		body: payload
+	});
+}
+
+export async function revokeAdminGrant(id: string, accessToken: string) {
+	return apiFetch<AdminGrantDto>(`/academy/admin/grants/${encodeURIComponent(id)}/revoke`, {
+		method: 'PUT',
+		accessToken
+	});
+}
+

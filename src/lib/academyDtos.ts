@@ -48,3 +48,64 @@ export type MediaDto = {
 	attachmentRefs: string[];
 };
 export type LessonDto = { lesson: ContentDto; media: MediaDto };
+
+// ==========================================
+// Package 4 Admin CMS DTOs
+// ==========================================
+
+export type ScopeDto = {
+	id: string;
+	name: string;
+	description: string;
+	isActive: boolean;
+	createdAt?: string;
+	updatedAt?: string;
+};
+
+export type AdminContentDto = {
+	id: string;
+	kind: 'subject' | 'level' | 'chapter' | 'lesson';
+	parentId: string;
+	subjectId: string;
+	level: number;
+	chapterNumber: number;
+	order: number;
+	scopeId?: string | null;
+	title: string;
+	description?: string;
+	thumbnail?: string;
+	durationSeconds: number;
+	instructor?: string;
+	status: 'draft' | 'review' | 'approved' | 'published' | 'archived';
+	version: number;
+	syariahRequired: boolean;
+	reviewedBy?: string | null;
+	syariahReviewedBy?: string | null;
+	rightsConfirmed: boolean;
+	approvedAt?: string | null;
+	publishedAt?: string | null;
+	createdAt?: string;
+	updatedAt?: string;
+};
+
+export type AdminStatsDto = {
+	totalLessons: number;
+	publishedLessons: number;
+	draftContent: number;
+	reviewContent: number;
+	totalScopes: number;
+	totalGrants: number;
+};
+
+export type AdminGrantDto = {
+	id: string;
+	userId: string;
+	scopeId: string;
+	state: 'active' | 'revoked';
+	startsAt: string;
+	expiresAt: string;
+	source: string;
+	auditId?: string | null;
+	createdAt: string;
+};
+
