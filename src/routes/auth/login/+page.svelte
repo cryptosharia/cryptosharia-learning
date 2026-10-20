@@ -1,12 +1,13 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
+	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
 	import { userAuth } from '$lib/auth.svelte';
+	import { safePostLoginDestination } from '$lib/authRedirect';
 	import * as publicEnv from '$env/static/public';
 	import { isApiMode } from '$lib/academyConfig';
 
 	const apiMode = isApiMode(publicEnv);
-
 	let email = $state('');
 	let password = $state('');
 	let otpCode = $state('');
@@ -15,38 +16,63 @@
 	let isLoading = $state(false);
 	let errorMsg = $state('');
 	let successMsg = $state('');
+	const isAdminRedirect = $derived(page.url.searchParams.get('redirect') === '/admin/courses');
+
+	async function continueAfterLogin(role?: string) {
+		const destination = safePostLoginDestination(page.url.searchParams.get('redirect'), role);
+		const target = new URL(destination, page.url);
+		if (target.pathname === '/admin/courses') {
+			await goto(resolve('/admin/courses'));
+		} else if (target.pathname === '/profile') {
+			if (target.hash === '#profil-akun') await goto(resolve('/profile#profil-akun'));
+			else await goto(resolve('/profile'));
+		} else if (target.pathname === '/') {
+			await goto(resolve('/'));
+		} else if (target.pathname === '/e-learning') {
+			await goto(resolve('/e-learning'));
+		} else {
+			const [, id] = target.pathname.match(/^\/e-learning\/([A-Za-z0-9_-]+)$/) ?? [];
+			if (id) {
+				const path = resolve('/e-learning/[id]', { id });
+				// eslint-disable-next-line svelte/no-navigation-without-resolve -- route is allowlisted above; only its validated lesson query is appended.
+				await goto(`${path}${target.search}`);
+			} else {
+				await goto(resolve('/e-learning'));
+			}
+		}
+	}
 
 	async function handleGoogleLogin() {
 		isLoading = true;
 		errorMsg = '';
 		try {
 			await userAuth.loginWithGoogle();
-			goto(resolve('/'));
+			await continueAfterLogin(userAuth.user?.role);
 		} catch {
-			errorMsg = userAuth.error || 'Gagal login dengan Google';
+			errorMsg = userAuth.error || 'Gagal masuk dengan Google.';
 		} finally {
 			isLoading = false;
 		}
 	}
 
-	async function handleEmailLogin(e: Event) {
-		e.preventDefault();
+	async function handleEmailLogin(event: SubmitEvent) {
+		event.preventDefault();
 		isLoading = true;
 		errorMsg = '';
 		try {
 			await userAuth.loginWithEmail(email, password);
-			goto(resolve('/'));
+			await continueAfterLogin(userAuth.user?.role);
 		} catch {
-			errorMsg = userAuth.error || 'Email atau password salah';
+			errorMsg = userAuth.error || 'Email atau kata sandi tidak cocok.';
 		} finally {
 			isLoading = false;
 		}
 	}
 
-	async function handleRequestOtp(e: Event) {
-		e.preventDefault();
+	async function handleRequestOtp(event: Event) {
+		event.preventDefault();
 		if (!email || !email.includes('@')) {
-			errorMsg = 'Silakan masukkan alamat email yang valid.';
+			errorMsg = 'Masukkan alamat email yang valid.';
 			return;
 		}
 		isLoading = true;
@@ -55,30 +81,30 @@
 		try {
 			await userAuth.requestOtp(email);
 			otpSent = true;
-			successMsg = `Kode verifikasi 6-digit telah dikirim ke ${email}.`;
-		} catch (err) {
-			errorMsg = (err instanceof Error ? err.message : '') || 'Gagal mengirim kode verifikasi.';
+			successMsg = `Kode verifikasi 6 digit dikirim ke ${email}.`;
+		} catch (error) {
+			errorMsg =
+				(error instanceof Error ? error.message : '') || 'Kode belum dapat dikirim. Coba lagi.';
 		} finally {
 			isLoading = false;
 		}
 	}
 
-	async function handleVerifyOtp(e: Event) {
-		e.preventDefault();
-		const trimmedCode = otpCode.trim();
-		if (!/^\d{6}$/.test(trimmedCode)) {
-			errorMsg = 'Kode OTP harus berupa 6 digit angka.';
+	async function handleVerifyOtp(event: Event) {
+		event.preventDefault();
+		const code = otpCode.trim();
+		if (!/^\d{6}$/.test(code)) {
+			errorMsg = 'Kode verifikasi harus terdiri dari 6 digit.';
 			return;
 		}
 		isLoading = true;
 		errorMsg = '';
 		try {
-			await userAuth.verifyOtp(email, trimmedCode);
-			goto(resolve('/e-learning'));
-		} catch (err) {
+			const user = await userAuth.verifyOtp(email, code);
+			await continueAfterLogin(user.role);
+		} catch (error) {
 			errorMsg =
-				(err instanceof Error ? err.message : '') ||
-				'Kode verifikasi tidak valid atau telah kedaluwarsa.';
+				(error instanceof Error ? error.message : '') || 'Kode tidak valid atau telah kedaluwarsa.';
 		} finally {
 			isLoading = false;
 		}
@@ -87,37 +113,75 @@
 
 <svelte:head>
 	<title>Masuk | CryptoSharia Academy</title>
+	<meta
+		name="description"
+		content="Masuk ke CryptoSharia Academy untuk melanjutkan pembelajaran."
+	/>
 </svelte:head>
 
-<div class="flex min-h-screen flex-col bg-gray-50 dark:bg-gray-950">
-	<header class="px-4 py-6">
-		<a href={resolve('/')} class="group mx-auto flex w-fit items-center gap-2.5 sm:mx-0 sm:ml-8">
-			<img
-				src="/logo.png"
-				alt="CryptoSharia"
-				class="h-9 w-9 rounded-full transition-transform group-hover:scale-105"
-			/>
-			<span class="font-sans text-lg font-extrabold text-gray-900 dark:text-white"
-				>Crypto<span class="text-primary-600 dark:text-primary-400">Sharia</span></span
-			>
+<div class="mx-auto flex w-full max-w-6xl flex-1 flex-col px-5 sm:px-6">
+	<header class="flex min-h-16 items-center justify-between border-b border-line">
+		<a href={resolve('/')} class="inline-flex min-h-11 items-center gap-3 no-underline">
+			<img src="/logo.png" alt="" width="36" height="36" class="h-9 w-9 rounded-full" />
+			<span class="leading-tight">
+				<span class="block font-bold text-white">CryptoSharia</span>
+				<span class="block text-xs text-muted">Academy</span>
+			</span>
 		</a>
+		<a href={resolve('/e-learning')} class="academy-link inline-flex min-h-11 items-center text-sm"
+			>Kembali ke kurikulum</a
+		>
 	</header>
 
-	<div class="flex flex-1 items-center justify-center px-4 pb-16">
-		<div class="w-full max-w-md">
-			<div class="mb-8">
-				<h1 class="text-2xl font-extrabold text-gray-900 dark:text-white">Masuk ke CryptoSharia</h1>
-				{#if apiMode}
-					<p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
-						Gunakan verifikasi kode OTP email untuk mengakses modul pembelajaran Academy.
+	<main
+		class="flex min-h-[calc(100dvh-7rem)] flex-1 flex-col justify-center gap-8 py-8 sm:py-12 lg:grid lg:min-h-0 lg:grid-cols-[minmax(0,1fr)_minmax(24rem,0.9fr)] lg:items-center lg:gap-16 lg:py-16"
+	>
+		<section class="hidden max-w-xl lg:block">
+			<p class="text-xs font-bold tracking-[0.18em] text-primary uppercase">
+				Belajar bersama Academy
+			</p>
+			<h1 class="mt-4 text-4xl leading-tight font-semibold tracking-tight text-white">
+				Masuk untuk melanjutkan pembelajaran
+			</h1>
+			<p class="mt-5 text-base leading-7 text-secondary">
+				Akses materi yang tersedia, lanjutkan posisi belajar, dan pantau progres Anda melalui satu
+				akun CryptoSharia Academy.
+			</p>
+			<div class="mt-8 grid gap-3 sm:grid-cols-2">
+				<div class="academy-card p-4">
+					<p class="font-semibold text-white">Kurikulum terstruktur</p>
+					<p class="mt-1 text-sm leading-6 text-muted">Empat bidang pembelajaran modular.</p>
+				</div>
+				<div class="academy-card p-4">
+					<p class="font-semibold text-white">Progres pribadi</p>
+					<p class="mt-1 text-sm leading-6 text-muted">
+						Posisi belajar dan status selesai tercatat terpisah.
 					</p>
-				{:else}
-					<p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
-						Belum punya akun? <a
-							href={resolve('/auth/register')}
-							class="font-semibold text-primary-600 transition-colors hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
-							>Daftar sekarang!</a
-						>
+				</div>
+			</div>
+		</section>
+
+		<section
+			class="academy-card-raised mx-auto w-full max-w-lg p-5 sm:p-8"
+			aria-labelledby="login-title"
+		>
+			<div class="mb-6">
+				<p class="text-xs font-bold tracking-[0.16em] text-primary uppercase">Akun Academy</p>
+				<h2 id="login-title" class="mt-2 text-2xl font-semibold text-white">
+					Masuk ke CryptoSharia Academy
+				</h2>
+				<p class="mt-2 text-sm leading-6 text-secondary">
+					{#if apiMode}
+						Gunakan email untuk menerima kode verifikasi dan mengakses pembelajaran.
+					{:else}
+						Masuk untuk melihat katalog dan melanjutkan pembelajaran Anda.
+					{/if}
+				</p>
+				{#if isAdminRedirect}
+					<p
+						class="mt-3 rounded-lg border border-primary/30 bg-primary/10 p-3 text-sm text-secondary"
+					>
+						Setelah masuk, akun dengan hak admin akan kembali ke Panel Admin.
 					</p>
 				{/if}
 			</div>
@@ -125,136 +189,85 @@
 			{#if errorMsg}
 				<div
 					role="alert"
-					class="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400"
+					class="mb-5 rounded-xl border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger"
 				>
 					{errorMsg}
 				</div>
 			{/if}
-
 			{#if successMsg}
 				<div
 					role="status"
-					class="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-600 dark:border-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-400"
+					class="mb-5 rounded-xl border border-success/30 bg-success/10 px-4 py-3 text-sm text-success"
 				>
 					{successMsg}
 				</div>
 			{/if}
 
 			{#if apiMode}
-				<!-- API Mode: Email OTP Flow -->
 				{#if !otpSent}
-					<form onsubmit={handleRequestOtp} class="space-y-5">
+					<form onsubmit={handleRequestOtp} class="space-y-5" aria-busy={isLoading}>
 						<div>
-							<label
-								for="email"
-								class="mb-2 block text-sm font-semibold text-gray-900 dark:text-white"
-								>Email Akun</label
-							>
+							<label for="email" class="academy-form-label">Email akun</label>
 							<input
 								type="email"
 								id="email"
 								bind:value={email}
-								placeholder="Masukkan email Anda..."
+								autocomplete="email"
+								placeholder="nama@email.com"
 								required
-								class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 transition-all outline-none placeholder:text-gray-400 focus:border-primary-500 focus:ring-2 focus:ring-primary-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-500"
+								class="academy-input"
 							/>
 						</div>
-
 						<button
 							type="submit"
 							disabled={isLoading || !email}
-							class="orange-glow w-full rounded-xl bg-primary-600 px-4 py-3 text-sm font-bold text-white transition-all hover:bg-primary-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+							class="academy-button-primary w-full"
 						>
-							{#if isLoading}
-								<span class="inline-flex items-center gap-2">
-									<svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24"
-										><circle
-											class="opacity-25"
-											cx="12"
-											cy="12"
-											r="10"
-											stroke="currentColor"
-											stroke-width="4"
-										/><path
-											class="opacity-75"
-											fill="currentColor"
-											d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-										/></svg
-									>
-									Mengirim Kode...
-								</span>
-							{:else}
-								Kirim Kode OTP
-							{/if}
+							{isLoading ? 'Mengirim kode…' : 'Kirim kode OTP'}
 						</button>
 					</form>
 				{:else}
-					<form onsubmit={handleVerifyOtp} class="space-y-5">
+					<form onsubmit={handleVerifyOtp} class="space-y-5" aria-busy={isLoading}>
 						<div>
-							<label
-								for="otpCode"
-								class="mb-2 block text-sm font-semibold text-gray-900 dark:text-white"
-								>Kode Verifikasi (6 Digit)</label
-							>
+							<label for="otpCode" class="academy-form-label">Kode verifikasi</label>
+							<p class="mb-3 text-sm text-muted">Masukkan 6 digit kode yang dikirim ke {email}.</p>
 							<input
 								type="text"
 								id="otpCode"
 								bind:value={otpCode}
-								placeholder="123456"
-								maxLength={6}
-								pattern={'[0-9]{6}'}
+								placeholder="000000"
+								maxlength="6"
+								pattern="[0-9][0-9][0-9][0-9][0-9][0-9]"
 								inputmode="numeric"
+								autocomplete="one-time-code"
 								required
-								class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-center font-mono text-lg tracking-widest text-gray-900 transition-all outline-none placeholder:text-gray-400 focus:border-primary-500 focus:ring-2 focus:ring-primary-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-500"
+								class="academy-input text-center font-mono text-xl tracking-[0.35em]"
 							/>
 						</div>
-
 						<button
 							type="submit"
 							disabled={isLoading || otpCode.trim().length !== 6}
-							class="orange-glow w-full rounded-xl bg-primary-600 px-4 py-3 text-sm font-bold text-white transition-all hover:bg-primary-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+							class="academy-button-primary w-full"
 						>
-							{#if isLoading}
-								<span class="inline-flex items-center gap-2">
-									<svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24"
-										><circle
-											class="opacity-25"
-											cx="12"
-											cy="12"
-											r="10"
-											stroke="currentColor"
-											stroke-width="4"
-										/><path
-											class="opacity-75"
-											fill="currentColor"
-											d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-										/></svg
-									>
-									Memverifikasi...
-								</span>
-							{:else}
-								Verifikasi & Masuk
-							{/if}
+							{isLoading ? 'Memverifikasi…' : 'Verifikasi dan masuk'}
 						</button>
-
-						<div class="flex items-center justify-between pt-2 text-sm">
+						<div class="flex flex-wrap items-center justify-between gap-2 pt-1 text-sm">
 							<button
 								type="button"
+								class="academy-link inline-flex min-h-11 items-center"
+								disabled={isLoading}
 								onclick={() => {
 									otpSent = false;
 									otpCode = '';
 									errorMsg = '';
 									successMsg = '';
-								}}
-								class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+								}}>Ganti email</button
 							>
-								Ganti email
-							</button>
 							<button
 								type="button"
-								onclick={handleRequestOtp}
+								class="academy-link inline-flex min-h-11 items-center"
 								disabled={isLoading}
-								class="font-semibold text-primary-600 hover:text-primary-700 dark:text-primary-400"
+								onclick={(event) => void handleRequestOtp(event)}
 							>
 								Kirim ulang kode
 							</button>
@@ -262,14 +275,14 @@
 					</form>
 				{/if}
 			{:else}
-				<!-- Emulator Mode: Existing Google & Password Auth -->
-				<div class="mb-6 space-y-3">
+				<div class="mb-6">
 					<button
+						type="button"
 						onclick={handleGoogleLogin}
 						disabled={isLoading}
-						class="flex w-full items-center justify-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 transition-all hover:border-gray-300 hover:bg-gray-50 active:scale-[0.98] disabled:opacity-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:border-gray-600 dark:hover:bg-gray-700"
+						class="academy-button-secondary w-full gap-3"
 					>
-						<svg class="h-5 w-5" viewBox="0 0 24 24">
+						<svg aria-hidden="true" class="h-5 w-5" viewBox="0 0 24 24">
 							<path
 								d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
 								fill="#4285F4"
@@ -287,114 +300,70 @@
 								fill="#EA4335"
 							/>
 						</svg>
-						Login dengan Google
+						Masuk dengan Google
 					</button>
-				</div>
-
-				<div class="relative my-6">
-					<div class="absolute inset-0 flex items-center">
-						<div class="w-full border-t border-gray-200 dark:border-gray-700"></div>
+					<div class="my-5 flex items-center gap-3 text-xs text-muted">
+						<span class="h-px flex-1 bg-line"></span><span>atau email dan kata sandi</span><span
+							class="h-px flex-1 bg-line"
+						></span>
 					</div>
-					<div class="relative flex justify-center text-sm">
-						<span class="bg-gray-50 px-4 text-gray-400 dark:bg-gray-950 dark:text-gray-500"
-							>atau</span
-						>
-					</div>
-				</div>
-
-				<form onsubmit={handleEmailLogin} class="space-y-5">
-					<div>
-						<label
-							for="email"
-							class="mb-2 block text-sm font-semibold text-gray-900 dark:text-white">Email</label
-						>
-						<input
-							type="email"
-							id="email"
-							bind:value={email}
-							placeholder="Masukkan email kamu..."
-							required
-							class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 transition-all outline-none placeholder:text-gray-400 focus:border-primary-500 focus:ring-2 focus:ring-primary-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-500"
-						/>
-					</div>
-
-					<div>
-						<label
-							for="password"
-							class="mb-2 block text-sm font-semibold text-gray-900 dark:text-white">Password</label
-						>
-						<div class="relative">
+					<form onsubmit={handleEmailLogin} class="space-y-4" aria-busy={isLoading}>
+						<div>
+							<label for="email" class="academy-form-label">Email</label>
 							<input
-								type={showPassword ? 'text' : 'password'}
-								id="password"
-								bind:value={password}
-								placeholder="Masukkan password kamu..."
+								type="email"
+								id="email"
+								bind:value={email}
+								autocomplete="email"
+								placeholder="nama@email.com"
 								required
-								class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 pr-12 text-sm text-gray-900 transition-all outline-none placeholder:text-gray-400 focus:border-primary-500 focus:ring-2 focus:ring-primary-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:placeholder:text-gray-500"
+								class="academy-input"
 							/>
-							<button
-								type="button"
-								onclick={() => (showPassword = !showPassword)}
-								class="absolute top-1/2 right-3 -translate-y-1/2 text-gray-400 transition-colors hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
-								aria-label="Toggle password"
-							>
-								{#if showPassword}
-									<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-										><path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
-										/></svg
-									>
-								{:else}
-									<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-										><path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-										/><path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-										/></svg
-									>
-								{/if}
-							</button>
 						</div>
-					</div>
-
-					<button
-						type="submit"
-						disabled={isLoading || !email || !password}
-						class="orange-glow w-full rounded-xl bg-primary-600 px-4 py-3 text-sm font-bold text-white transition-all hover:bg-primary-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
-					>
-						{#if isLoading}
-							<span class="inline-flex items-center gap-2">
-								<svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24"
-									><circle
-										class="opacity-25"
-										cx="12"
-										cy="12"
-										r="10"
-										stroke="currentColor"
-										stroke-width="4"
-									/><path
-										class="opacity-75"
-										fill="currentColor"
-										d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-									/></svg
+						<div>
+							<label for="password" class="academy-form-label">Kata sandi</label>
+							<div class="relative">
+								<input
+									type={showPassword ? 'text' : 'password'}
+									id="password"
+									bind:value={password}
+									autocomplete="current-password"
+									placeholder="Kata sandi"
+									required
+									class="academy-input pr-14"
+								/>
+								<button
+									type="button"
+									class="absolute inset-y-0 right-2 my-1 min-h-10 rounded-lg px-3 text-xs font-semibold text-muted hover:text-white"
+									aria-label={showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}
+									onclick={() => (showPassword = !showPassword)}
 								>
-								Memproses...
-							</span>
-						{:else}
-							Login
-						{/if}
-					</button>
-				</form>
+									{showPassword ? 'Sembunyikan' : 'Lihat'}
+								</button>
+							</div>
+						</div>
+						<button
+							type="submit"
+							disabled={isLoading || !email || !password}
+							class="academy-button-primary w-full"
+						>
+							{isLoading ? 'Memproses…' : 'Masuk'}
+						</button>
+					</form>
+				</div>
 			{/if}
-		</div>
-	</div>
+
+			{#if !apiMode}
+				<p class="border-t border-line pt-5 text-sm text-secondary">
+					Belum punya akun? <a href={resolve('/auth/register')} class="academy-link"
+						>Daftar sekarang</a
+					>
+				</p>
+			{/if}
+		</section>
+	</main>
+
+	<footer class="border-t border-line py-5 text-center text-xs text-muted">
+		Masuk dengan aman ke ruang belajar CryptoSharia Academy.
+	</footer>
 </div>

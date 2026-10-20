@@ -14,7 +14,8 @@ export async function mockAcademyApi() {
 		completions: new Map(),
 		sessions: new Set(),
 		accessUsers: new Set(),
-		invalidUsers: new Set()
+		invalidUsers: new Set(),
+		contentUpdates: []
 	};
 	const key = 'package3-synthetic-private-key';
 	const lesson = () => ({
@@ -60,6 +61,68 @@ export async function mockAcademyApi() {
 		},
 		lesson()
 	];
+	const adminContent = [
+		{
+			id: 'fundamental',
+			kind: 'subject',
+			parentId: 'root',
+			subjectId: 'fundamental',
+			level: 1,
+			chapterNumber: 1,
+			order: 0,
+			title: 'Analisis Fundamental · data QA',
+			status: 'published',
+			version: 1,
+			syariahRequired: false,
+			rightsConfirmed: true
+		},
+		{
+			id: 'admin-level-synthetic',
+			kind: 'level',
+			parentId: 'fundamental',
+			subjectId: 'fundamental',
+			level: 1,
+			chapterNumber: 1,
+			order: 0,
+			title: 'Level QA sintetis',
+			status: 'published',
+			version: 1,
+			syariahRequired: false,
+			rightsConfirmed: true
+		},
+		{
+			id: 'admin-chapter-synthetic',
+			kind: 'chapter',
+			parentId: 'admin-level-synthetic',
+			subjectId: 'fundamental',
+			level: 1,
+			chapterNumber: 1,
+			order: 0,
+			title: 'Bab QA sintetis',
+			status: 'published',
+			version: 1,
+			syariahRequired: false,
+			rightsConfirmed: true
+		},
+		{
+			id: 'admin-lesson-synthetic',
+			kind: 'lesson',
+			parentId: 'admin-chapter-synthetic',
+			subjectId: 'fundamental',
+			level: 1,
+			chapterNumber: 1,
+			order: 0,
+			scopeId: 'scope-synthetic',
+			title: 'Pelajaran sintetis QA',
+			description: 'Konten pengujian lokal; bukan materi resmi.',
+			status: 'draft',
+			version: 1,
+			durationSeconds: 120,
+			syariahRequired: true,
+			rightsConfirmed: false
+		}
+	];
+	state.adminContent = adminContent;
 	const server = createServer(async (req, res) => {
 		const reply = (status, data, headers = {}) => {
 			res.writeHead(status, { 'content-type': 'application/json', ...headers });
@@ -117,9 +180,68 @@ export async function mockAcademyApi() {
 						id: uid,
 						email: `${uid}@example.test`,
 						name: uid,
-						role: 'member',
+						role: uid === 'admin' ? 'admin' : 'member',
 						status: 'active'
 					});
+		if (path.startsWith('/academy/admin/')) {
+			if (uid !== 'admin') return reply(403, { error: 'FORBIDDEN' });
+			if (path === '/academy/admin/stats')
+				return reply(200, {
+					totalLessons: 1,
+					publishedLessons: 0,
+					draftContent: 1,
+					reviewContent: 0,
+					totalScopes: 1,
+					totalGrants: 1
+				});
+			if (path === '/academy/admin/scopes')
+				return reply(200, [
+					{
+						id: 'scope-synthetic',
+						name: 'Scope sintetis QA',
+						description: 'Data uji lokal, bukan data siswa.',
+						isActive: true,
+						createdAt: '2026-01-01T00:00:00Z',
+						updatedAt: '2026-01-01T00:00:00Z'
+					}
+				]);
+			if (path === '/academy/admin/content') return reply(200, adminContent);
+			const contentIdMatch = path.match(/^\/academy\/admin\/content\/([^/]+)$/);
+			if (contentIdMatch && req.method === 'PUT') {
+				const id = decodeURIComponent(contentIdMatch[1]);
+				const item = adminContent.find((record) => record.id === id);
+				if (!item) return reply(404, { error: 'NOT_FOUND' });
+				const editableFields = [
+					'title',
+					'description',
+					'thumbnail',
+					'durationSeconds',
+					'instructor',
+					'order',
+					'scopeId',
+					'syariahRequired'
+				];
+				const updates = Object.fromEntries(
+					editableFields.filter((field) => field in body).map((field) => [field, body[field]])
+				);
+				Object.assign(item, updates);
+				state.contentUpdates.push({ id, body: structuredClone(body) });
+				return reply(200, item);
+			}
+			if (path === '/academy/admin/grants')
+				return reply(200, [
+					{
+						id: 'grant-synthetic',
+						userId: 'learner-synthetic',
+						scopeId: 'scope-synthetic',
+						state: 'active',
+						startsAt: '2026-01-01T00:00:00Z',
+						expiresAt: '2099-01-01T00:00:00Z',
+						source: 'QA fixture',
+						createdAt: '2026-01-01T00:00:00Z'
+					}
+				]);
+		}
 		const entitled = uid === 'alice' && state.grant === 'active';
 		const denial = () =>
 			reply(403, {

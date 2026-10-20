@@ -206,43 +206,77 @@
 </script>
 
 <svelte:head><title>Materi | CryptoSharia Academy</title></svelte:head>
-<section class="mx-auto max-w-5xl px-6 py-24">
-	<a href={resolve('/e-learning')}>Kembali ke katalog</a>
-	<a class="ml-4 underline" href={resolve('/profile')}>Dashboard pembelajaran</a>
-	<div class="mt-5 grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
+<section class="mx-auto max-w-6xl px-5 py-10 sm:px-6 sm:py-14">
+	<nav class="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm" aria-label="Lokasi materi">
+		<a class="academy-link inline-flex min-h-11 items-center" href={resolve('/e-learning')}
+			>Kurikulum</a
+		>
+		<span class="text-muted" aria-hidden="true">/</span>
+		<a class="academy-link inline-flex min-h-11 items-center" href={resolve('/profile')}
+			>Pembelajaran Saya</a
+		>
+	</nav>
+
+	<div class="mt-3 grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1fr)_19rem] lg:items-start">
 		<div class="min-w-0">
-			<h1 class="my-4 text-2xl font-bold">{selected?.title || 'Materi Academy'}</h1>
-			{#if selected}<p>
-					{curriculum.find((n) => n.id === selected?.subjectId)?.title ?? selected.subject} · Level {selected.level}
-					· Bab {selected.chapterNumber}: {curriculum.find((n) => n.id === selected?.parentId)
-						?.title ?? selected.chapter}
+			<header class="mb-5">
+				<p class="text-xs font-bold tracking-[0.16em] text-primary uppercase">Materi Academy</p>
+				<h1 class="mt-2 text-2xl font-semibold tracking-tight text-white sm:text-3xl">
+					{selected?.title || 'Materi pembelajaran'}
+				</h1>
+				{#if selected}
+					<p class="mt-2 text-sm text-secondary">
+						{curriculum.find((item) => item.id === selected?.subjectId)?.title ?? selected.subject}
+						· Level {selected.level} · Bab {selected.chapterNumber}: {curriculum.find(
+							(item) => item.id === selected?.parentId
+						)?.title ?? selected.chapter}
+					</p>
+					{#if selected.description}<p class="mt-3 max-w-3xl leading-7 text-secondary">
+							{selected.description}
+						</p>{/if}
+				{/if}
+			</header>
+
+			<div class="academy-card-raised overflow-hidden p-3 sm:p-4">
+				{#if view.status === 'ready' && video && selected}
+					{#key `${uid}_${selected.id}_${selected.version}_${video.videoId}`}
+						<AcademyVideo lesson={selected} videoId={video.videoId} {uid} />
+					{/key}
+				{:else if view.status === 'loading'}
+					<div
+						class="aspect-video w-full animate-pulse rounded-xl bg-surface-raised"
+						aria-hidden="true"
+					></div>
+				{/if}
+				<p
+					role="status"
+					aria-live="polite"
+					data-testid="access-status"
+					data-status={view.status}
+					class={`mt-3 rounded-lg border px-4 py-3 text-sm ${view.status === 'ready' ? 'border-success/30 bg-success/10 text-success' : view.status === 'loading' ? 'border-line bg-background text-secondary' : 'border-warning/30 bg-warning/10 text-secondary'}`}
+				>
+					{messages[view.status]}
 				</p>
-				<p class="my-3">{selected.description}</p>{/if}
-			<p role="status" data-testid="access-status" data-status={view.status}>
-				{messages[view.status]}
-			</p>
-			{#if view.status === 'ready' && video && selected}
-				{#key `${uid}_${selected.id}_${selected.version}_${video.videoId}`}<AcademyVideo
-						lesson={selected}
-						videoId={video.videoId}
-						{uid}
-					/>{/key}
-			{/if}
+			</div>
+
 			{#if view.status === 'ready' && selected && uid}
-				{#key `${uid}_${selected.id}_${selected.version}`}
-					<AcademyCompletion lesson={selected} {uid} />
-				{/key}
+				<div class="mt-4">
+					{#key `${uid}_${selected.id}_${selected.version}`}
+						<AcademyCompletion lesson={selected} {uid} />
+					{/key}
+				</div>
 			{/if}
-			<nav class="my-5 flex gap-3" aria-label="Navigasi pelajaran">
+
+			<nav class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2" aria-label="Navigasi pelajaran">
 				<button
-					class="rounded border p-3"
+					class="academy-button-secondary w-full"
 					disabled={selectedIndex <= 0}
 					onclick={() => {
 						if (selectedIndex > 0) select(lessons[selectedIndex - 1]);
 					}}>Pelajaran sebelumnya</button
 				>
 				<button
-					class="rounded border p-3"
+					class="academy-button-secondary w-full"
 					disabled={selectedIndex < 0 || selectedIndex >= lessons.length - 1}
 					onclick={() => {
 						if (selectedIndex >= 0 && selectedIndex < lessons.length - 1)
@@ -250,31 +284,59 @@
 					}}>Pelajaran berikutnya</button
 				>
 			</nav>
+
+			{#if view.status !== 'loading' && view.status !== 'ready'}
+				<div
+					class="mt-4 flex flex-col gap-3 rounded-xl border border-line bg-surface p-4 sm:flex-row sm:items-center sm:justify-between"
+				>
+					<p class="text-sm text-secondary">Akses diperiksa oleh server saat materi dibuka.</p>
+					<button class="academy-link min-h-11 w-fit" onclick={() => controller?.resume()}
+						>Periksa akses kembali</button
+					>
+				</div>
+			{/if}
+			<p class="mt-5 text-xs leading-5 text-muted">
+				Tautan YouTube unlisted bukan DRM. Jangan bagikan referensi media di luar ruang belajar.
+			</p>
 		</div>
-		<aside class="min-w-0 rounded-xl border p-4" aria-label="Struktur pelajaran">
-			<h2 class="font-bold">Urutan pelajaran</h2>
-			<ul class="my-6 space-y-3">
-				{#each lessons as lesson (lesson.id)}<li>
-						<button
-							class="rounded border p-3"
-							aria-pressed={selected?.id === lesson.id}
-							class:font-bold={selected?.id === lesson.id}
-							class:border-orange-500={selected?.id === lesson.id}
-							onclick={() => select(lesson)}>{lesson.title}</button
-						>
-						<p class="text-sm">
-							Level {lesson.level} · Bab {lesson.chapterNumber} · {lesson.durationSeconds} detik
-						</p>
-					</li>{/each}
-			</ul>
+
+		<aside class="academy-card min-w-0 p-4 sm:p-5" aria-label="Daftar materi dalam lingkup ini">
+			<div class="flex items-start justify-between gap-3">
+				<div>
+					<h2 class="font-semibold text-white">Daftar materi</h2>
+					<p class="mt-1 text-xs text-muted">{lessons.length} lesson di lingkup ini</p>
+				</div>
+				<span class="rounded-full border border-line px-2.5 py-1 text-xs text-muted"
+					>{selectedIndex >= 0 ? `${selectedIndex + 1}/${lessons.length}` : '—'}</span
+				>
+			</div>
+			{#if lessons.length}
+				<ul class="mt-4 space-y-2">
+					{#each lessons as lesson (lesson.id)}
+						<li>
+							<button
+								class={`min-h-11 w-full rounded-xl border p-3 text-left transition ${selected?.id === lesson.id ? 'border-primary/50 bg-primary/10 text-white' : 'border-line bg-background text-secondary hover:border-line hover:bg-surface-raised'}`}
+								aria-pressed={selected?.id === lesson.id}
+								onclick={() => select(lesson)}
+							>
+								<span class="block font-medium">{lesson.title}</span>
+								<span class="mt-1 block text-xs text-muted"
+									>Level {lesson.level} · Bab {lesson.chapterNumber} · {Math.max(
+										1,
+										Math.round(lesson.durationSeconds / 60)
+									)} menit</span
+								>
+							</button>
+						</li>
+					{/each}
+				</ul>
+			{:else if catalogReady}
+				<div class="mt-4 rounded-xl border border-line bg-background p-4 text-sm text-secondary">
+					Belum ada lesson terbit untuk ditampilkan.
+				</div>
+			{:else}
+				<p class="mt-4 text-sm text-muted">Memuat daftar materi…</p>
+			{/if}
 		</aside>
 	</div>
-	{#if view.status !== 'loading' && view.status !== 'ready'}<button
-			class="rounded border p-2"
-			onclick={() => controller?.resume()}>Periksa akses kembali</button
-		>{/if}
-	<p class="mt-6 text-sm">
-		Referensi YouTube yang sudah diketahui tidak dapat dicabut oleh situs ini. YouTube Unlisted
-		bukan DRM.
-	</p>
 </section>

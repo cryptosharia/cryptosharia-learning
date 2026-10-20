@@ -1,4 +1,7 @@
 <script lang="ts">
+	import { beforeNavigate } from '$app/navigation';
+	import { resolve } from '$app/paths';
+	import { SvelteURLSearchParams } from 'svelte/reactivity';
 	import { onMount } from 'svelte';
 	import type { PageData } from './$types';
 	import type { AdminContentDto, ScopeDto, AdminStatsDto, AdminGrantDto } from '$lib/academyDtos';
@@ -19,6 +22,10 @@
 	// Async state
 	let loading = $state(false);
 	let busy = $state(false);
+	let statsLoading = $state(false);
+	let statsError = $state('');
+	let contentLoaded = $state(false);
+	let contentError = $state(false);
 	let errorMessage = $state('');
 	let successMessage = $state('');
 
@@ -48,6 +55,27 @@
 	let formVideoUrl = $state('');
 	let parsedVideo = $derived(parseYouTubeUrl(formVideoUrl));
 	let formInternalNote = $state('');
+	let editorBaseline = $state('');
+	let editorValue = $derived(
+		JSON.stringify({
+			formKind,
+			formParentId,
+			formSubjectId,
+			formLevel,
+			formChapterNumber,
+			formOrder,
+			formScopeId,
+			formTitle,
+			formDescription,
+			formThumbnail,
+			formDurationMinutes,
+			formInstructor,
+			formSyariahRequired,
+			formVideoUrl,
+			formInternalNote
+		})
+	);
+	let editorHasUnsavedChanges = $derived(editorBaseline !== '' && editorValue !== editorBaseline);
 
 	// Scope Modal/Form states
 	let newScopeId = $state('');
@@ -73,13 +101,74 @@
 		successMessage = '';
 	}
 
+	function confirmDiscardEditorChanges() {
+		if (!editorHasUnsavedChanges) return true;
+		if (!confirm('Perubahan belum disimpan. Buang perubahan ini dan lanjutkan?')) return false;
+		resetEditor();
+		return true;
+	}
+
+	function canSelectTab(nextTab: TabType) {
+		return nextTab === activeTab || confirmDiscardEditorChanges();
+	}
+
+	function contentKindLabel(kind: AdminContentDto['kind']) {
+		return { subject: 'Subjek', level: 'Level', chapter: 'Bab', lesson: 'Pelajaran' }[kind];
+	}
+
+	function subjectLabel(item: AdminContentDto) {
+		return (
+			contentItems.find((record) => record.kind === 'subject' && record.id === item.subjectId)
+				?.title ??
+			subjects.find((subject) => subject.id === item.subjectId)?.title ??
+			'Subjek tidak tersedia'
+		);
+	}
+
+	function parentLabel(item: AdminContentDto) {
+		if (item.kind === 'subject') return 'Akar kurikulum';
+		const parent = contentItems.find((record) => record.id === item.parentId);
+		if (parent) return parent.title;
+		if (item.kind === 'level') return subjectLabel(item);
+		if (item.kind === 'chapter') return `Level ${item.level}`;
+		return `Bab ${item.chapterNumber}`;
+	}
+
+	function curriculumPath(item: AdminContentDto) {
+		const subject = subjectLabel(item);
+		const level =
+			contentItems.find(
+				(record) =>
+					record.kind === 'level' &&
+					record.subjectId === item.subjectId &&
+					record.level === item.level
+			)?.title ?? `Level ${item.level}`;
+		const chapter =
+			contentItems.find(
+				(record) =>
+					record.kind === 'chapter' &&
+					record.subjectId === item.subjectId &&
+					record.level === item.level &&
+					record.chapterNumber === item.chapterNumber
+			)?.title ?? `Bab ${item.chapterNumber}`;
+		if (item.kind === 'subject') return subject;
+		if (item.kind === 'level') return `${subject} → ${item.title}`;
+		if (item.kind === 'chapter') return `${subject} → ${level} → ${item.title}`;
+		return `${subject} → ${level} → ${chapter} → ${item.title}`;
+	}
+
 	// Fetch helper methods
 	async function loadStats() {
+		statsLoading = true;
+		statsError = '';
 		try {
 			const res = await fetch('/api/academy/admin/stats');
-			if (res.ok) stats = await res.json();
-		} catch (e) {
-			console.error('Failed to load stats', e);
+			if (!res.ok) throw new Error('Ringkasan belum dapat dimuat.');
+			stats = await res.json();
+		} catch {
+			statsError = 'Ringkasan belum dapat dimuat. Coba segarkan data.';
+		} finally {
+			statsLoading = false;
 		}
 	}
 
@@ -94,8 +183,10 @@
 
 	async function loadContent() {
 		loading = true;
+		contentLoaded = false;
+		contentError = false;
 		try {
-			const query = new URLSearchParams();
+			const query = new SvelteURLSearchParams();
 			if (filterStatus !== 'all') query.set('status', filterStatus);
 			if (filterKind !== 'all') query.set('kind', filterKind);
 			if (filterSubject !== 'all') query.set('subjectId', filterSubject);
@@ -103,11 +194,14 @@
 			const res = await fetch(`/api/academy/admin/content?${query.toString()}`);
 			if (res.ok) {
 				contentItems = await res.json();
+				contentLoaded = true;
 			} else {
 				const err = await res.json();
+				contentError = true;
 				showError(err.message || 'Gagal memuat daftar konten');
 			}
 		} catch {
+			contentError = true;
 			showError('Koneksi ke server terputus');
 		} finally {
 			loading = false;
@@ -149,6 +243,8 @@
 			return true;
 		})
 	);
+	let structureCount = $derived(contentItems.filter((item) => item.kind !== 'lesson').length);
+	let approvedCount = $derived(contentItems.filter((item) => item.status === 'approved').length);
 
 	// Editor Actions
 	function resetEditor() {
@@ -169,6 +265,7 @@
 		formSyariahRequired = false;
 		formVideoUrl = '';
 		formInternalNote = '';
+		editorBaseline = editorValue;
 	}
 
 	function startEdit(item: AdminContentDto) {
@@ -176,7 +273,7 @@
 		editId = item.id;
 		formKind = item.kind;
 		formParentId = item.parentId;
-		formSubjectId = item.subjectId as any;
+		formSubjectId = item.subjectId as typeof formSubjectId;
 		formLevel = item.level;
 		formChapterNumber = item.chapterNumber;
 		formOrder = item.order;
@@ -189,6 +286,7 @@
 		formSyariahRequired = item.syariahRequired;
 		formVideoUrl = '';
 		formInternalNote = '';
+		editorBaseline = editorValue;
 		activeTab = 'editor';
 	}
 
@@ -257,7 +355,11 @@
 				const payload = {
 					id: generatedId,
 					kind: formKind,
-					parentId: formParentId || (formKind === 'subject' ? 'root' : `${formSubjectId}-l${formLevel}-c${formChapterNumber}`),
+					parentId:
+						formParentId ||
+						(formKind === 'subject'
+							? 'root'
+							: `${formSubjectId}-l${formLevel}-c${formChapterNumber}`),
 					subjectId: formSubjectId,
 					level: formLevel,
 					chapterNumber: formChapterNumber,
@@ -309,8 +411,8 @@
 			resetEditor();
 			await Promise.all([loadContent(), loadStats()]);
 			activeTab = 'curriculum';
-		} catch (err: any) {
-			showError(err.message || 'Terjadi kesalahan sistem');
+		} catch (err: unknown) {
+			showError(err instanceof Error ? err.message : 'Terjadi kesalahan sistem');
 		} finally {
 			busy = false;
 		}
@@ -336,8 +438,8 @@
 
 			showSuccess(`Status konten berhasil diubah menjadi "${targetStatus.toUpperCase()}".`);
 			await Promise.all([loadContent(), loadStats()]);
-		} catch (err: any) {
-			showError(err.message || 'Gagal mengubah status materi');
+		} catch (err: unknown) {
+			showError(err instanceof Error ? err.message : 'Gagal mengubah status materi');
 		} finally {
 			busy = false;
 		}
@@ -360,8 +462,8 @@
 
 			showSuccess('Draft materi berhasil dihapus.');
 			await Promise.all([loadContent(), loadStats()]);
-		} catch (err: any) {
-			showError(err.message || 'Gagal menghapus draft');
+		} catch (err: unknown) {
+			showError(err instanceof Error ? err.message : 'Gagal menghapus draft');
 		} finally {
 			busy = false;
 		}
@@ -397,8 +499,8 @@
 			newScopeName = '';
 			newScopeDesc = '';
 			await Promise.all([loadScopes(), loadStats()]);
-		} catch (err: any) {
-			showError(err.message || 'Gagal membuat scope');
+		} catch (err: unknown) {
+			showError(err instanceof Error ? err.message : 'Gagal membuat scope');
 		} finally {
 			busy = false;
 		}
@@ -414,9 +516,7 @@
 		busy = true;
 		try {
 			const startsAt = new Date().toISOString();
-			const expiresAt = new Date(
-				Date.now() + grantDurationDays * 24 * 3600 * 1000
-			).toISOString();
+			const expiresAt = new Date(Date.now() + grantDurationDays * 24 * 3600 * 1000).toISOString();
 
 			const res = await fetch('/api/academy/admin/grants', {
 				method: 'POST',
@@ -438,8 +538,8 @@
 			showSuccess(`Hak akses lingkup "${grantScopeId}" berhasil diberikan kepada siswa.`);
 			grantUserId = '';
 			await Promise.all([loadGrants(), loadStats()]);
-		} catch (err: any) {
-			showError(err.message || 'Gagal memproses grant siswa');
+		} catch (err: unknown) {
+			showError(err instanceof Error ? err.message : 'Gagal memproses grant siswa');
 		} finally {
 			busy = false;
 		}
@@ -461,38 +561,54 @@
 
 			showSuccess('Hak akses siswa berhasil dicabut.');
 			await Promise.all([loadGrants(), loadStats()]);
-		} catch (err: any) {
-			showError(err.message || 'Gagal mencabut grant');
+		} catch (err: unknown) {
+			showError(err instanceof Error ? err.message : 'Gagal mencabut grant');
 		} finally {
 			busy = false;
 		}
 	}
+
+	beforeNavigate(({ cancel }) => {
+		if (!confirmDiscardEditorChanges()) cancel();
+	});
 </script>
 
 <svelte:head>
 	<title>Admin Dashboard & CMS | CryptoSharia Academy</title>
 </svelte:head>
 
-<div class="min-h-screen bg-slate-950 text-slate-100">
+<div class="admin-console min-h-screen bg-slate-950 text-slate-100">
 	<!-- Top Navigation Banner -->
 	<header class="sticky top-0 z-40 border-b border-slate-800 bg-slate-900/90 backdrop-blur-md">
 		<div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
 			<div class="flex items-center space-x-3">
-				<a href="/e-learning" class="flex items-center space-x-2 text-emerald-400 hover:text-emerald-300">
+				<a
+					href={resolve('/e-learning')}
+					class="flex items-center space-x-2 text-primary hover:text-white"
+				>
 					<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+						/>
 					</svg>
 					<span class="font-bold tracking-tight">CryptoSharia Academy</span>
 				</a>
-				<span class="rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-semibold text-emerald-400 border border-emerald-500/20">
-					Admin CMS Package 4
+				<span
+					class="rounded-full border border-primary/30 bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary"
+				>
+					Panel admin
 				</span>
 			</div>
 
 			<div class="flex items-center space-x-4">
 				<div class="hidden text-right text-xs sm:block">
 					<p class="font-medium text-slate-200">{data.user?.email || 'admin@cryptosharia.id'}</p>
-					<p class="capitalize text-slate-400">Role: <span class="font-semibold text-emerald-400">{data.user?.role}</span></p>
+					<p class="text-slate-400 capitalize">
+						Peran: <span class="font-semibold text-primary">{data.user?.role}</span>
+					</p>
 				</div>
 				<form action="/auth/signout" method="POST">
 					<button
@@ -506,59 +622,95 @@
 		</div>
 
 		<!-- Main Nav Tabs -->
-		<div class="mx-auto flex max-w-7xl overflow-x-auto px-4 sm:px-6">
-			<nav class="flex space-x-1 py-1" aria-label="Tabs">
+		<div class="mx-auto max-w-7xl px-4 sm:px-6">
+			<nav class="flex flex-wrap gap-x-1 py-1" aria-label="Tabs">
 				<button
-					onclick={() => (activeTab = 'overview')}
-					class="flex items-center space-x-2 border-b-2 px-3 py-2 text-sm font-medium transition {activeTab === 'overview' ? 'border-emerald-400 text-emerald-400' : 'border-transparent text-slate-400 hover:border-slate-700 hover:text-slate-200'}"
+					onclick={() => {
+						if (!canSelectTab('overview')) return;
+						activeTab = 'overview';
+					}}
+					aria-current={activeTab === 'overview' ? 'page' : undefined}
+					class="flex items-center space-x-2 border-b-2 px-3 py-2 text-sm font-medium transition {activeTab ===
+					'overview'
+						? 'border-emerald-400 text-emerald-400'
+						: 'border-transparent text-slate-400 hover:border-slate-700 hover:text-slate-200'}"
 				>
 					<span>Ringkasan</span>
 				</button>
 				<button
 					onclick={() => {
+						if (!canSelectTab('curriculum')) return;
 						activeTab = 'curriculum';
 						void loadContent();
 					}}
-					class="flex items-center space-x-2 border-b-2 px-3 py-2 text-sm font-medium transition {activeTab === 'curriculum' ? 'border-emerald-400 text-emerald-400' : 'border-transparent text-slate-400 hover:border-slate-700 hover:text-slate-200'}"
+					aria-current={activeTab === 'curriculum' ? 'page' : undefined}
+					class="flex items-center space-x-2 border-b-2 px-3 py-2 text-sm font-medium transition {activeTab ===
+					'curriculum'
+						? 'border-emerald-400 text-emerald-400'
+						: 'border-transparent text-slate-400 hover:border-slate-700 hover:text-slate-200'}"
 				>
 					<span>Kurikulum & Konten</span>
 				</button>
 				<button
-					onclick={() => (activeTab = 'editor')}
-					class="flex items-center space-x-2 border-b-2 px-3 py-2 text-sm font-medium transition {activeTab === 'editor' ? 'border-emerald-400 text-emerald-400' : 'border-transparent text-slate-400 hover:border-slate-700 hover:text-slate-200'}"
+					onclick={() => {
+						if (!canSelectTab('editor')) return;
+						activeTab = 'editor';
+					}}
+					aria-current={activeTab === 'editor' ? 'page' : undefined}
+					class="flex items-center space-x-2 border-b-2 px-3 py-2 text-sm font-medium transition {activeTab ===
+					'editor'
+						? 'border-emerald-400 text-emerald-400'
+						: 'border-transparent text-slate-400 hover:border-slate-700 hover:text-slate-200'}"
 				>
 					<span>{isEditing ? 'Edit Materi' : '+ Buat Materi Baru'}</span>
 				</button>
 				<button
 					onclick={() => {
+						if (!canSelectTab('workflow')) return;
 						activeTab = 'workflow';
 						filterStatus = 'all';
 						void loadContent();
 					}}
-					class="flex items-center space-x-2 border-b-2 px-3 py-2 text-sm font-medium transition {activeTab === 'workflow' ? 'border-emerald-400 text-emerald-400' : 'border-transparent text-slate-400 hover:border-slate-700 hover:text-slate-200'}"
+					aria-current={activeTab === 'workflow' ? 'page' : undefined}
+					class="flex items-center space-x-2 border-b-2 px-3 py-2 text-sm font-medium transition {activeTab ===
+					'workflow'
+						? 'border-emerald-400 text-emerald-400'
+						: 'border-transparent text-slate-400 hover:border-slate-700 hover:text-slate-200'}"
 				>
 					<span>Alur Review & Publikasi</span>
 					{#if stats && stats.reviewContent > 0}
-						<span class="rounded-full bg-amber-500/20 px-1.5 py-0.5 text-xs font-bold text-amber-300">
+						<span
+							class="rounded-full bg-amber-500/20 px-1.5 py-0.5 text-xs font-bold text-amber-300"
+						>
 							{stats.reviewContent}
 						</span>
 					{/if}
 				</button>
 				<button
 					onclick={() => {
+						if (!canSelectTab('scopes')) return;
 						activeTab = 'scopes';
 						void loadScopes();
 					}}
-					class="flex items-center space-x-2 border-b-2 px-3 py-2 text-sm font-medium transition {activeTab === 'scopes' ? 'border-emerald-400 text-emerald-400' : 'border-transparent text-slate-400 hover:border-slate-700 hover:text-slate-200'}"
+					aria-current={activeTab === 'scopes' ? 'page' : undefined}
+					class="flex items-center space-x-2 border-b-2 px-3 py-2 text-sm font-medium transition {activeTab ===
+					'scopes'
+						? 'border-emerald-400 text-emerald-400'
+						: 'border-transparent text-slate-400 hover:border-slate-700 hover:text-slate-200'}"
 				>
 					<span>Lingkup Akses</span>
 				</button>
 				<button
 					onclick={() => {
+						if (!canSelectTab('grants')) return;
 						activeTab = 'grants';
 						void loadGrants();
 					}}
-					class="flex items-center space-x-2 border-b-2 px-3 py-2 text-sm font-medium transition {activeTab === 'grants' ? 'border-emerald-400 text-emerald-400' : 'border-transparent text-slate-400 hover:border-slate-700 hover:text-slate-200'}"
+					aria-current={activeTab === 'grants' ? 'page' : undefined}
+					class="flex items-center space-x-2 border-b-2 px-3 py-2 text-sm font-medium transition {activeTab ===
+					'grants'
+						? 'border-emerald-400 text-emerald-400'
+						: 'border-transparent text-slate-400 hover:border-slate-700 hover:text-slate-200'}"
 				>
 					<span>Hak Akses Siswa</span>
 				</button>
@@ -570,80 +722,218 @@
 	<main class="mx-auto max-w-7xl px-4 py-8 sm:px-6">
 		<!-- Alerts -->
 		{#if errorMessage}
-			<div class="mb-6 flex items-start justify-between rounded-xl border border-red-800/80 bg-red-950/40 p-4 text-red-200">
+			<div
+				role="alert"
+				class="mb-6 flex items-start justify-between rounded-xl border border-red-800/80 bg-red-950/40 p-4 text-red-200"
+			>
 				<div class="flex items-center space-x-3">
-					<svg class="h-5 w-5 text-red-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+					<svg
+						class="h-5 w-5 flex-shrink-0 text-red-400"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke="currentColor"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+						/>
 					</svg>
-					<span class="text-sm font-medium leading-relaxed">{errorMessage}</span>
+					<span class="text-sm leading-relaxed font-medium">{errorMessage}</span>
 				</div>
-				<button onclick={() => (errorMessage = '')} class="text-red-400 hover:text-red-300">✕</button>
+				<button onclick={() => (errorMessage = '')} class="text-red-400 hover:text-red-300"
+					>✕</button
+				>
 			</div>
 		{/if}
 
 		{#if successMessage}
-			<div class="mb-6 flex items-start justify-between rounded-xl border border-emerald-800/80 bg-emerald-950/40 p-4 text-emerald-200">
+			<div
+				role="status"
+				class="mb-6 flex items-start justify-between rounded-xl border border-emerald-800/80 bg-emerald-950/40 p-4 text-emerald-200"
+			>
 				<div class="flex items-center space-x-3">
-					<svg class="h-5 w-5 text-emerald-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+					<svg
+						class="h-5 w-5 flex-shrink-0 text-emerald-400"
+						fill="none"
+						viewBox="0 0 24 24"
+						stroke="currentColor"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M5 13l4 4L19 7"
+						/>
 					</svg>
-					<span class="text-sm font-medium leading-relaxed">{successMessage}</span>
+					<span class="text-sm leading-relaxed font-medium">{successMessage}</span>
 				</div>
-				<button onclick={() => (successMessage = '')} class="text-emerald-400 hover:text-emerald-300">✕</button>
+				<button
+					onclick={() => (successMessage = '')}
+					class="text-emerald-400 hover:text-emerald-300">✕</button
+				>
 			</div>
+		{/if}
+		{#if busy}
+			<p
+				role="status"
+				class="mb-5 rounded-lg border border-primary/30 bg-primary/10 px-4 py-3 text-sm text-primary"
+			>
+				Memproses perubahan…
+			</p>
 		{/if}
 
 		<!-- TAB 1: OVERVIEW -->
 		{#if activeTab === 'overview'}
 			<div class="space-y-6">
 				<div>
-					<h1 class="text-2xl font-bold tracking-tight text-white">Dashboard Pengelolaan Academy</h1>
+					<h1 class="text-2xl font-bold tracking-tight text-white">Ringkasan Academy</h1>
 					<p class="mt-1 text-sm text-slate-400">
-						Kelola hierarki kurikulum, materi video YouTube berizin, alur persetujuan syariah, dan hak akses siswa secara terpadu.
+						Pantau konten, proses editorial, publikasi, dan hak akses dari satu ruang kerja.
 					</p>
 				</div>
 
 				<!-- Stats Grid -->
-				<div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+				<div
+					class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6"
+					aria-label="Ringkasan operasional"
+				>
 					<div class="rounded-xl border border-slate-800 bg-slate-900/60 p-4 shadow-sm">
 						<p class="text-xs font-medium text-slate-400">Total Pelajaran</p>
-						<p class="mt-2 text-2xl font-bold text-white">{stats?.totalLessons ?? 0}</p>
+						<p class="mt-2 text-2xl font-bold text-white">{stats?.totalLessons ?? '—'}</p>
+						<p class="mt-1 text-[11px] leading-4 text-slate-500">Data dari ringkasan admin</p>
 					</div>
 					<div class="rounded-xl border border-slate-800 bg-slate-900/60 p-4 shadow-sm">
 						<p class="text-xs font-medium text-emerald-400">Pelajaran Terbit</p>
-						<p class="mt-2 text-2xl font-bold text-emerald-400">{stats?.publishedLessons ?? 0}</p>
+						<p class="mt-2 text-2xl font-bold text-emerald-400">{stats?.publishedLessons ?? '—'}</p>
+						<p class="mt-1 text-[11px] leading-4 text-slate-500">Status publikasi published</p>
 					</div>
 					<div class="rounded-xl border border-slate-800 bg-slate-900/60 p-4 shadow-sm">
 						<p class="text-xs font-medium text-amber-400">Menunggu Review</p>
-						<p class="mt-2 text-2xl font-bold text-amber-400">{stats?.reviewContent ?? 0}</p>
+						<p class="mt-2 text-2xl font-bold text-amber-400">{stats?.reviewContent ?? '—'}</p>
+						<p class="mt-1 text-[11px] leading-4 text-slate-500">Antrean editorial</p>
 					</div>
 					<div class="rounded-xl border border-slate-800 bg-slate-900/60 p-4 shadow-sm">
 						<p class="text-xs font-medium text-slate-400">Draft Editorial</p>
-						<p class="mt-2 text-2xl font-bold text-slate-300">{stats?.draftContent ?? 0}</p>
+						<p class="mt-2 text-2xl font-bold text-slate-300">{stats?.draftContent ?? '—'}</p>
+						<p class="mt-1 text-[11px] leading-4 text-slate-500">Belum masuk antrean review</p>
 					</div>
 					<div class="rounded-xl border border-slate-800 bg-slate-900/60 p-4 shadow-sm">
-						<p class="text-xs font-medium text-cyan-400">Lingkup Akses (Scopes)</p>
-						<p class="mt-2 text-2xl font-bold text-cyan-400">{stats?.totalScopes ?? 0}</p>
+						<p class="text-xs font-medium text-cyan-400">Lingkup Akses</p>
+						<p class="mt-2 text-2xl font-bold text-cyan-400">{stats?.totalScopes ?? '—'}</p>
+						<p class="mt-1 text-[11px] leading-4 text-slate-500">Scope terdaftar</p>
 					</div>
 					<div class="rounded-xl border border-slate-800 bg-slate-900/60 p-4 shadow-sm">
-						<p class="text-xs font-medium text-indigo-400">Hak Akses Siswa Aktif</p>
-						<p class="mt-2 text-2xl font-bold text-indigo-400">{stats?.totalGrants ?? 0}</p>
+						<p class="text-xs font-medium text-indigo-400">Hak Akses Siswa</p>
+						<p class="mt-2 text-2xl font-bold text-indigo-400">{stats?.totalGrants ?? '—'}</p>
+						<p class="mt-1 text-[11px] leading-4 text-slate-500">Total catatan grant</p>
 					</div>
 				</div>
+				{#if statsError}
+					<div
+						role="alert"
+						class="rounded-lg border border-amber-800/50 bg-amber-950/20 px-4 py-3 text-sm text-amber-200"
+					>
+						{statsError}
+						<button
+							class="ml-2 font-semibold underline underline-offset-2"
+							onclick={() => void loadStats()}>Coba lagi</button
+						>
+					</div>
+				{:else if statsLoading && !stats}
+					<p role="status" class="text-sm text-slate-400">Memuat ringkasan operasional…</p>
+				{/if}
+
+				<section
+					class="rounded-xl border border-slate-800 bg-slate-900/40 p-5 sm:p-6"
+					aria-labelledby="readiness-title"
+					aria-busy={!contentLoaded && !contentError}
+				>
+					<div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+						<div>
+							<p class="text-xs font-bold tracking-[0.16em] text-primary uppercase">
+								Alur operasional
+							</p>
+							<h2 id="readiness-title" class="mt-2 text-lg font-semibold text-white">
+								Kesiapan publikasi
+							</h2>
+						</div>
+						<p class="max-w-xl text-xs leading-5 text-slate-400">
+							Status mengikuti data editorial yang tersedia. Persetujuan dan publikasi tetap
+							melewati otorisasi masing-masing.
+						</p>
+					</div>
+					{#if contentError}
+						<div
+							class="mt-4 flex flex-col gap-3 rounded-lg border border-amber-800/50 bg-amber-950/20 p-4 sm:flex-row sm:items-center sm:justify-between"
+						>
+							<p role="alert" class="text-sm text-amber-200">Tahap editorial belum dapat dimuat.</p>
+							<button
+								class="rounded-lg border border-slate-700 px-3 py-2 text-sm text-slate-200 hover:bg-slate-800"
+								onclick={() => void loadContent()}>Muat ulang status</button
+							>
+						</div>
+					{:else if !contentLoaded}
+						<div
+							class="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-5"
+							aria-label="Memuat status publikasi"
+						>
+							{#each [1, 2, 3, 4, 5] as stage (stage)}<div
+									class="h-24 animate-pulse rounded-lg border border-slate-800 bg-slate-900/70"
+								></div>{/each}
+						</div>
+						<p role="status" class="sr-only">Memuat status editorial…</p>
+					{:else}
+						<ol class="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+							<li class="rounded-lg border border-slate-800 bg-slate-950/50 p-4">
+								<p class="text-xs text-slate-400">01 · Struktur kurikulum</p>
+								<p class="mt-2 text-xl font-semibold text-white">{structureCount}</p>
+								<p class="mt-1 text-xs text-slate-500">Record subject, level, dan chapter</p>
+							</li>
+							<li class="rounded-lg border border-slate-800 bg-slate-950/50 p-4">
+								<p class="text-xs text-slate-400">02 · Draft editorial</p>
+								<p class="mt-2 text-xl font-semibold text-white">{stats?.draftContent ?? '—'}</p>
+								<p class="mt-1 text-xs text-slate-500">Dikelola tim editorial</p>
+							</li>
+							<li class="rounded-lg border border-slate-800 bg-slate-950/50 p-4">
+								<p class="text-xs text-slate-400">03 · Menunggu review</p>
+								<p class="mt-2 text-xl font-semibold text-amber-300">
+									{stats?.reviewContent ?? '—'}
+								</p>
+								<p class="mt-1 text-xs text-slate-500">Belum dapat dipublikasikan</p>
+							</li>
+							<li class="rounded-lg border border-slate-800 bg-slate-950/50 p-4">
+								<p class="text-xs text-slate-400">04 · Disetujui</p>
+								<p class="mt-2 text-xl font-semibold text-blue-300">{approvedCount}</p>
+								<p class="mt-1 text-xs text-slate-500">Menunggu transisi publisher</p>
+							</li>
+							<li class="rounded-lg border border-slate-800 bg-slate-950/50 p-4">
+								<p class="text-xs text-slate-400">05 · Pelajaran terbit</p>
+								<p class="mt-2 text-xl font-semibold text-emerald-300">
+									{stats?.publishedLessons ?? '—'}
+								</p>
+								<p class="mt-1 text-xs text-slate-500">Tampil di katalog siswa</p>
+							</li>
+						</ol>
+					{/if}
+				</section>
 
 				<!-- Quick Action Cards -->
 				<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
 					<div class="rounded-xl border border-slate-800 bg-slate-900/40 p-6">
 						<h3 class="text-base font-semibold text-white">Buat Materi Baru</h3>
-						<p class="mt-2 text-xs text-slate-400 leading-relaxed">
-							Tambahkan pelajaran baru ke dalam subjek, tentukan bab dan urutan, serta masukkan tautan YouTube video.
+						<p class="mt-2 text-xs leading-relaxed text-slate-400">
+							Tambahkan pelajaran baru ke dalam subjek, tentukan bab dan urutan, serta masukkan
+							tautan YouTube video.
 						</p>
 						<button
 							onclick={() => {
+								if (!confirmDiscardEditorChanges()) return;
 								resetEditor();
 								activeTab = 'editor';
 							}}
-							class="mt-4 inline-flex items-center rounded-lg bg-emerald-600 px-3.5 py-2 text-xs font-semibold text-white transition hover:bg-emerald-500"
+							class="mt-4 inline-flex min-h-11 items-center rounded-lg bg-primary px-3.5 py-2 text-xs font-semibold text-slate-950 transition hover:bg-orange-400"
 						>
 							Buka Editor Materi →
 						</button>
@@ -651,16 +941,18 @@
 
 					<div class="rounded-xl border border-slate-800 bg-slate-900/40 p-6">
 						<h3 class="text-base font-semibold text-white">Tinjau Antrean Publikasi</h3>
-						<p class="mt-2 text-xs text-slate-400 leading-relaxed">
-							Periksa materi yang diajukan oleh tim editorial. Konfirmasi hak cipta dan kesesuaian syariah sebelum penerbitan.
+						<p class="mt-2 text-xs leading-relaxed text-slate-400">
+							Periksa materi yang diajukan oleh tim editorial. Konfirmasi hak cipta dan kesesuaian
+							syariah sebelum penerbitan.
 						</p>
 						<button
 							onclick={() => {
+								if (!confirmDiscardEditorChanges()) return;
 								activeTab = 'workflow';
 								filterStatus = 'all';
 								void loadContent();
 							}}
-							class="mt-4 inline-flex items-center rounded-lg bg-amber-600 px-3.5 py-2 text-xs font-semibold text-white transition hover:bg-amber-500"
+							class="mt-4 inline-flex min-h-11 items-center rounded-lg border border-amber-700/60 bg-amber-600/15 px-3.5 py-2 text-xs font-semibold text-amber-200 transition hover:bg-amber-600/25"
 						>
 							Buka Alur Review →
 						</button>
@@ -668,15 +960,17 @@
 
 					<div class="rounded-xl border border-slate-800 bg-slate-900/40 p-6">
 						<h3 class="text-base font-semibold text-white">Kelola Hak Akses Siswa</h3>
-						<p class="mt-2 text-xs text-slate-400 leading-relaxed">
-							Berikan atau cabut izin akses materi pada lingkup tertentu (misal: Crypto Dasar, Premium, dsb.) secara manual.
+						<p class="mt-2 text-xs leading-relaxed text-slate-400">
+							Berikan atau cabut izin akses materi pada lingkup tertentu (misal: Crypto Dasar,
+							Premium, dsb.) secara manual.
 						</p>
 						<button
 							onclick={() => {
+								if (!confirmDiscardEditorChanges()) return;
 								activeTab = 'grants';
 								void loadGrants();
 							}}
-							class="mt-4 inline-flex items-center rounded-lg bg-indigo-600 px-3.5 py-2 text-xs font-semibold text-white transition hover:bg-indigo-500"
+							class="mt-4 inline-flex min-h-11 items-center rounded-lg border border-slate-700 bg-slate-800 px-3.5 py-2 text-xs font-semibold text-slate-200 transition hover:bg-slate-700"
 						>
 							Kelola Hak Akses →
 						</button>
@@ -690,13 +984,17 @@
 			<div class="space-y-6">
 				<div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
 					<div>
-						<h1 class="text-2xl font-bold tracking-tight text-white">Kurikulum & Materi Pembelajaran</h1>
+						<h1 class="text-2xl font-bold tracking-tight text-white">
+							Kurikulum & Materi Pembelajaran
+						</h1>
 						<p class="mt-1 text-sm text-slate-400">
-							Daftar seluruh item hierarki kurikulum mulai dari subjek, level, bab, hingga pelajaran.
+							Daftar seluruh item hierarki kurikulum mulai dari subjek, level, bab, hingga
+							pelajaran.
 						</p>
 					</div>
 					<button
 						onclick={() => {
+							if (!confirmDiscardEditorChanges()) return;
 							resetEditor();
 							activeTab = 'editor';
 						}}
@@ -707,7 +1005,9 @@
 				</div>
 
 				<!-- Filters -->
-				<div class="flex flex-wrap items-center gap-3 rounded-xl border border-slate-800 bg-slate-900/40 p-4">
+				<div
+					class="flex flex-wrap items-center gap-3 rounded-xl border border-slate-800 bg-slate-900/40 p-4"
+				>
 					<div class="flex items-center space-x-2">
 						<label for="filter-sub" class="text-xs font-medium text-slate-400">Subjek:</label>
 						<select
@@ -716,7 +1016,7 @@
 							class="rounded-lg border border-slate-700 bg-slate-800 px-2.5 py-1.5 text-xs text-slate-200 focus:border-emerald-500"
 						>
 							<option value="all">Semua Subjek</option>
-							{#each subjects as s}
+							{#each subjects as s (s.id)}
 								<option value={s.id}>{s.title}</option>
 							{/each}
 						</select>
@@ -764,10 +1064,12 @@
 				<!-- Table of Content -->
 				<div class="overflow-x-auto rounded-xl border border-slate-800 bg-slate-900/60 shadow-sm">
 					<table class="w-full text-left text-xs text-slate-300">
-						<thead class="border-b border-slate-800 bg-slate-900/90 text-slate-400 uppercase tracking-wider text-[11px]">
+						<thead
+							class="border-b border-slate-800 bg-slate-900/90 text-[11px] tracking-wider text-slate-400 uppercase"
+						>
 							<tr>
-								<th class="px-4 py-3">Materi</th>
-								<th class="px-4 py-3">Subjek & Posisi</th>
+								<th class="px-4 py-3">Materi & hierarki</th>
+								<th class="px-4 py-3">Posisi kurikulum</th>
 								<th class="px-4 py-3">Status</th>
 								<th class="px-4 py-3">Durasi</th>
 								<th class="px-4 py-3">Lingkup</th>
@@ -778,7 +1080,8 @@
 							{#if loading}
 								<tr>
 									<td colspan="6" class="px-4 py-8 text-center text-slate-400">
-										Memuat daftar materi kurikulum…
+										<div class="mx-auto h-5 w-48 animate-pulse rounded bg-slate-800"></div>
+										<p role="status" class="mt-3">Memuat struktur kurikulum…</p>
 									</td>
 								</tr>
 							{:else if filteredItems.length === 0}
@@ -792,31 +1095,56 @@
 									<tr class="transition hover:bg-slate-800/30">
 										<td class="px-4 py-3">
 											<div class="font-medium text-white">{item.title}</div>
-											<div class="text-[11px] text-slate-400 font-mono">{item.id}</div>
+											<div class="mt-1 flex flex-wrap items-center gap-2">
+												<span
+													class="rounded-full border border-slate-700 bg-slate-800 px-2 py-0.5 text-[10px] font-semibold text-slate-300"
+												>
+													{contentKindLabel(item.kind)}
+												</span>
+												<span class="font-mono text-[11px] text-slate-500">ID: {item.id}</span>
+											</div>
+											<div class="mt-2 text-[11px] leading-5 text-slate-400">
+												{curriculumPath(item)}
+											</div>
 										</td>
 										<td class="px-4 py-3">
-											<span class="capitalize text-slate-200">{item.subjectId}</span>
-											<span class="text-slate-400">· L{item.level} Bab {item.chapterNumber} (Urt: {item.order})</span>
+											<div class="text-slate-200">{subjectLabel(item)}</div>
+											<div class="mt-1 text-[11px] text-slate-400">
+												{item.kind === 'subject'
+													? 'Posisi akar kurikulum'
+													: `Level ${item.level} · Bab ${item.chapterNumber} · Urutan ${item.order}`}
+											</div>
+											<div class="mt-1 text-[11px] text-slate-500">Parent: {parentLabel(item)}</div>
 										</td>
 										<td class="px-4 py-3">
 											{#if item.status === 'published'}
-												<span class="inline-flex items-center rounded-full bg-emerald-500/10 px-2 py-0.5 text-[11px] font-semibold text-emerald-400 border border-emerald-500/20">
+												<span
+													class="inline-flex items-center rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[11px] font-semibold text-emerald-400"
+												>
 													Published (v{item.version})
 												</span>
 											{:else if item.status === 'review'}
-												<span class="inline-flex items-center rounded-full bg-amber-500/10 px-2 py-0.5 text-[11px] font-semibold text-amber-300 border border-amber-500/20">
+												<span
+													class="inline-flex items-center rounded-full border border-amber-500/20 bg-amber-500/10 px-2 py-0.5 text-[11px] font-semibold text-amber-300"
+												>
 													Review (v{item.version})
 												</span>
 											{:else if item.status === 'approved'}
-												<span class="inline-flex items-center rounded-full bg-blue-500/10 px-2 py-0.5 text-[11px] font-semibold text-blue-300 border border-blue-500/20">
+												<span
+													class="inline-flex items-center rounded-full border border-blue-500/20 bg-blue-500/10 px-2 py-0.5 text-[11px] font-semibold text-blue-300"
+												>
 													Approved (v{item.version})
 												</span>
 											{:else if item.status === 'draft'}
-												<span class="inline-flex items-center rounded-full bg-slate-800 px-2 py-0.5 text-[11px] font-medium text-slate-300 border border-slate-700">
+												<span
+													class="inline-flex items-center rounded-full border border-slate-700 bg-slate-800 px-2 py-0.5 text-[11px] font-medium text-slate-300"
+												>
 													Draft (v{item.version})
 												</span>
 											{:else}
-												<span class="inline-flex items-center rounded-full bg-stone-900 px-2 py-0.5 text-[11px] font-medium text-stone-400 border border-stone-800">
+												<span
+													class="inline-flex items-center rounded-full border border-stone-800 bg-stone-900 px-2 py-0.5 text-[11px] font-medium text-stone-400"
+												>
 													{item.status}
 												</span>
 											{/if}
@@ -824,7 +1152,7 @@
 										<td class="px-4 py-3 text-slate-300">
 											{item.durationSeconds ? `${Math.round(item.durationSeconds / 60)} mnt` : '—'}
 										</td>
-										<td class="px-4 py-3 text-slate-300 font-mono text-[11px]">
+										<td class="px-4 py-3 font-mono text-[11px] text-slate-300">
 											{item.scopeId || 'Global'}
 										</td>
 										<td class="px-4 py-3 text-right">
@@ -840,14 +1168,14 @@
 													<button
 														disabled={busy}
 														onclick={() => handleTransition(item.id, 'review')}
-														class="rounded bg-amber-600/20 px-2 py-1 text-[11px] font-semibold text-amber-300 hover:bg-amber-600/30 border border-amber-600/30"
+														class="rounded border border-amber-600/30 bg-amber-600/20 px-2 py-1 text-[11px] font-semibold text-amber-300 hover:bg-amber-600/30"
 													>
 														Ajukan
 													</button>
 													<button
 														disabled={busy}
 														onclick={() => handleDeleteDraft(item.id)}
-														class="rounded bg-red-950/40 px-2 py-1 text-[11px] font-medium text-red-400 hover:bg-red-900/50 border border-red-800/40"
+														class="rounded border border-red-800/40 bg-red-950/40 px-2 py-1 text-[11px] font-medium text-red-400 hover:bg-red-900/50"
 													>
 														Hapus
 													</button>
@@ -879,21 +1207,35 @@
 						{isEditing ? `Edit Materi: ${formTitle}` : 'Buat Materi Baru'}
 					</h1>
 					<p class="mt-1 text-sm text-slate-400">
-						Formulir penyusunan materi kurikulum, penempatan posisi hierarki, dan integrasi video YouTube berizin.
+						Formulir penyusunan materi kurikulum, penempatan posisi hierarki, dan integrasi video
+						YouTube berizin.
 					</p>
 				</div>
 
-				<div class="rounded-xl border border-slate-800 bg-slate-900/60 p-6 space-y-5">
+				<div class="space-y-5 rounded-xl border border-slate-800 bg-slate-900/60 p-6">
+					{#if editorHasUnsavedChanges}
+						<p
+							role="status"
+							class="rounded-lg border border-amber-700/60 bg-amber-950/30 px-3 py-2 text-xs text-amber-200"
+						>
+							Ada perubahan yang belum disimpan. Simpan sebelum berpindah dari editor.
+						</p>
+					{/if}
 					<!-- Jenis Konten -->
 					<div>
-						<span class="block text-xs font-semibold text-slate-300 mb-1">Jenis Konten</span>
+						<span class="mb-1 block text-xs font-semibold text-slate-300">Jenis Konten</span>
 						<div class="grid grid-cols-4 gap-2">
-							{#each ['lesson', 'chapter', 'level', 'subject'] as k}
+							{#each ['lesson', 'chapter', 'level', 'subject'] as k (k)}
 								<button
 									type="button"
 									disabled={isEditing}
-									onclick={() => (formKind = k as any)}
-									class="rounded-lg border px-3 py-2 text-xs font-medium capitalize transition {formKind === k ? 'border-emerald-500 bg-emerald-500/10 text-emerald-400' : 'border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700'} {isEditing ? 'opacity-60 cursor-not-allowed' : ''}"
+									onclick={() => (formKind = k as AdminContentDto['kind'])}
+									class="rounded-lg border px-3 py-2 text-xs font-medium capitalize transition {formKind ===
+									k
+										? 'border-emerald-500 bg-emerald-500/10 text-emerald-400'
+										: 'border-slate-700 bg-slate-800 text-slate-300 hover:bg-slate-700'} {isEditing
+										? 'cursor-not-allowed opacity-60'
+										: ''}"
 								>
 									{k}
 								</button>
@@ -903,7 +1245,9 @@
 
 					<!-- Judul -->
 					<div>
-						<label for="form-title" class="block text-xs font-semibold text-slate-300 mb-1">Judul Materi *</label>
+						<label for="form-title" class="mb-1 block text-xs font-semibold text-slate-300"
+							>Judul Materi *</label
+						>
 						<input
 							id="form-title"
 							type="text"
@@ -916,21 +1260,25 @@
 					<!-- Hierarki: Subjek, Level, Bab, Urutan -->
 					<div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
 						<div>
-							<label for="form-sub" class="block text-xs font-semibold text-slate-300 mb-1">Subjek</label>
+							<label for="form-sub" class="mb-1 block text-xs font-semibold text-slate-300"
+								>Subjek</label
+							>
 							<select
 								id="form-sub"
 								bind:value={formSubjectId}
 								disabled={isEditing}
 								class="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-xs text-white"
 							>
-								{#each subjects as s}
+								{#each subjects as s (s.id)}
 									<option value={s.id}>{s.title}</option>
 								{/each}
 							</select>
 						</div>
 
 						<div>
-							<label for="form-lvl" class="block text-xs font-semibold text-slate-300 mb-1">Level (1-6)</label>
+							<label for="form-lvl" class="mb-1 block text-xs font-semibold text-slate-300"
+								>Level (1-6)</label
+							>
 							<input
 								id="form-lvl"
 								type="number"
@@ -943,7 +1291,9 @@
 						</div>
 
 						<div>
-							<label for="form-chap" class="block text-xs font-semibold text-slate-300 mb-1">Bab (1-7)</label>
+							<label for="form-chap" class="mb-1 block text-xs font-semibold text-slate-300"
+								>Bab (1-7)</label
+							>
 							<input
 								id="form-chap"
 								type="number"
@@ -956,7 +1306,9 @@
 						</div>
 
 						<div>
-							<label for="form-ord" class="block text-xs font-semibold text-slate-300 mb-1">Urutan (Order)</label>
+							<label for="form-ord" class="mb-1 block text-xs font-semibold text-slate-300"
+								>Urutan (Order)</label
+							>
 							<input
 								id="form-ord"
 								type="number"
@@ -970,21 +1322,25 @@
 					<!-- Lingkup Akses & Durasi -->
 					<div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
 						<div>
-							<label for="form-scope" class="block text-xs font-semibold text-slate-300 mb-1">Lingkup Akses (Scope)</label>
+							<label for="form-scope" class="mb-1 block text-xs font-semibold text-slate-300"
+								>Lingkup Akses (Scope)</label
+							>
 							<select
 								id="form-scope"
 								bind:value={formScopeId}
 								class="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-xs text-white"
 							>
 								<option value="">Akses Terbuka / Global</option>
-								{#each scopes as sc}
+								{#each scopes as sc (sc.id)}
 									<option value={sc.id}>{sc.name} ({sc.id})</option>
 								{/each}
 							</select>
 						</div>
 
 						<div>
-							<label for="form-dur" class="block text-xs font-semibold text-slate-300 mb-1">Perkiraan Durasi (Menit)</label>
+							<label for="form-dur" class="mb-1 block text-xs font-semibold text-slate-300"
+								>Perkiraan Durasi (Menit)</label
+							>
 							<input
 								id="form-dur"
 								type="number"
@@ -997,7 +1353,9 @@
 
 					<!-- Instruktur -->
 					<div>
-						<label for="form-inst" class="block text-xs font-semibold text-slate-300 mb-1">Pengajar / Instruktur</label>
+						<label for="form-inst" class="mb-1 block text-xs font-semibold text-slate-300"
+							>Pengajar / Instruktur</label
+						>
 						<input
 							id="form-inst"
 							type="text"
@@ -1009,7 +1367,9 @@
 
 					<!-- Deskripsi -->
 					<div>
-						<label for="form-desc" class="block text-xs font-semibold text-slate-300 mb-1">Deskripsi & Silabus Materi</label>
+						<label for="form-desc" class="mb-1 block text-xs font-semibold text-slate-300"
+							>Deskripsi & Silabus Materi</label
+						>
 						<textarea
 							id="form-desc"
 							rows="3"
@@ -1021,19 +1381,23 @@
 
 					<!-- Bagian Khusus Video YouTube (Hanya Lesson) -->
 					{#if formKind === 'lesson'}
-						<div class="rounded-xl border border-slate-700/80 bg-slate-800/50 p-4 space-y-3">
+						<div class="space-y-3 rounded-xl border border-slate-700/80 bg-slate-800/50 p-4">
 							<div class="flex items-center justify-between">
-								<h3 class="text-xs font-bold text-emerald-400 uppercase tracking-wider">
+								<h3 class="text-xs font-bold tracking-wider text-emerald-400 uppercase">
 									Integrasi Video YouTube Terproteksi
 								</h3>
 								{#if parsedVideo}
-									<span class="rounded bg-emerald-500/20 px-2 py-0.5 text-[10px] font-bold text-emerald-300">
+									<span
+										class="rounded bg-emerald-500/20 px-2 py-0.5 text-[10px] font-bold text-emerald-300"
+									>
 										Video ID: {parsedVideo.videoId}
 									</span>
 								{/if}
 							</div>
 							<p class="text-[11px] text-slate-400">
-								Masukkan URL YouTube (misal: <code>https://youtu.be/dQw4w9WgXcQ</code> atau <code>https://youtube.com/watch?v=...</code>). Video hanya akan diberikan kepada siswa yang memiliki hak akses aktif.
+								Masukkan URL YouTube (misal: <code>https://youtu.be/dQw4w9WgXcQ</code> atau
+								<code>https://youtube.com/watch?v=...</code>). Video hanya akan diberikan kepada
+								siswa yang memiliki hak akses aktif.
 							</p>
 
 							<input
@@ -1044,7 +1408,9 @@
 							/>
 
 							{#if parsedVideo}
-								<div class="mt-3 aspect-video w-full max-w-sm overflow-hidden rounded-lg border border-slate-700 bg-black">
+								<div
+									class="mt-3 aspect-video w-full max-w-sm overflow-hidden rounded-lg border border-slate-700 bg-black"
+								>
 									<iframe
 										src={parsedVideo.embedUrl}
 										title="Preview Video"
@@ -1055,7 +1421,9 @@
 							{/if}
 
 							<div>
-								<label for="form-note" class="block text-[11px] font-semibold text-slate-300 mb-1">Catatan Internal / Editorial (Opsional)</label>
+								<label for="form-note" class="mb-1 block text-[11px] font-semibold text-slate-300"
+									>Catatan Internal / Editorial (Opsional)</label
+								>
 								<input
 									id="form-note"
 									type="text"
@@ -1081,10 +1449,11 @@
 					</div>
 
 					<!-- Form Actions -->
-					<div class="flex items-center justify-end space-x-3 pt-4 border-t border-slate-800">
+					<div class="flex items-center justify-end space-x-3 border-t border-slate-800 pt-4">
 						<button
 							type="button"
 							onclick={() => {
+								if (!confirmDiscardEditorChanges()) return;
 								resetEditor();
 								activeTab = 'curriculum';
 							}}
@@ -1109,9 +1478,12 @@
 		{#if activeTab === 'workflow'}
 			<div class="space-y-6">
 				<div>
-					<h1 class="text-2xl font-bold tracking-tight text-white">Alur Review & Publikasi Materi</h1>
+					<h1 class="text-2xl font-bold tracking-tight text-white">
+						Alur Review & Publikasi Materi
+					</h1>
 					<p class="mt-1 text-sm text-slate-400">
-						Antrean persetujuan konten sebelum dipublikasikan kepada siswa. Melindungi integritas hak cipta dan kepatuhan syariah.
+						Antrean persetujuan konten sebelum dipublikasikan kepada siswa. Melindungi integritas
+						hak cipta dan kepatuhan syariah.
 					</p>
 				</div>
 
@@ -1120,29 +1492,44 @@
 						{#if loading}
 							<p class="py-8 text-center text-xs text-slate-400">Memuat antrean review…</p>
 						{:else}
-							{@const queue = contentItems.filter((i) => i.status === 'review' || i.status === 'approved')}
+							{@const queue = contentItems.filter(
+								(i) => i.status === 'review' || i.status === 'approved'
+							)}
 							{#if queue.length === 0}
 								<div class="py-12 text-center">
-									<p class="text-sm font-medium text-slate-300">Tidak ada antrean materi yang menunggu review saat ini.</p>
-									<p class="mt-1 text-xs text-slate-500">Materi yang diajukan oleh tim editorial akan muncul di sini.</p>
+									<p class="text-sm font-medium text-slate-300">
+										Tidak ada antrean materi yang menunggu review saat ini.
+									</p>
+									<p class="mt-1 text-xs text-slate-500">
+										Materi yang diajukan oleh tim editorial akan muncul di sini.
+									</p>
 								</div>
 							{:else}
 								{#each queue as item (item.id)}
-									<div data-content-id={item.id} class="flex flex-col justify-between gap-4 py-4 sm:flex-row sm:items-center">
+									<div
+										data-content-id={item.id}
+										class="flex flex-col justify-between gap-4 py-4 sm:flex-row sm:items-center"
+									>
 										<div>
 											<div class="flex items-center space-x-2">
-												<span class="font-semibold text-white text-sm">{item.title}</span>
-												<span class="rounded bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold text-amber-300 border border-amber-500/20 uppercase">
+												<span class="text-sm font-semibold text-white">{item.title}</span>
+												<span
+													class="rounded border border-amber-500/20 bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold text-amber-300 uppercase"
+												>
 													{item.status}
 												</span>
 												{#if item.syariahRequired}
-													<span class="rounded bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-300 border border-emerald-500/20">
+													<span
+														class="rounded border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-300"
+													>
 														Wajib Tinjau Syariah
 													</span>
 												{/if}
 											</div>
 											<p class="mt-1 text-xs text-slate-400">
-												ID: <span class="font-mono text-slate-300">{item.id}</span> · Subjek: <span class="capitalize text-slate-200">{item.subjectId}</span> · L{item.level} Bab {item.chapterNumber} · Versi {item.version}
+												ID: <span class="font-mono text-slate-300">{item.id}</span> · Subjek:
+												<span class="text-slate-200 capitalize">{item.subjectId}</span>
+												· L{item.level} Bab {item.chapterNumber} · Versi {item.version}
 											</p>
 										</div>
 
@@ -1192,18 +1579,22 @@
 		{#if activeTab === 'scopes'}
 			<div class="space-y-6">
 				<div>
-					<h1 class="text-2xl font-bold tracking-tight text-white">Lingkup Akses (Scope Management)</h1>
+					<h1 class="text-2xl font-bold tracking-tight text-white">
+						Lingkup Akses (Scope Management)
+					</h1>
 					<p class="mt-1 text-sm text-slate-400">
 						Definisi grup akses paket kursus (misal: Fundamental, Premium, VIP Bootcamp).
 					</p>
 				</div>
 
 				<!-- Create New Scope Form -->
-				<div class="rounded-xl border border-slate-800 bg-slate-900/60 p-6 space-y-4">
+				<div class="space-y-4 rounded-xl border border-slate-800 bg-slate-900/60 p-6">
 					<h3 class="text-sm font-bold text-white">Tambah Lingkup Akses Baru</h3>
 					<div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
 						<div>
-							<label for="scope-id" class="block text-xs font-semibold text-slate-300 mb-1">ID Scope (slug unik)</label>
+							<label for="scope-id" class="mb-1 block text-xs font-semibold text-slate-300"
+								>ID Scope (slug unik)</label
+							>
 							<input
 								id="scope-id"
 								type="text"
@@ -1213,7 +1604,9 @@
 							/>
 						</div>
 						<div>
-							<label for="scope-name" class="block text-xs font-semibold text-slate-300 mb-1">Nama Scope</label>
+							<label for="scope-name" class="mb-1 block text-xs font-semibold text-slate-300"
+								>Nama Scope</label
+							>
 							<input
 								id="scope-name"
 								type="text"
@@ -1223,7 +1616,9 @@
 							/>
 						</div>
 						<div>
-							<label for="scope-desc" class="block text-xs font-semibold text-slate-300 mb-1">Keterangan</label>
+							<label for="scope-desc" class="mb-1 block text-xs font-semibold text-slate-300"
+								>Keterangan</label
+							>
 							<input
 								id="scope-desc"
 								type="text"
@@ -1245,7 +1640,9 @@
 				<!-- Scope List -->
 				<div class="overflow-x-auto rounded-xl border border-slate-800 bg-slate-900/60">
 					<table class="w-full text-left text-xs text-slate-300">
-						<thead class="border-b border-slate-800 bg-slate-900/90 text-slate-400 uppercase tracking-wider text-[11px]">
+						<thead
+							class="border-b border-slate-800 bg-slate-900/90 text-[11px] tracking-wider text-slate-400 uppercase"
+						>
 							<tr>
 								<th class="px-4 py-3">ID Scope</th>
 								<th class="px-4 py-3">Nama</th>
@@ -1254,13 +1651,15 @@
 							</tr>
 						</thead>
 						<tbody class="divide-y divide-slate-800/60">
-							{#each scopes as sc}
+							{#each scopes as sc (sc.id)}
 								<tr class="hover:bg-slate-800/30">
-									<td class="px-4 py-3 font-mono text-emerald-400 font-semibold">{sc.id}</td>
-									<td class="px-4 py-3 text-white font-medium">{sc.name}</td>
+									<td class="px-4 py-3 font-mono font-semibold text-emerald-400">{sc.id}</td>
+									<td class="px-4 py-3 font-medium text-white">{sc.name}</td>
 									<td class="px-4 py-3 text-slate-400">{sc.description || '—'}</td>
 									<td class="px-4 py-3">
-										<span class="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-400 border border-emerald-500/20">
+										<span
+											class="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-400"
+										>
 											{sc.isActive ? 'Aktif' : 'Non-aktif'}
 										</span>
 									</td>
@@ -1276,41 +1675,49 @@
 		{#if activeTab === 'grants'}
 			<div class="space-y-6">
 				<div>
-					<h1 class="text-2xl font-bold tracking-tight text-white">Kelola Hak Akses Siswa (Entitlements)</h1>
+					<h1 class="text-2xl font-bold tracking-tight text-white">
+						Kelola Hak Akses Siswa (Entitlements)
+					</h1>
 					<p class="mt-1 text-sm text-slate-400">
 						Otorisasi langsung bagi siswa untuk mengakses video pembelajaran pada lingkup tertentu.
 					</p>
 				</div>
 
 				<!-- Grant Form -->
-				<div class="rounded-xl border border-slate-800 bg-slate-900/60 p-6 space-y-4">
+				<div class="space-y-4 rounded-xl border border-slate-800 bg-slate-900/60 p-6">
 					<h3 class="text-sm font-bold text-white">Alokasi Hak Akses Baru</h3>
 					<div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
 						<div>
-							<label for="grant-uid" class="block text-xs font-semibold text-slate-300 mb-1">User ID Siswa (UUID)</label>
+							<label for="grant-uid" class="mb-1 block text-xs font-semibold text-slate-300"
+								>User ID Siswa (UUID)</label
+							>
 							<input
 								id="grant-uid"
 								type="text"
 								bind:value={grantUserId}
 								placeholder="e.g. 25f4507b-7908-458c-a07b-edae1f0e107a"
-								class="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-xs text-white font-mono"
+								class="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 font-mono text-xs text-white"
 							/>
 						</div>
 						<div>
-							<label for="grant-scope" class="block text-xs font-semibold text-slate-300 mb-1">Lingkup Akses (Scope)</label>
+							<label for="grant-scope" class="mb-1 block text-xs font-semibold text-slate-300"
+								>Lingkup Akses (Scope)</label
+							>
 							<select
 								id="grant-scope"
 								bind:value={grantScopeId}
 								class="w-full rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-xs text-white"
 							>
 								<option value="">Pilih Scope...</option>
-								{#each scopes as sc}
+								{#each scopes as sc (sc.id)}
 									<option value={sc.id}>{sc.name} ({sc.id})</option>
 								{/each}
 							</select>
 						</div>
 						<div>
-							<label for="grant-dur" class="block text-xs font-semibold text-slate-300 mb-1">Masa Berlaku (Hari)</label>
+							<label for="grant-dur" class="mb-1 block text-xs font-semibold text-slate-300"
+								>Masa Berlaku (Hari)</label
+							>
 							<input
 								id="grant-dur"
 								type="number"
@@ -1332,7 +1739,9 @@
 				<!-- Grants Table -->
 				<div class="overflow-x-auto rounded-xl border border-slate-800 bg-slate-900/60">
 					<table class="w-full text-left text-xs text-slate-300">
-						<thead class="border-b border-slate-800 bg-slate-900/90 text-slate-400 uppercase tracking-wider text-[11px]">
+						<thead
+							class="border-b border-slate-800 bg-slate-900/90 text-[11px] tracking-wider text-slate-400 uppercase"
+						>
 							<tr>
 								<th class="px-4 py-3">Siswa (User ID)</th>
 								<th class="px-4 py-3">Lingkup</th>
@@ -1360,15 +1769,23 @@
 									<tr class="hover:bg-slate-800/30">
 										<td class="px-4 py-3 font-mono text-[11px] text-white">{g.userId}</td>
 										<td class="px-4 py-3 font-semibold text-emerald-400">{g.scopeId}</td>
-										<td class="px-4 py-3 text-slate-400">{new Date(g.startsAt).toLocaleDateString()}</td>
-										<td class="px-4 py-3 text-slate-400">{new Date(g.expiresAt).toLocaleDateString()}</td>
+										<td class="px-4 py-3 text-slate-400"
+											>{new Date(g.startsAt).toLocaleDateString()}</td
+										>
+										<td class="px-4 py-3 text-slate-400"
+											>{new Date(g.expiresAt).toLocaleDateString()}</td
+										>
 										<td class="px-4 py-3">
 											{#if g.state === 'active'}
-												<span class="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-400 border border-emerald-500/20">
+												<span
+													class="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-400"
+												>
 													Aktif
 												</span>
 											{:else}
-												<span class="rounded-full bg-red-500/10 px-2 py-0.5 text-[10px] font-semibold text-red-400 border border-red-500/20">
+												<span
+													class="rounded-full border border-red-500/20 bg-red-500/10 px-2 py-0.5 text-[10px] font-semibold text-red-400"
+												>
 													Dicabut (Revoked)
 												</span>
 											{/if}
@@ -1378,7 +1795,7 @@
 												<button
 													disabled={busy}
 													onclick={() => handleRevokeGrant(g.id)}
-													class="rounded bg-red-950/40 px-2 py-1 text-[11px] font-medium text-red-400 hover:bg-red-900/50 border border-red-800/40"
+													class="rounded border border-red-800/40 bg-red-950/40 px-2 py-1 text-[11px] font-medium text-red-400 hover:bg-red-900/50"
 												>
 													Cabut Akses
 												</button>

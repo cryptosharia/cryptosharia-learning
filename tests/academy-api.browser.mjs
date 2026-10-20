@@ -61,6 +61,7 @@ try {
 		await route.abort();
 	});
 	page = await context.newPage();
+	page.setDefaultTimeout(7000);
 	page.on('pageerror', (e) => errors.push(e.message));
 	page.on('response', async (res) => {
 		if (res.url().startsWith(base) && /javascript|json/.test(res.headers()['content-type'] || '')) {
@@ -82,29 +83,167 @@ try {
 		if (status === 'ready') await page.locator('iframe').waitFor();
 		assert.equal(await page.locator('iframe').count(), status === 'ready' ? 1 : 0);
 	};
-	const login = async (email) => {
-		await page.goto(base + '/auth/login');
+	const captureResponsive = async (name) => {
+		for (const width of [360, 375, 390, 768, 1024, 1440, 1920]) {
+			await page.setViewportSize({ width, height: width < 600 ? 844 : 1000 });
+			assert.equal(
+				await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
+				true,
+				`${name} layout should not overflow at ${width}px`
+			);
+			const menuButton = page.getByRole('button', { name: /navigasi/ }).first();
+			if ((await menuButton.count()) > 0)
+				assert.equal(
+					await menuButton.isVisible(),
+					width < 768,
+					`${name} navigation breakpoint should match ${width}px`
+				);
+			if (width === 1440)
+				await page.screenshot({
+					path: join(evidence, `${name}-desktop.png`),
+					clip: { x: 0, y: 0, width: 1440, height: 800 }
+				});
+			if (width === 390)
+				await page.screenshot({
+					path: join(evidence, `${name}-mobile-390.png`),
+					fullPage: !name.startsWith('academy-cms')
+				});
+		}
+		await page.setViewportSize({ width: 1280, height: 720 });
+	};
+	const login = async (email, redirect = '', expectedPath = '/e-learning') => {
+		const query = redirect ? `?redirect=${encodeURIComponent(redirect)}` : '';
+		await page.goto(base + '/auth/login' + query);
 		await page.locator('#email').fill(email);
-		await page.locator('form button[type="submit"]').click();
+		await page.getByRole('button', { name: 'Kirim kode OTP' }).click();
 		await page.locator('#otpCode').fill(mock.state.mail.at(-1).code);
-		await page.locator('form button[type="submit"]').click();
-		await page.waitForURL(base + '/e-learning');
+		const otpState = await page.locator('#otpCode').evaluate((input) => ({
+			value: input.value,
+			pattern: input.pattern,
+			maxLength: input.maxLength,
+			validity: {
+				valid: input.validity.valid,
+				valueMissing: input.validity.valueMissing,
+				patternMismatch: input.validity.patternMismatch,
+				tooLong: input.validity.tooLong,
+				badInput: input.validity.badInput
+			}
+		}));
+		assert.equal(otpState.validity.valid, true, 'six-digit OTP must pass browser form validation');
+		const verify = page.waitForResponse(
+			(response) => response.url().endsWith('/api/auth/otp/verify'),
+			{ timeout: 5000 }
+		);
+		await page.getByRole('button', { name: 'Verifikasi dan masuk' }).click();
+		assert.equal((await verify).status(), 200);
+		await page.waitForURL(base + expectedPath);
 		await page.getByRole('button', { name: 'Keluar', exact: true }).first().waitFor();
+	};
+	const editSyntheticRecord = async ({
+		id,
+		parentId,
+		title,
+		nextTitle,
+		nextDescription,
+		checkDiscard
+	}) => {
+		const before = structuredClone(mock.state.adminContent.find((item) => item.id === id));
+		assert.ok(before, `synthetic record ${id} must exist`);
+		assert.equal(before.parentId, parentId);
+		assert.equal(before.title, title);
+		const row = page.getByRole('row').filter({ hasText: id }).first();
+		await row.getByRole('button', { name: 'Edit' }).click();
+		await page.locator('#form-title').fill(nextTitle);
+		await page.locator('#form-desc').fill(nextDescription);
+		await page
+			.getByRole('status')
+			.filter({ hasText: 'Ada perubahan yang belum disimpan.' })
+			.waitFor({ timeout: 5000 });
+		if (checkDiscard) {
+			let discardMessage = '';
+			page.once('dialog', async (dialog) => {
+				discardMessage = dialog.message();
+				await dialog.dismiss();
+			});
+			await page.getByRole('button', { name: 'Kurikulum & Konten' }).click();
+			assert.match(discardMessage, /Perubahan belum disimpan/);
+			await page.getByRole('heading', { name: `Edit Materi: ${nextTitle}` }).waitFor();
+		}
+		const responsePromise = page.waitForResponse(
+			(response) =>
+				response.url().includes(`/api/academy/admin/content/${id}`) &&
+				response.request().method() === 'PUT'
+		);
+		await page.getByRole('button', { name: 'Simpan Perubahan' }).click();
+		const response = await responsePromise;
+		assert.equal(response.status(), 200);
+		const update = mock.state.contentUpdates.at(-1);
+		const after = mock.state.adminContent.find((item) => item.id === id);
+		assert.equal(update.id, id);
+		assert.equal(after.id, before.id);
+		assert.equal(after.parentId, before.parentId);
+		assert.equal(after.kind, before.kind);
+		assert.equal(after.status, before.status);
+		assert.equal(update.body.title, nextTitle);
+		assert.equal(update.body.description, nextDescription);
+		assert.equal('id' in update.body, false);
+		assert.equal('parentId' in update.body, false);
+		await page
+			.getByRole('status')
+			.filter({ hasText: `Konten "${nextTitle}" berhasil diperbarui.` })
+			.waitFor();
+		const updatedRow = page.getByRole('row').filter({ hasText: nextTitle }).first();
+		await updatedRow.waitFor();
+		await updatedRow.getByRole('button', { name: 'Edit' }).waitFor();
 	};
 	await check('anonymous catalog and curriculum exclude private media', async () => {
 		const res = await request.get(base + '/api/academy/catalog');
 		assert.equal(res.status(), 200);
 		assert.ok(!JSON.stringify(await res.json()).includes('synthetic01'));
 		await page.goto(base + '/e-learning');
+		await page.locator('summary').filter({ hasText: 'Lihat materi terbit' }).click();
+		await page.locator('summary').filter({ hasText: 'Level 1 · Level sintetis' }).click();
 		await page.getByText('Pelajaran sintetis Package 3', { exact: true }).waitFor();
+		await captureResponsive('academy-catalog-api-mock');
 		assert.equal((await request.get(base + '/api/academy/me/grants')).status(), 401);
 	});
-	await check('API-mode root renders the public curriculum without CMS navigation', async () => {
-		await page.goto(base + '/');
-		await page.getByRole('heading', { name: 'Kurikulum Academy', exact: true }).waitFor();
-		await page.getByText('Pelajaran sintetis Package 3', { exact: true }).waitFor();
-		assert.equal(await page.getByRole('link', { name: 'CMS', exact: true }).count(), 0);
-		await page.screenshot({ path: join(evidence, 'academy-root-api-mock.png'), fullPage: true });
+	await check(
+		'API-mode root renders the public Academy landing with live lesson status',
+		async () => {
+			await page.goto(base + '/');
+			await page.getByRole('heading', { name: /Belajar kripto secara terstruktur/ }).waitFor();
+			await page.getByRole('status').filter({ hasText: '1 lesson telah diterbitkan' }).waitFor();
+			assert.equal(await page.getByRole('link', { name: 'CMS', exact: true }).count(), 0);
+			await captureResponsive('academy-home-api-mock');
+		}
+	);
+	await check(
+		'mobile navigation opens, closes with Escape, and closes after selection',
+		async () => {
+			await page.setViewportSize({ width: 390, height: 844 });
+			const toggle = page.locator('button[aria-controls="academy-mobile-menu"]');
+			await toggle.click();
+			assert.equal(await toggle.getAttribute('aria-expanded'), 'true');
+			await page.getByRole('navigation', { name: 'Navigasi mobile' }).waitFor();
+			await page.keyboard.press('Escape');
+			assert.equal(await toggle.getAttribute('aria-expanded'), 'false');
+			await toggle.click();
+			await page
+				.getByRole('navigation', { name: 'Navigasi mobile' })
+				.getByRole('link', { name: 'Kurikulum' })
+				.click();
+			await page.waitForURL(`${base}/e-learning`);
+			assert.equal(await page.getByRole('navigation', { name: 'Navigasi mobile' }).count(), 0);
+			await page.setViewportSize({ width: 1280, height: 720 });
+		}
+	);
+	await check('guest dashboard and login show responsive entry states', async () => {
+		await page.goto(base + '/profile');
+		await page.getByRole('link', { name: /Masuk ke Academy/ }).waitFor();
+		await captureResponsive('academy-dashboard-guest-api-mock');
+		await page.goto(base + '/auth/login');
+		await page.getByRole('heading', { name: 'Masuk ke CryptoSharia Academy' }).waitFor();
+		await captureResponsive('academy-login-api-mock');
 	});
 	await check('CSRF rejects missing, malformed and cross-origin headers', async () => {
 		for (const origin of [undefined, 'null', 'https://evil.example']) {
@@ -145,7 +284,91 @@ try {
 		assert.equal((await res.json()).user.id, 'alice');
 		assert.equal(res.headers()['cache-control'], 'no-store');
 	});
+	await check(
+		'OTP honors internal redirects and rejects CMS or external redirects for a member',
+		async () => {
+			await login('alice@example.test', '/profile', '/profile');
+			await login('bob@example.test', '/admin/courses', '/e-learning');
+			await login('bob@example.test', 'https://evil.example/', '/e-learning');
+		}
+	);
+	await check(
+		'authorized synthetic admin sees editorial overview and CMS stays role-gated',
+		async () => {
+			await login('admin@example.test', '/admin/courses', '/admin/courses');
+			await page.getByRole('heading', { name: 'Ringkasan Academy' }).waitFor();
+			await page.getByText('Kesiapan publikasi', { exact: true }).waitFor();
+			await page.setViewportSize({ width: 390, height: 844 });
+			const finalAdminTab = await page
+				.getByRole('button', { name: 'Hak Akses Siswa' })
+				.boundingBox();
+			assert.ok(
+				finalAdminTab && finalAdminTab.x + finalAdminTab.width <= 390,
+				'last CMS tab must fit inside the mobile viewport'
+			);
+			await page.setViewportSize({ width: 1280, height: 720 });
+			await captureResponsive('academy-cms-admin-synthetic-api-mock');
+			await page.getByRole('button', { name: 'Kurikulum & Konten' }).click();
+			await page.getByRole('heading', { name: 'Kurikulum & Materi Pembelajaran' }).waitFor();
+			await page.getByText('Pelajaran sintetis QA', { exact: true }).waitFor();
+			await page
+				.getByText(
+					'Analisis Fundamental · data QA → Level QA sintetis → Bab QA sintetis → Pelajaran sintetis QA',
+					{ exact: true }
+				)
+				.waitFor();
+			await page.setViewportSize({ width: 390, height: 844 });
+			const mobileTabBoxes = await page
+				.getByRole('navigation', { name: 'Tabs' })
+				.getByRole('button')
+				.evaluateAll((buttons) =>
+					buttons.map((button) => {
+						const { x, y, width, height } = button.getBoundingClientRect();
+						return { label: button.innerText, x, y, width, height };
+					})
+				);
+			assert.equal(mobileTabBoxes.length, 6);
+			assert.ok(
+				mobileTabBoxes.every(
+					(box) => box.x >= 0 && box.x + box.width <= 390 && box.y >= 0 && box.height > 0
+				),
+				'all CMS tabs must fit inside the mobile viewport in the curriculum view'
+			);
+			await captureResponsive('academy-cms-curriculum-synthetic-api-mock');
+			await editSyntheticRecord({
+				id: 'admin-level-synthetic',
+				parentId: 'fundamental',
+				title: 'Level QA sintetis',
+				nextTitle: 'FOUNDATION: DASAR-DASAR CRYPTO & NILAI ASET',
+				nextDescription: 'Tujuan belajar level sintetis untuk pengujian lokal.',
+				checkDiscard: true
+			});
+			await editSyntheticRecord({
+				id: 'fundamental',
+				parentId: 'root',
+				title: 'Analisis Fundamental · data QA',
+				nextTitle: 'Analisis Fundamental · Subject QA diperbarui',
+				nextDescription: 'Deskripsi subject untuk pengujian lokal.'
+			});
+			await editSyntheticRecord({
+				id: 'admin-chapter-synthetic',
+				parentId: 'admin-level-synthetic',
+				title: 'Bab QA sintetis',
+				nextTitle: 'Bab QA sintetis diperbarui',
+				nextDescription: 'Deskripsi chapter untuk pengujian lokal.'
+			});
+			await editSyntheticRecord({
+				id: 'admin-lesson-synthetic',
+				parentId: 'admin-chapter-synthetic',
+				title: 'Pelajaran sintetis QA',
+				nextTitle: 'Pelajaran sintetis QA diperbarui',
+				nextDescription: 'Metadata lesson untuk pengujian lokal.'
+			});
+			await captureResponsive('academy-cms-curriculum-metadata-updated-synthetic-api-mock');
+		}
+	);
 	await check('authorized player loads and simulated playback saves position', async () => {
+		await login('alice@example.test');
 		await openLesson();
 		await playerStatus('ready');
 		await page.waitForFunction(() => window.__fakePlayers?.length > 0);
@@ -155,6 +378,10 @@ try {
 				(await fetch('/api/academy/me/progress').then((r) => r.json())).progress[0]
 					?.positionSeconds === 45
 		);
+		await page
+			.locator('[data-testid="progress-status"]')
+			.filter({ hasText: 'Posisi belajar tersimpan.' })
+			.waitFor();
 		assert.equal(mock.state.completions.size, 0);
 	});
 	await check(
@@ -188,12 +415,11 @@ try {
 		await page.reload();
 		await page.getByRole('button', { name: 'Selesai', exact: true }).waitFor();
 		await page.goto(base + '/profile');
-		await page
-			.locator('[data-testid="completion-summary"]')
-			.filter({ hasText: '1 dari 1 lesson selesai (100%)' })
-			.waitFor();
+		const progressSummary = page.locator('section[aria-labelledby="progress-title"]');
+		await progressSummary.getByText('1 dari 1 lesson', { exact: true }).waitFor();
+		await progressSummary.getByText('100%', { exact: true }).waitFor();
 		assert.equal(await page.getByRole('button', { name: 'Simpan profil' }).count(), 0);
-		await page.screenshot({ path: join(evidence, 'dashboard-mock.png'), fullPage: true });
+		await captureResponsive('academy-dashboard-logged-in-api-mock');
 	});
 	await check('strict payload and stale version are rejected', async () => {
 		assert.equal(
@@ -246,7 +472,11 @@ try {
 		await login('alice@example.test');
 		await openLesson();
 		await playerStatus('ready');
+		const logoutResponse = page.waitForResponse((response) =>
+			response.url().endsWith('/api/auth/logout')
+		);
 		await page.getByRole('button', { name: 'Keluar', exact: true }).first().click();
+		assert.equal((await logoutResponse).status(), 200);
 		await page.waitForFunction(() => document.querySelectorAll('iframe').length === 0);
 		await page.waitForFunction(async () => (await fetch('/api/auth/me')).status === 401);
 		assert.ok(!(await context.cookies()).some((c) => c.name.startsWith('cs_')));
@@ -282,7 +512,11 @@ try {
 } catch (error) {
 	if (page) {
 		await page.screenshot({ path: join(evidence, 'failure.png'), fullPage: true }).catch(() => {});
-		await writeFile(join(evidence, 'failure.txt'), await page.locator('body').innerText());
+		const body = await page
+			.locator('body')
+			.innerText()
+			.catch(() => '<Page unavailable after failure>');
+		await writeFile(join(evidence, 'failure.txt'), body);
 	}
 	results.push({ name: error.message, status: 'FAIL' });
 	console.error(error);
