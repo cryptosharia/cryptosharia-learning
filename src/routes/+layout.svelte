@@ -9,17 +9,17 @@
 	let { children } = $props();
 	let mobileMenuOpen = $state(false);
 	let logoutError = $state('');
+	/** Tracks the current URL hash, updated on hashchange without full reload. */
+	let currentHash = $state('');
 	const isAuthRoute = $derived(page.url.pathname.startsWith('/auth/'));
 	const isAdminRoute = $derived(page.url.pathname.startsWith('/admin/'));
 	const hideSiteChrome = $derived(isAuthRoute || isAdminRoute);
-	const isAdmin = $derived(['admin', 'super_admin'].includes(userAuth.user?.role ?? ''));
 	const navLinks = $derived(
 		userAuth.isLoggedIn
 			? [
 					{ label: 'Kurikulum', href: '/e-learning' },
 					{ label: 'Pembelajaran Saya', href: '/profile' },
-					{ label: 'Profil', href: '/profile#profil-akun' },
-					...(isAdmin ? [{ label: 'Panel admin', href: '/admin/courses' }] : [])
+					{ label: 'Profil', href: '/profile#profil-akun' }
 				]
 			: [
 					{ label: 'Beranda', href: '/' },
@@ -33,14 +33,42 @@
 		return userAuth.init();
 	});
 	$effect(() => {
-		if (page.url.href) mobileMenuOpen = false;
+		if (page.url.href) {
+			mobileMenuOpen = false;
+			// Sync hash state whenever SvelteKit navigation occurs
+			currentHash = page.url.hash;
+		}
 	});
 
+	/** Detect in-page hash changes (e.g. clicking <a href="#profil-akun">)
+	 *  without triggering a full SvelteKit navigation. */
+	function handleHashChange() {
+		currentHash = window.location.hash;
+	}
+
+	/**
+	 * Returns true when this nav link should be marked as the current page.
+	 * Rules:
+	 *   /profile              → active only when on /profile AND hash is empty
+	 *   /profile#profil-akun → active only when on /profile AND hash is #profil-akun
+	 *   All other links       → active when pathname matches (hash ignored)
+	 */
 	function isCurrent(href: string) {
-		const path = href.split('#')[0];
-		return path === '/'
-			? page.url.pathname === '/'
-			: page.url.pathname === path || page.url.pathname.startsWith(`${path}/`);
+		const [path, fragment] = href.split('#');
+		if (path === '/') return page.url.pathname === '/';
+		const pathMatch =
+			page.url.pathname === path || page.url.pathname.startsWith(`${path}/`);
+		if (!pathMatch) return false;
+		// For links that share the same path but differ by hash,
+		// use the reactive hash to distinguish them.
+		if (fragment !== undefined) {
+			return currentHash === `#${fragment}`;
+		}
+		// For /profile (no fragment): active only when no #profil-akun hash
+		if (path === '/profile') {
+			return currentHash !== '#profil-akun';
+		}
+		return true;
 	}
 
 	async function logout() {
@@ -59,7 +87,7 @@
 	}
 </script>
 
-<svelte:window onkeydown={handleKeydown} />
+<svelte:window onkeydown={handleKeydown} onhashchange={handleHashChange} />
 
 <div class="flex min-h-screen flex-col bg-background text-foreground">
 	{#if !hideSiteChrome}
@@ -88,9 +116,7 @@
 										? resolve('/profile')
 										: link.href === '/profile#profil-akun'
 											? resolve('/profile#profil-akun')
-											: link.href === '/admin/courses'
-												? resolve('/admin/courses')
-												: resolve('/e-learning')}
+											: resolve('/e-learning')}
 							aria-current={isCurrent(link.href) ? 'page' : undefined}
 							class={`inline-flex min-h-11 items-center rounded-lg px-3 text-sm no-underline transition hover:bg-surface hover:text-white ${isCurrent(link.href) ? 'font-semibold text-primary' : 'text-secondary'}`}
 							>{link.label}</a
@@ -162,9 +188,7 @@
 											? resolve('/profile')
 											: link.href === '/profile#profil-akun'
 												? resolve('/profile#profil-akun')
-												: link.href === '/admin/courses'
-													? resolve('/admin/courses')
-													: resolve('/e-learning')}
+												: resolve('/e-learning')}
 								aria-current={isCurrent(link.href) ? 'page' : undefined}
 								class={`flex min-h-11 items-center rounded-lg px-3 text-sm no-underline hover:bg-background ${isCurrent(link.href) ? 'font-semibold text-primary' : 'text-secondary'}`}
 								>{link.label}</a
