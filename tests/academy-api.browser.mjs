@@ -99,6 +99,13 @@ try {
 		await page.getByText('Pelajaran sintetis Package 3', { exact: true }).waitFor();
 		assert.equal((await request.get(base + '/api/academy/me/grants')).status(), 401);
 	});
+	await check('API-mode root renders the public curriculum without CMS navigation', async () => {
+		await page.goto(base + '/');
+		await page.getByRole('heading', { name: 'Kurikulum Academy', exact: true }).waitFor();
+		await page.getByText('Pelajaran sintetis Package 3', { exact: true }).waitFor();
+		assert.equal(await page.getByRole('link', { name: 'CMS', exact: true }).count(), 0);
+		await page.screenshot({ path: join(evidence, 'academy-root-api-mock.png'), fullPage: true });
+	});
 	await check('CSRF rejects missing, malformed and cross-origin headers', async () => {
 		for (const origin of [undefined, 'null', 'https://evil.example']) {
 			const res = await request.post(base + '/api/auth/otp/request', {
@@ -256,8 +263,12 @@ try {
 		await openLesson();
 		await playerStatus('unauthorized');
 		await page.goto(base + '/admin/courses');
-		await page.getByText(/Package 4/).waitFor();
+		const currentUrl = new URL(page.url());
+		assert.equal(currentUrl.pathname, '/auth/login');
+		assert.equal(currentUrl.searchParams.get('redirect'), '/admin/courses');
 		assert.equal(await page.getByRole('button', { name: 'Simpan draft' }).count(), 0);
+		assert.equal(await page.getByRole('link', { name: 'CMS', exact: true }).count(), 0);
+		assert.ok(!(await context.cookies()).some((cookie) => cookie.name.startsWith('cs_')));
 	});
 	await check('browser responses and modules contain no API credentials or tokens', async () => {
 		assert.ok(payloads.length > 10);
