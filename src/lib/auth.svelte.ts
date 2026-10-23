@@ -23,6 +23,7 @@ export type AuthUser = {
 	email: string;
 	displayName?: string;
 	role?: string;
+	hasPassword?: boolean;
 	providerData?: { providerId: string }[];
 };
 
@@ -100,6 +101,7 @@ export function initAuth() {
 							email: data.user.email,
 							displayName: data.user.name,
 							role: data.user.role,
+							hasPassword: data.user.hasPassword,
 							providerData: []
 						};
 					} else {
@@ -201,10 +203,91 @@ export async function verifyOtp(email: string, code: string): Promise<AuthUser> 
 		email: user.email,
 		displayName: user.name,
 		role: user.role,
+		hasPassword: user.hasPassword,
 		providerData: []
 	};
 	notifyListeners();
 	return currentUser;
+}
+
+/** Login with the central CryptoSharia API password session. */
+export async function loginWithPassword(email: string, password: string): Promise<AuthUser> {
+	++authGeneration;
+	error = null;
+	const res = await fetch('/api/auth/password/login', {
+		method: 'POST',
+		headers: { 'content-type': 'application/json' },
+		body: JSON.stringify({ email, password })
+	});
+	if (!res.ok) {
+		const data = await res.json().catch(() => null);
+		const message = data?.message || 'Email atau kata sandi tidak valid.';
+		error = message;
+		throw new Error(message);
+	}
+
+	const data = await res.json();
+	const user = data.user;
+	currentUser = {
+		uid: user.id,
+		email: user.email,
+		displayName: user.name,
+		role: user.role,
+		hasPassword: user.hasPassword,
+		providerData: []
+	};
+	notifyListeners();
+	return currentUser;
+}
+
+/** Request a reset link through the API BFF. */
+export async function requestPasswordReset(email: string): Promise<void> {
+	error = null;
+	const res = await fetch('/api/auth/password/forgot', {
+		method: 'POST',
+		headers: { 'content-type': 'application/json' },
+		body: JSON.stringify({ email })
+	});
+	if (!res.ok) {
+		const data = await res.json().catch(() => null);
+		const message = data?.message || 'Permintaan belum dapat diproses. Coba lagi nanti.';
+		error = message;
+		throw new Error(message);
+	}
+}
+
+/** Complete a one-time password reset token flow through the API BFF. */
+export async function resetPassword(token: string, newPassword: string): Promise<void> {
+	error = null;
+	const res = await fetch('/api/auth/password/reset', {
+		method: 'POST',
+		headers: { 'content-type': 'application/json' },
+		body: JSON.stringify({ token, newPassword })
+	});
+	if (!res.ok) {
+		const data = await res.json().catch(() => null);
+		const message = data?.message || 'Tautan reset tidak valid atau telah kedaluwarsa.';
+		error = message;
+		throw new Error(message);
+	}
+}
+
+/** Add the first password after a fresh OTP proof on the active session. */
+export async function setPassword(otpCode: string, newPassword: string): Promise<void> {
+	error = null;
+	const res = await fetch('/api/auth/password/set', {
+		method: 'POST',
+		headers: { 'content-type': 'application/json' },
+		body: JSON.stringify({ otpCode, newPassword })
+	});
+	if (!res.ok) {
+		const data = await res.json().catch(() => null);
+		const message = data?.message || 'Kata sandi belum dapat diatur.';
+		error = message;
+		throw new Error(message);
+	}
+	if (currentUser) currentUser = { ...currentUser, hasPassword: true };
+	notifyListeners();
 }
 
 /** Login with Google popup (emulator mode) */
@@ -340,8 +423,12 @@ export const userAuth = {
 	init: initAuth,
 	loginWithGoogle,
 	loginWithEmail,
+	loginWithPassword,
 	registerWithEmail,
 	changePassword,
+	requestPasswordReset,
+	resetPassword,
+	setPassword,
 	requestOtp,
 	verifyOtp,
 	logout

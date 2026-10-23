@@ -9,9 +9,9 @@ export const GET: RequestHandler = async ({ locals }) => {
 		);
 	}
 
-	const { id, name, email, role } = locals.user;
+	const { id, name, email, role, hasPassword } = locals.user;
 	return json(
-		{ user: { id, name, email, role } },
+		{ user: { id, name, email, role, hasPassword } },
 		{ status: 200, headers: { 'cache-control': 'no-store' } }
 	);
 };

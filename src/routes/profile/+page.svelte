@@ -14,6 +14,13 @@
 	let status = $state('Memuat akun…');
 	let signed = $state(false);
 	let generation = 0;
+	let setPasswordOtpSent = $state(false);
+	let setPasswordOtpCode = $state('');
+	let newPassword = $state('');
+	let confirmPassword = $state('');
+	let settingPassword = $state(false);
+	let showNewPassword = $state(false);
+	let passwordMessage = $state('');
 
 	onMount(() => {
 		if (apiMode) {
@@ -69,6 +76,50 @@
 			if (currentGeneration === generation) status = 'Perubahan belum tersimpan. Coba lagi.';
 		}
 	}
+
+	async function requestPasswordSetupCode() {
+		const email = userAuth.user?.email;
+		if (!email) return;
+		settingPassword = true;
+		passwordMessage = '';
+		try {
+			await userAuth.requestOtp(email);
+			setPasswordOtpSent = true;
+			passwordMessage = 'Jika email dapat menerima kode, OTP telah dikirim.';
+		} catch {
+			passwordMessage = 'Kode belum dapat dikirim. Coba lagi nanti.';
+		} finally {
+			settingPassword = false;
+		}
+	}
+
+	async function submitPasswordSetup(event: SubmitEvent) {
+		event.preventDefault();
+		if (newPassword.length < 12 || newPassword.length > 128) {
+			passwordMessage = 'Kata sandi harus terdiri dari 12 sampai 128 karakter.';
+			return;
+		}
+		if (newPassword !== confirmPassword) {
+			passwordMessage = 'Konfirmasi kata sandi tidak cocok.';
+			return;
+		}
+		settingPassword = true;
+		passwordMessage = '';
+		try {
+			await userAuth.setPassword(setPasswordOtpCode.trim(), newPassword);
+			passwordMessage =
+				'Kata sandi berhasil dibuat. Anda dapat menggunakannya saat login berikutnya.';
+			setPasswordOtpSent = false;
+			setPasswordOtpCode = '';
+			newPassword = '';
+			confirmPassword = '';
+		} catch {
+			passwordMessage =
+				userAuth.error || 'Kata sandi belum dapat diatur. Periksa kode OTP dan coba lagi.';
+		} finally {
+			settingPassword = false;
+		}
+	}
 </script>
 
 <svelte:head>
@@ -115,6 +166,93 @@
 						</dd>
 					</div>
 				</dl>
+				<section class="mt-7 border-t border-line pt-6" aria-labelledby="password-title">
+					<h3 id="password-title" class="font-semibold text-white">Kata sandi</h3>
+					{#if userAuth.user?.hasPassword}
+						<p class="mt-2 text-sm leading-6 text-secondary">
+							Kata sandi sudah aktif untuk akun ini.
+						</p>
+						<a
+							class="academy-link mt-2 inline-flex min-h-11 items-center"
+							href={resolve('/auth/forgot-password')}>Atur ulang kata sandi</a
+						>
+					{:else if !setPasswordOtpSent}
+						<p class="mt-2 text-sm leading-6 text-secondary">
+							Akun OTP Anda belum memiliki kata sandi. Verifikasi email untuk membuatnya.
+						</p>
+						<button
+							type="button"
+							class="academy-button-secondary mt-4"
+							disabled={settingPassword}
+							onclick={requestPasswordSetupCode}
+						>
+							{settingPassword ? 'Mengirim kode…' : 'Kirim kode verifikasi'}
+						</button>
+					{:else}
+						<form class="mt-4 max-w-xl space-y-4" onsubmit={submitPasswordSetup}>
+							<div>
+								<label for="setup-otp" class="academy-form-label">Kode verifikasi email</label>
+								<input
+									id="setup-otp"
+									class="academy-input text-center font-mono tracking-[0.3em]"
+									bind:value={setPasswordOtpCode}
+									inputmode="numeric"
+									autocomplete="one-time-code"
+									maxlength="6"
+									pattern="[0-9][0-9][0-9][0-9][0-9][0-9]"
+									required
+								/>
+							</div>
+							<div>
+								<label for="setup-password" class="academy-form-label">Kata sandi baru</label>
+								<div class="relative">
+									<input
+										id="setup-password"
+										class="academy-input pr-20"
+										type={showNewPassword ? 'text' : 'password'}
+										bind:value={newPassword}
+										autocomplete="new-password"
+										minlength="12"
+										maxlength="128"
+										required
+									/>
+									<button
+										type="button"
+										class="absolute inset-y-0 right-2 px-3 text-xs text-muted hover:text-white"
+										aria-label={showNewPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}
+										onclick={() => (showNewPassword = !showNewPassword)}
+										>{showNewPassword ? 'Sembunyikan' : 'Lihat'}</button
+									>
+								</div>
+							</div>
+							<div>
+								<label for="setup-confirm-password" class="academy-form-label"
+									>Konfirmasi kata sandi</label
+								>
+								<input
+									id="setup-confirm-password"
+									class="academy-input"
+									type="password"
+									bind:value={confirmPassword}
+									autocomplete="new-password"
+									minlength="12"
+									maxlength="128"
+									required
+								/>
+							</div>
+							<button
+								type="submit"
+								class="academy-button-primary"
+								disabled={settingPassword || setPasswordOtpCode.trim().length !== 6}
+							>
+								{settingPassword ? 'Menyimpan…' : 'Buat kata sandi'}
+							</button>
+						</form>
+					{/if}
+					{#if passwordMessage}
+						<p role="status" class="mt-3 text-sm text-secondary">{passwordMessage}</p>
+					{/if}
+				</section>
 			{:else}
 				<form class="mt-5 max-w-xl" onsubmit={save}>
 					<label for="display-name" class="academy-form-label">Nama tampilan</label>

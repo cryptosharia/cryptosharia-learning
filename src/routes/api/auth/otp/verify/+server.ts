@@ -50,7 +50,8 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 					id: user.id,
 					email: user.email,
 					name: user.name,
-					role: user.role
+					role: user.role,
+					hasPassword: user.hasPassword
 				}
 			},
 			{ status: 200, headers: { 'cache-control': 'no-store' } }

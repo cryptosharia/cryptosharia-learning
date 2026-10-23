@@ -12,7 +12,9 @@
 	let password = $state('');
 	let otpCode = $state('');
 	let otpSent = $state(false);
+	let apiLoginMethod = $state<'password' | 'otp'>('password');
 	let showPassword = $state(false);
+	let promptPasswordSetup = $state(false);
 	let isLoading = $state(false);
 	let errorMsg = $state('');
 	let successMsg = $state('');
@@ -69,6 +71,20 @@
 		}
 	}
 
+	async function handlePasswordLogin(event: SubmitEvent) {
+		event.preventDefault();
+		isLoading = true;
+		errorMsg = '';
+		try {
+			await userAuth.loginWithPassword(email, password);
+			await continueAfterLogin(userAuth.user?.role);
+		} catch {
+			errorMsg = userAuth.error || 'Email atau kata sandi tidak valid.';
+		} finally {
+			isLoading = false;
+		}
+	}
+
 	async function handleRequestOtp(event: Event) {
 		event.preventDefault();
 		if (!email || !email.includes('@')) {
@@ -101,6 +117,10 @@
 		errorMsg = '';
 		try {
 			const user = await userAuth.verifyOtp(email, code);
+			if (!user.hasPassword) {
+				promptPasswordSetup = true;
+				return;
+			}
 			await continueAfterLogin(user.role);
 		} catch (error) {
 			errorMsg =
@@ -172,7 +192,7 @@
 				</h2>
 				<p class="mt-2 text-sm leading-6 text-secondary">
 					{#if apiMode}
-						Gunakan email untuk menerima kode verifikasi dan mengakses pembelajaran.
+						Masuk dengan email dan kata sandi, atau gunakan kode OTP melalui email.
 					{:else}
 						Masuk untuk melihat katalog dan melanjutkan pembelajaran Anda.
 					{/if}
@@ -203,8 +223,94 @@
 				</div>
 			{/if}
 
-			{#if apiMode}
-				{#if !otpSent}
+			{#if promptPasswordSetup}
+				<div class="space-y-4" role="status">
+					<div
+						class="rounded-xl border border-primary/30 bg-primary/10 p-4 text-sm leading-6 text-secondary"
+					>
+						Akun Anda belum memiliki kata sandi. Anda dapat membuatnya dengan verifikasi email di
+						menu Profil Akun.
+					</div>
+					<a class="academy-button-primary w-full" href={resolve('/profile#profil-akun')}
+						>Buat kata sandi di profil</a
+					>
+					<button
+						type="button"
+						class="academy-button-secondary w-full"
+						onclick={() => void continueAfterLogin(userAuth.user?.role)}
+					>
+						Lanjutkan ke pembelajaran
+					</button>
+				</div>
+			{:else if apiMode}
+				<div
+					class="mb-5 grid grid-cols-2 gap-2 rounded-xl border border-line bg-background p-1"
+					aria-label="Metode masuk"
+				>
+					<button
+						type="button"
+						aria-pressed={apiLoginMethod === 'password'}
+						class={`min-h-10 rounded-lg px-3 text-sm font-semibold ${apiLoginMethod === 'password' ? 'bg-primary text-white' : 'text-muted hover:text-white'}`}
+						onclick={() => (apiLoginMethod = 'password')}>Dengan kata sandi</button
+					>
+					<button
+						type="button"
+						aria-pressed={apiLoginMethod === 'otp'}
+						class={`min-h-10 rounded-lg px-3 text-sm font-semibold ${apiLoginMethod === 'otp' ? 'bg-primary text-white' : 'text-muted hover:text-white'}`}
+						onclick={() => (apiLoginMethod = 'otp')}>Dengan kode OTP</button
+					>
+				</div>
+				{#if apiLoginMethod === 'password'}
+					<form onsubmit={handlePasswordLogin} class="space-y-5" aria-busy={isLoading}>
+						<div>
+							<label for="email-password" class="academy-form-label">Email akun</label>
+							<input
+								type="email"
+								id="email-password"
+								bind:value={email}
+								autocomplete="username"
+								placeholder="nama@email.com"
+								required
+								class="academy-input"
+							/>
+						</div>
+						<div>
+							<label for="password" class="academy-form-label">Kata sandi</label>
+							<div class="relative">
+								<input
+									type={showPassword ? 'text' : 'password'}
+									id="password"
+									bind:value={password}
+									autocomplete="current-password"
+									maxlength="128"
+									placeholder="Kata sandi"
+									required
+									class="academy-input pr-14"
+								/>
+								<button
+									type="button"
+									class="absolute inset-y-0 right-2 my-1 min-h-10 rounded-lg px-3 text-xs font-semibold text-muted hover:text-white"
+									aria-label={showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}
+									onclick={() => (showPassword = !showPassword)}
+								>
+									{showPassword ? 'Sembunyikan' : 'Lihat'}
+								</button>
+							</div>
+							<div class="mt-2 text-right">
+								<a class="academy-link text-sm" href={resolve('/auth/forgot-password')}
+									>Lupa kata sandi?</a
+								>
+							</div>
+						</div>
+						<button
+							type="submit"
+							disabled={isLoading || !email || !password}
+							class="academy-button-primary w-full"
+						>
+							{isLoading ? 'Memproses…' : 'Masuk'}
+						</button>
+					</form>
+				{:else if !otpSent}
 					<form onsubmit={handleRequestOtp} class="space-y-5" aria-busy={isLoading}>
 						<div>
 							<label for="email" class="academy-form-label">Email akun</label>

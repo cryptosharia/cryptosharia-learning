@@ -28,6 +28,7 @@ export interface UserProfile {
 	role: string;
 	status: string;
 	permissions?: string[];
+	hasPassword?: boolean;
 	createdAt?: string;
 	updatedAt?: string;
 }
@@ -46,6 +47,7 @@ export async function apiFetch<T = unknown>(
 	options: {
 		method?: string;
 		accessToken?: string;
+		clientIp?: string;
 		body?: unknown;
 		signal?: AbortSignal;
 	} = {}
@@ -69,6 +71,9 @@ export async function apiFetch<T = unknown>(
 
 	if (options.accessToken) {
 		headers['authorization'] = `Bearer ${options.accessToken}`;
+	}
+	if (options.clientIp && /^[0-9a-fA-F:.]+$/.test(options.clientIp)) {
+		headers['forwarded'] = `for="${options.clientIp}"`;
 	}
 
 	if (options.body !== undefined) {
@@ -129,17 +134,56 @@ export async function apiFetch<T = unknown>(
 // Auth API methods
 // ==========================================
 
-export async function requestOtp(email: string) {
+export async function requestOtp(email: string, clientIp?: string) {
 	return apiFetch<void>('/auth/otp/request', {
 		method: 'POST',
+		clientIp,
 		body: { email }
 	});
 }
 
-export async function verifyOtp(email: string, code: string) {
+export async function verifyOtp(email: string, code: string, clientIp?: string) {
 	return apiFetch<TokenPair>('/auth/otp/verify', {
 		method: 'POST',
+		clientIp,
 		body: { email, code }
+	});
+}
+
+export async function loginWithPasswordApi(email: string, password: string, clientIp?: string) {
+	return apiFetch<TokenPair>('/auth/password/login', {
+		method: 'POST',
+		clientIp,
+		body: { email, password }
+	});
+}
+
+export async function forgotPasswordApi(email: string, clientIp?: string) {
+	return apiFetch<void>('/auth/password/forgot', {
+		method: 'POST',
+		clientIp,
+		body: { email, application: 'learning' }
+	});
+}
+
+export async function resetPasswordApi(token: string, newPassword: string) {
+	return apiFetch<void>('/auth/password/reset', {
+		method: 'POST',
+		body: { token, newPassword }
+	});
+}
+
+export async function setPasswordApi(
+	accessToken: string,
+	otpCode: string,
+	newPassword: string,
+	clientIp?: string
+) {
+	return apiFetch<void>('/auth/password/set', {
+		method: 'POST',
+		accessToken,
+		clientIp,
+		body: { otpCode, newPassword }
 	});
 }
 
@@ -411,4 +455,3 @@ export async function revokeAdminGrant(id: string, accessToken: string) {
 		accessToken
 	});
 }
-
