@@ -10,6 +10,7 @@ const environment: Record<string, string | undefined> = publicEnv;
 
 export const handle: Handle = async ({ event, resolve }) => {
 	const pathname = event.url.pathname;
+	if (pathname === '/api/health') return resolve(event);
 	const isGuardedRoute =
 		isAcademyPath(pathname) || pathname.startsWith('/auth/') || pathname.startsWith('/api/');
 

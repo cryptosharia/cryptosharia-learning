@@ -1,4 +1,5 @@
 import adapter from '@sveltejs/adapter-vercel';
+import nodeAdapter from '@sveltejs/adapter-node';
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
@@ -8,7 +9,7 @@ const config = {
 	},
 	kit: {
 		// Adapter output is local build evidence only; no project linkage or deployment.
-		adapter: adapter()
+		adapter: process.env.ADAPTER === 'node' ? nodeAdapter() : adapter()
 	}
 };
 
