@@ -269,6 +269,28 @@ test('production API configuration accepts only the approved HTTPS origin', () =
 	);
 });
 
+test('VPS staging permits only the exact private Docker API service', () => {
+	const valid = {
+		VPS_ENV: 'staging',
+		API_BASE_URL: 'http://cryptosharia_api_staging:3000',
+		API_KEY: 'synthetic-server-only-key'
+	};
+	assert.equal(resolveApiConfig(valid).baseUrl, 'http://cryptosharia_api_staging:3000');
+	for (const API_BASE_URL of [
+		'http://cryptosharia_api_staging:3001',
+		'http://cryptosharia_api_staging.evil.example:3000',
+		'http://cryptosharia_api_staging:3000/hidden',
+		'http://cryptosharia_api_staging:3000?target=other',
+		'http://evil:pass@cryptosharia_api_staging:3000',
+		'https://cryptosharia_api_staging:3000',
+		'http://example.com:3000'
+	]) {
+		assert.equal(resolveApiConfig({ ...valid, API_BASE_URL }).baseUrl, '');
+	}
+	assert.equal(resolveApiConfig({ ...valid, VPS_ENV: 'production' }).baseUrl, '');
+	assert.equal(resolveApiConfig({ ...valid, VPS_ENV: undefined }).baseUrl, '');
+});
+
 test('production session cookies are Secure and HttpOnly with a shared root path', () => {
 	const child = spawnSync(
 		process.execPath,

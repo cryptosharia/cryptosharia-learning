@@ -35,8 +35,20 @@ export function resolveApiConfig(env: Record<string, string | undefined>): ApiCo
 			!url.search &&
 			!url.hash;
 
-		// Keep local testing loopback-only and production pinned to the owner-specified API origin.
-		if (isLoopback || isApprovedProductionApi) {
+		// Docker networking is permitted only for the explicitly declared
+		// private staging backend; never allow arbitrary HTTP origins in production.
+		const isApprovedVpsStagingApi =
+			env.VPS_ENV === 'staging' &&
+			url.protocol === 'http:' &&
+			url.hostname === 'cryptosharia_api_staging' &&
+			url.port === '3000' &&
+			url.pathname === '/' &&
+			!url.username &&
+			!url.password &&
+			!url.search &&
+			!url.hash;
+
+		if (isLoopback || isApprovedProductionApi || isApprovedVpsStagingApi) {
 			baseUrl = url.href.replace(/\/+$/, '');
 		}
 	} catch {
