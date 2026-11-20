@@ -1,4 +1,4 @@
-FROM node:22-bookworm-slim AS build
+FROM node:24-bookworm-slim AS build
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci
@@ -14,7 +14,7 @@ ARG PUBLIC_FIREBASE_APP_ID
 ARG PUBLIC_FIREBASE_AUTH_EMULATOR_URL
 ARG PUBLIC_FIREBASE_FIRESTORE_EMULATOR_URL
 RUN ADAPTER=node npm run build && npm prune --omit=dev
-FROM node:22-bookworm-slim AS runtime
+FROM node:24-bookworm-slim AS runtime
 ENV NODE_ENV=production HOST=0.0.0.0 PORT=3000
 WORKDIR /app
 COPY --from=build --chown=node:node /app/build ./build
